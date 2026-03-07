@@ -1,0 +1,100 @@
+{
+  "sections": {
+    "overview": {
+      "filterTitle": "Filter submissions",
+      "filterDescription": "Choose which submissions to show on the landing page. Only approved items appear in News & Updates.",
+      "submissionsTitle": "News & updates submissions",
+      "submissionsDescription": "Approve or reject community submissions. Approved items will appear on the landing page.",
+      "emptySubmissions": "No submissions match the current filter.",
+      "statistics": {
+        "totalSubmissions": "Total submissions",
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "upcomingEvents": "Upcoming events"
+      }
+    },
+    "events": {
+      "pageTitle": "Calendar Events",
+      "pageDescription": "Add events to show on the landing page Community Calendar section.",
+      "addEventTitle": "Add event",
+      "upcomingTitle": "Upcoming events",
+      "emptyEvents": "No events yet. Add one above to show on the landing page."
+    },
+    "notifications": {
+      "pageTitle": "Notifications",
+      "pageDescription": "Updates about submissions and calendar.",
+      "emptyTitle": "No notifications yet.",
+      "emptyDescription": "When there's activity, it'll show here."
+    },
+    "profile": {
+      "pageTitle": "Edit profile"
+    },
+    "preferences": {
+      "panelTitle": "Preferences",
+      "emailLabel": "Email notifications",
+      "inAppLabel": "In-app notifications"
+    }
+  },
+  "tips": {
+    "event": [
+      { "icon": "fa-calendar-check", "text": "Use a clear date so visitors see when the event is." },
+      { "icon": "fa-clock", "text": "Add time (e.g. 2:00 PM) for better clarity." },
+      { "icon": "fa-link", "text": "Link to registration or more info if you have one." }
+    ],
+    "profile": [
+      { "icon": "fa-lock", "text": "Leave password blank to keep your current password." },
+      { "icon": "fa-envelope", "text": "Use a valid email so we can reach you." },
+      { "icon": "fa-map-marker-alt", "text": "City and state help us show local events and news." }
+    ]
+  },
+  "filters": [
+    { "value": "all", "label": "All" },
+    { "value": "pending", "label": "Pending" },
+    { "value": "approved", "label": "Approved" },
+    { "value": "rejected", "label": "Rejected" }
+  ],
+  "sampleData": {
+    "submissions": [
+      {
+        "id": "sample-1",
+        "title": "Code Camp Season 4 — Registration Open",
+        "summary": "Join the community and connect with aspiring IT developers in Misamis Occidental.",
+        "imageUrl": "https://picsum.photos/400/240?random=1",
+        "date": "2026-02-15",
+        "link": "https://example.com/code-camp",
+        "status": "pending",
+        "author": "community"
+      },
+      {
+        "id": "sample-2",
+        "title": "Tech Savvy at Workflow Co-Working Space",
+        "summary": "Monthly meetup for developers. Bring your laptop and ideas.",
+        "imageUrl": "",
+        "date": "2026-02-10",
+        "link": "",
+        "status": "approved",
+        "author": "community"
+      }
+    ],
+    "calendarEvents": [
+      {
+        "id": "ev-1",
+        "title": "Code Camp Workshop",
+        "date": "2026-03-01",
+        "time": "2:00 PM",
+        "description": "Full-stack web development session.",
+        "link": "https://example.com/workshop"
+      }
+    ],
+    "notifications": [
+      {
+        "title": "New submission",
+        "text": "A community member submitted \"Code Camp Season 4 — Registration Open\" for review.",
+        "time": "2 hours ago",
+        "read": false,
+        "icon": "fa-newspaper"
+      }
+    ]
+  }
+}

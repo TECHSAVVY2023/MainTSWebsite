@@ -1,0 +1,91 @@
+{
+  "sections": {
+    "myNews": {
+      "welcomeTitle": "Welcome back, Community Member",
+      "sectionTitle": "My News and Updates",
+      "sectionSubtitle": "Latest from the community",
+      "emptyMessage": "No news or updates yet. Use the form below to add one."
+    },
+    "upload": {
+      "formTitle": "Upload News and Updates",
+      "formSubtitle": "Submit your news or update for review. Approved items will appear on the landing page.",
+      "previewTitle": "Card preview"
+    },
+    "notifications": {
+      "pageTitle": "Notifications",
+      "pageDescription": "Updates about your submissions and community.",
+      "emptyTitle": "No notifications yet.",
+      "emptyDescription": "When your news is reviewed or we have updates, they'll show here."
+    },
+    "profile": {
+      "pageTitle": "Edit profile"
+    },
+    "preferences": {
+      "panelTitle": "Preferences",
+      "emailLabel": "Email notifications",
+      "inAppLabel": "In-app notifications"
+    }
+  },
+  "tips": {
+    "upload": [
+      { "icon": "fa-check", "text": "Keep the title clear and under 60 characters for best display." },
+      { "icon": "fa-image", "text": "Use a high-quality image (landscape works best)." },
+      { "icon": "fa-clock", "text": "After submitting, an admin will review before it appears on the landing page." }
+    ],
+    "profile": [
+      { "icon": "fa-lock", "text": "Leave password blank to keep your current password." },
+      { "icon": "fa-envelope", "text": "Use a valid email so we can reach you." },
+      { "icon": "fa-map-marker-alt", "text": "City and state help us show local events and news." }
+    ]
+  },
+  "sampleData": {
+    "submissions": [
+      {
+        "id": "sample-1",
+        "title": "Code Camp Season 4 — Registration Open",
+        "summary": "Join the community and connect with aspiring IT developers in Misamis Occidental. Early bird slots are limited.",
+        "description": "Code Camp Season 4 is officially open for registration!",
+        "imageUrl": "https://picsum.photos/seed/codecamp/600/400",
+        "images": ["https://picsum.photos/seed/codecamp/600/400", "https://picsum.photos/600/400?random=news1", "https://picsum.photos/600/400?random=news2"],
+        "headlineIndex": 0,
+        "date": "2026-02-15",
+        "link": "#",
+        "status": "pending",
+        "author": "community"
+      },
+      {
+        "id": "sample-2",
+        "title": "Tech Savvy at Workflow Co-Working Space",
+        "summary": "Monthly meetup for developers. Bring your laptop and ideas.",
+        "description": "We run code camps in full-stack web development.",
+        "imageUrl": "https://picsum.photos/seed/workflow/600/400",
+        "images": ["https://picsum.photos/seed/workflow/600/400", "https://picsum.photos/600/400?random=workflow1"],
+        "headlineIndex": 0,
+        "date": "2026-02-10",
+        "link": "#",
+        "status": "approved",
+        "author": "community"
+      },
+      {
+        "id": "sample-3",
+        "title": "Community Projects and Open-Source Contributions",
+        "summary": "Campers will have the opportunity to contribute to real community projects.",
+        "description": "Starting this season, selected capstone projects will evolve into real community initiatives.",
+        "imageUrl": "https://picsum.photos/seed/community/600/400",
+        "date": "2026-01-20",
+        "link": "#",
+        "status": "approved",
+        "author": "community"
+      }
+    ],
+    "notifications": [
+      {
+        "title": "Submission received",
+        "text": "Your news \"Code Camp Season 4\" has been received and is under review.",
+        "time": "1 hour ago",
+        "read": false,
+        "icon": "fa-paper-plane"
+      }
+    ]
+  }
+}
