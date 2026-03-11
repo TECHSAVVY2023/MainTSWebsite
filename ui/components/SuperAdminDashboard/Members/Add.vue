@@ -14,7 +14,7 @@
 
     <!-- 🪟 Card -->
     <div
-      class="relative lg:w-3/12 w-full rounded-3xl px-5 p-3 text-white bg-[#14002b]/80 backdrop-blur-xl border border-violet-500/30"
+      class="relative w-full max-w-6xl rounded-3xl lg:p-8 p-3 text-white bg-[#14002b]/80 backdrop-blur-xl border border-violet-500/30"
     >
       <!-- Logos -->
       <div class="flex items-center gap-x-3 w-fit mx-auto">
@@ -24,7 +24,7 @@
 
       <!-- Title -->
       <h1
-        class="text-lg font-extrabold mb-5 text-center bg-gradient-to-r from-violet-300 via-green-400 to-green-600 bg-clip-text text-transparent"
+        class="lg:text-3xl text-lg font-extrabold lg:mb-8 mb-5 text-center bg-gradient-to-r from-violet-300 via-green-400 to-green-600 bg-clip-text text-transparent"
       >
         Tech Savvy Code Camp Membership
       </h1>
@@ -32,82 +32,82 @@
       <!-- FORM -->
       <form @submit.prevent="submitForm">
         <!-- NAME + BIRTHDATE -->
-        <div class="lg:gap-4 gap-2 mb-2 lg:mb-4">
-          <div class="">
+        <div class="flex flex-wrap lg:gap-4 gap-2 mb-2 lg:mb-4">
+          <div class="flex-1">
             <label class="block text-xs mb-1 text-violet-300 font-bold">
               Full Name
             </label>
-            <div class="gap-2">
+            <div class="lg:flex gap-2">
               <input
                 v-model="form.firstname"
                 placeholder="First Name"
-                class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm mb-2"
+                class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
               />
               <input
                 v-model="form.middlename"
                 placeholder="Middle Name"
-                class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm mb-2"
+                class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
               />
               <input
                 v-model="form.lastname"
                 placeholder="Last Name"
-                class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm mb-2"
+                class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
               />
             </div>
           </div>
 
-          <div class="">
+          <div class="lg:w-48 w-full">
             <label class="block text-xs mb-1 text-violet-300 font-bold">
               Birthdate
             </label>
             <input
               v-model="form.birthdate"
               type="date"
-              class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+              class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
             />
           </div>
         </div>
 
         <!-- CONTACT -->
-        <div class="gap-2 lg:gap-4 mb-2 lg:mb-4">
-          <div class="mb-2">
+        <div class="grid md:grid-cols-3 gap-2 lg:gap-4 mb-2 lg:mb-4">
+          <div>
             <label class="block text-xs mb-1 text-violet-300 font-bold">
-              Contact Mobile
+              Mobile
             </label>
             <input
               v-model="form.mobile"
               placeholder="09xxxxxxxxx"
-              class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+              class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
             />
           </div>
 
-          <div class="mb-2">
+          <div>
             <label class="block text-xs mb-1 text-violet-300 font-bold">
-              Contact Email
+              Email
             </label>
             <input
               v-model="form.email"
               type="email"
               placeholder="Gmail"
-              class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+              class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
             />
           </div>
 
-          <div class="mb-2">
+          <div>
             <label class="block text-xs mb-1 text-violet-300 font-bold">
-              Website / GitHub / Social Media
+              Website / GitHub
             </label>
             <input
               v-model="form.website"
               placeholder="https://github.com/username"
-              class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+              class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
             />
           </div>
         </div>
 
         <!-- ROLE + ID + PHOTO -->
-        <div class="gap-2 lg:gap-4 w-full">
-          <div class="w-full mb-2 lg:mb-0">
+        <div class="lg:flex gap-2 lg:gap-4 w-full">
+          <div class="lg:w-6/12 w-full mb-2 lg:mb-0">
             <label class="block text-xs mb-1 text-violet-300 font-bold">
               Profile Picture
             </label>
@@ -119,7 +119,7 @@
             />
           </div>
 
-          <div class="w-full gap-x-2 hidden">
+          <div class="w-full flex gap-x-2">
             <div class="w-full">
               <label class="block text-xs mb-1 text-violet-300 font-bold">
                 Role
@@ -127,11 +127,11 @@
               <input
                 v-model="form.role"
                 placeholder="Participant"
-                class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+                class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
               />
             </div>
 
-            <div class="w-full">
+            <div class="lg:w-6/12 w-full">
               <label class="block text-xs mb-1 text-violet-300 font-bold">
                 ID Number
               </label>
@@ -139,7 +139,7 @@
                 v-model="form.idNumber"
                 required
                 placeholder="Approved ID"
-                class="w-full px-2 py-1  lg:text-sm text-[10px] bg-white text-black rounded-sm"
+                class="w-full px-2 py-1 lg:py-2 lg:text-sm text-[10px] bg-white text-black rounded-sm"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@
           class="lg:mt-10 mt-7 w-full rounded-xl py-2 font-semibold tracking-wide bg-gradient-to-r from-violet-600 via-green-600 to-violet-600 hover:scale-[1.03] hover:shadow-[0_0_30px_rgba(139,92,246,0.9)] transition-all disabled:opacity-50 text-xs lg:text-sm"
         >
           <i class="fa fa-paper-plane mr-2"></i>
-          {{ loading ? "Saving..." : "Submit" }}
+          {{ loading ? "Saving..." : "Submit Member" }}
         </button>
       </form>
 
@@ -208,8 +208,8 @@ const form = ref({
   middlename: "",
   lastname: "",
   birthdate: "",
-  role: "Participant",
-  idNumber: "ID" + Date.now(),
+  role: "",
+  idNumber: "",
   mobile: "",
   email: "",
   website: "",
