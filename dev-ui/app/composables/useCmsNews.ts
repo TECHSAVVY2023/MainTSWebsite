@@ -22,6 +22,7 @@ type CmsRawItem = {
   approval_status?: string
   links?: string[]
   files?: { name?: string; url?: string }[]
+  images?: string[]
   created_at?: string
 }
 
@@ -51,14 +52,15 @@ export function useCmsNews () {
 
   function mapCmsToNewsItem (cms: CmsRawItem, baseUrl?: string): CmsNewsItem {
     const base = baseUrl ?? apiBase
-    let fileUrl = Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : ''
+    const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
+    let fileUrl = imgFromImages || (Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : '')
     if (fileUrl && base && !fileUrl.startsWith('http')) {
       fileUrl = resolveMediaUrl(fileUrl, base)
     }
-    const rawUrls = Array.isArray(cms.files)
-      ? cms.files.map((f) => f?.url).filter(Boolean) as string[]
-      : []
-    const images = rawUrls.map((u) => resolveMediaUrl(u, base))
+    const rawImageUrls = Array.isArray(cms.images) && cms.images.length > 0
+      ? cms.images.filter(Boolean) as string[]
+      : (Array.isArray(cms.files) ? cms.files.map((f) => f?.url).filter(Boolean) as string[] : [])
+    const images = rawImageUrls.map((u) => resolveMediaUrl(u, base))
     const link = Array.isArray(cms.links) && cms.links[0] ? cms.links[0] : ''
     return {
       id: String(cms.id ?? ''),
@@ -124,7 +126,8 @@ export function useCmsNews () {
       return courseItems.map((item, idx) => {
         const title = item.title || 'Untitled'
         const slug = slugify(title) || `course-${item.id ?? idx}`
-        const fileUrl = Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : ''
+        const imgFromImages = Array.isArray(item.images) && item.images[0] ? item.images[0] : ''
+        const fileUrl = imgFromImages || (Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : '')
         const img = fileUrl ? resolveMediaUrl(fileUrl, apiBase) : ''
         const filters = (item.filters || '').toLowerCase()
         const category = filters.includes('fullstack') ? 'fullstack'
@@ -171,8 +174,9 @@ export function useCmsNews () {
         } catch {
           domain = link
         }
-        const fileUrl = Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : ''
-        const img = fileUrl && !fileUrl.startsWith('http') ? `${apiBase.replace(/\/$/, '')}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}` : fileUrl
+        const imgFromImages = Array.isArray(item.images) && item.images[0] ? item.images[0] : ''
+        const fileUrl = imgFromImages || (Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : '')
+        const img = fileUrl ? resolveMediaUrl(fileUrl, apiBase) : ''
         return {
           title: item.title || 'Untitled',
           domain: domain || item.title || '',

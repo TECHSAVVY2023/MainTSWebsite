@@ -12,7 +12,7 @@
             <a href="#news" class="text-[0.8125rem] text-white/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#news')">News</a>
             <NuxtLink to="/courses" class="text-[0.8125rem] text-white/75 no-underline transition-colors hover:text-accent-purple w-fit">Courses</NuxtLink>
             <a href="#calendar" class="text-[0.8125rem] text-white/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#calendar')">Calendar</a>
-            <NuxtLink to="/community-dashboard" class="text-[0.8125rem] text-white/75 no-underline transition-colors hover:text-accent-purple w-fit">Community</NuxtLink>
+            <NuxtLink to="/" class="text-[0.8125rem] text-white/75 no-underline transition-colors hover:text-accent-purple w-fit">Community</NuxtLink>
             <NuxtLink to="/login" class="text-[0.8125rem] font-semibold text-accent-purple no-underline mt-1 transition-colors hover:text-accent-light w-fit">Login</NuxtLink>
           </nav>
         </div>

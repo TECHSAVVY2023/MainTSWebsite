@@ -54,7 +54,7 @@
       </form>
       <p class="text-center text-sm text-[#3D2A6E] mt-6">
         New to TECH SAVVY?
-        <NuxtLink to="/community-dashboard" class="text-[#6B5B95] font-semibold no-underline transition-colors hover:text-accent-purple">Join Community</NuxtLink>
+        <NuxtLink to="/" class="text-[#6B5B95] font-semibold no-underline transition-colors hover:text-accent-purple">Join Community</NuxtLink>
       </p>
     </div>
   </main>

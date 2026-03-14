@@ -70,7 +70,7 @@ export function useLogin () {
   }
 
   function onSubmit () {
-    router.push('/community-dashboard')
+    router.push('/')
   }
 
   return {

@@ -11,12 +11,14 @@ export type LandingCourseItem = { slug: string; title: string; instructor?: stri
 export type LandingCalEvent = { date: string; time?: string; title?: string; description?: string; link?: string }
 
 function mapCmsToNewsItem (
-  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; links?: string[]; files?: { name?: string; url?: string }[]; created_at?: string },
+  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; links?: string[]; files?: { name?: string; url?: string }[]; images?: string[]; created_at?: string },
   baseUrl: string
 ) {
-  let fileUrl = Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : ''
+  const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
+  let fileUrl = imgFromImages || (Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : '')
   if (fileUrl && baseUrl && !fileUrl.startsWith('http')) {
-    fileUrl = `${baseUrl.replace(/\/$/, '')}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
+    const origin = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '')
+    fileUrl = `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
   }
   const link = Array.isArray(cms.links) && cms.links[0] ? cms.links[0] : ''
   return {
