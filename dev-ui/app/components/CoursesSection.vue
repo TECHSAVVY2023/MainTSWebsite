@@ -1,0 +1,103 @@
+<template>
+  <section
+    id="courses"
+    class="min-h-screen flex flex-col pt-16 pb-12 md:pt-24 md:pb-24 relative overflow-hidden bg-violet"
+  >
+    <SectionWires gradient-id-prefix="swg-courses" />
+    <div class="relative z-10 isolate flex-1 flex flex-col">
+      <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-8 sm:mb-12">
+          <div class="mb-0">
+            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-white mb-1">
+              Courses
+            </h2>
+            <p class="text-sm sm:text-base text-white/60 max-w-[42rem] leading-relaxed">
+              Learn full-stack web development with hands-on projects
+            </p>
+          </div>
+          <NuxtLink
+            to="/courses"
+            class="inline-flex items-center gap-2 py-2 px-4 sm:py-2.5 sm:px-5 rounded-full bg-violet-border border border-accent-purple/25 text-accent-purple font-medium text-sm sm:text-base transition-colors hover:bg-violet-light hover:border-accent-purple/40 hover:text-accent-light no-underline shrink-0"
+          >
+            Browse all courses
+            <i class="fas fa-arrow-right text-xs" />
+          </NuxtLink>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-start w-full">
+          <article
+            v-for="(course, i) in safeCourses"
+            :key="course.slug"
+            class="course-card group flex flex-col bg-neutral-card text-gray-900 rounded-xl overflow-hidden shadow-lg self-start transition-all duration-300 hover:-translate-y-1 hover:shadow-xl animate-fade-in"
+            :style="{ animationDelay: `${i * 0.1}s` }"
+          >
+            <NuxtLink :to="`/courses/${course.slug}`" class="flex flex-col h-full no-underline text-inherit">
+              <div class="relative w-full aspect-video overflow-hidden shrink-0">
+                <img
+                  :src="course.image || defaultImage"
+                  :alt="course.title"
+                  class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  loading="lazy"
+                  @error="onImageError($event)"
+                />
+                <span
+                  v-if="course.badge"
+                  class="absolute top-2 left-2 px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide bg-accent-gold text-violet rounded"
+                >
+                  {{ course.badge }}
+                </span>
+              </div>
+              <div class="p-4 flex flex-col flex-1 min-h-0">
+                <h3 class="text-sm font-bold tracking-wide mb-1 overflow-hidden text-ellipsis line-clamp-2 leading-snug">
+                  {{ course.title }}
+                </h3>
+                <p class="text-xs text-gray-500 mb-2">
+                  {{ course.instructor }}
+                </p>
+                <div class="flex items-center gap-3 text-xs text-gray-500 mb-2">
+                  <span class="inline-flex items-center gap-1">
+                    <i class="fas fa-star text-accent-gold text-xs" /> {{ course.rating }}
+                  </span>
+                  <span>{{ course.duration }}</span>
+                </div>
+                <span class="text-xs font-semibold tracking-wide uppercase text-violet mt-auto transition-colors group-hover:text-accent-purple">
+                  View course
+                </span>
+              </div>
+            </NuxtLink>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup lang="ts">
+type CourseItem = {
+  slug: string
+  title: string
+  instructor?: string
+  rating?: string
+  duration?: string
+  badge?: string
+  image?: string
+}
+
+const props = withDefaults(
+  defineProps<{
+    courses?: CourseItem[] | unknown
+    defaultImage?: string
+  }>(),
+  { defaultImage: '/assets/no-image.png' }
+)
+
+const safeCourses = computed(() => {
+  const raw = props.courses
+  return Array.isArray(raw) ? raw.filter((c): c is CourseItem => c != null && typeof c === 'object') : []
+})
+
+function onImageError(ev: Event) {
+  const el = ev.target as HTMLImageElement | null
+  if (el?.src !== undefined) el.src = props.defaultImage
+}
+</script>

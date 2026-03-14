@@ -7,8 +7,13 @@
   html {
     scroll-behavior: smooth;
   }
-  
   body {
     @apply font-inter;
+  }
+}
+
+@layer components {
+  .section-content-layer {
+    @apply flex-1 flex flex-col relative z-[2];
   }
 }

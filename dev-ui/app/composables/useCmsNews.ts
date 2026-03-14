@@ -42,15 +42,23 @@ export function useCmsNews () {
     return []
   }
 
+  function resolveMediaUrl (url: string, baseUrl?: string): string {
+    if (!url || url.startsWith('http')) return url
+    const base = baseUrl ?? apiBase
+    const origin = base ? base.replace(/\/api\/?$/, '').replace(/\/$/, '') : ''
+    return origin ? `${origin}${url.startsWith('/') ? '' : '/'}${url}` : url
+  }
+
   function mapCmsToNewsItem (cms: CmsRawItem, baseUrl?: string): CmsNewsItem {
     const base = baseUrl ?? apiBase
     let fileUrl = Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : ''
     if (fileUrl && base && !fileUrl.startsWith('http')) {
-      fileUrl = `${base.replace(/\/$/, '')}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
+      fileUrl = resolveMediaUrl(fileUrl, base)
     }
-    const images = Array.isArray(cms.files)
+    const rawUrls = Array.isArray(cms.files)
       ? cms.files.map((f) => f?.url).filter(Boolean) as string[]
       : []
+    const images = rawUrls.map((u) => resolveMediaUrl(u, base))
     const link = Array.isArray(cms.links) && cms.links[0] ? cms.links[0] : ''
     return {
       id: String(cms.id ?? ''),
@@ -69,10 +77,110 @@ export function useCmsNews () {
     try {
       const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
       const data = await $fetch<unknown>(url)
-      const list = normalizeCmsList(data)
+      const list = normalizeCmsList(data) as CmsRawItem[]
       return list
-        .filter((item: CmsRawItem) => item.approval_status !== 'rejected')
-        .map((item: unknown) => mapCmsToNewsItem(item as CmsRawItem, apiBase))
+        .filter((item) => item.approval_status !== 'rejected')
+        .map((item) => mapCmsToNewsItem(item, apiBase))
+    } catch {
+      return []
+    }
+  }
+
+  type CmsCourseItem = {
+    id: string
+    slug: string
+    title: string
+    instructor: string
+    category: string
+    rating: string
+    reviewCount: number
+    duration: string
+    price: string
+    level: string
+    badge?: string
+    image: string
+    description: string
+  }
+
+  function slugify (text: string): string {
+    return (text || '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'item'
+  }
+
+  async function fetchCmsCourses (): Promise<CmsCourseItem[]> {
+    if (!apiBase) return []
+    try {
+      const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
+      const data = await $fetch<unknown>(url)
+      const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
+      const courseItems = list.filter(
+        (item) => item.approval_status !== 'rejected' && (item.filters || '').toLowerCase().includes('course')
+      )
+      return courseItems.map((item, idx) => {
+        const title = item.title || 'Untitled'
+        const slug = slugify(title) || `course-${item.id ?? idx}`
+        const fileUrl = Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : ''
+        const img = fileUrl ? resolveMediaUrl(fileUrl, apiBase) : ''
+        const filters = (item.filters || '').toLowerCase()
+        const category = filters.includes('fullstack') ? 'fullstack'
+          : filters.includes('frontend') ? 'frontend'
+          : filters.includes('backend') ? 'backend'
+          : filters.includes('development') ? 'development'
+          : 'fullstack'
+        const badge = filters.includes('popular') ? 'Popular' : filters.includes('essential') ? 'Essential' : undefined
+        return {
+          id: String(item.id ?? idx),
+          slug,
+          title,
+          instructor: item.authors || 'TECH SAVVY Mentors',
+          category,
+          rating: '4.8',
+          reviewCount: 0,
+          duration: '',
+          price: 'Free',
+          level: 'Beginner',
+          badge,
+          image: img,
+          description: item.descriptions || ''
+        }
+      })
+    } catch {
+      return []
+    }
+  }
+
+  async function fetchCmsProjects (): Promise<{ title: string; domain: string; url: string; image: string; alt: string }[]> {
+    if (!apiBase) return []
+    try {
+      const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
+      const data = await $fetch<unknown>(url)
+      const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
+      const projectItems = list.filter(
+        (item) => item.approval_status !== 'rejected' && (item.filters || '').toLowerCase().includes('project')
+      )
+      return projectItems.map((item) => {
+        const link = Array.isArray(item.links) && item.links[0] ? item.links[0] : '#'
+        let domain = ''
+        try {
+          domain = link !== '#' ? new URL(link).hostname : ''
+        } catch {
+          domain = link
+        }
+        const fileUrl = Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : ''
+        const img = fileUrl && !fileUrl.startsWith('http') ? `${apiBase.replace(/\/$/, '')}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}` : fileUrl
+        return {
+          title: item.title || 'Untitled',
+          domain: domain || item.title || '',
+          url: link,
+          image: img,
+          alt: item.title || 'Project'
+        }
+      })
     } catch {
       return []
     }
@@ -83,6 +191,8 @@ export function useCmsNews () {
     CMS_LIST_PATH,
     normalizeCmsList,
     mapCmsToNewsItem,
-    fetchCmsList
+    fetchCmsList,
+    fetchCmsCourses,
+    fetchCmsProjects
   }
 }
