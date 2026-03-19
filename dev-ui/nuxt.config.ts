@@ -3,10 +3,20 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   srcDir: 'app',
   modules: ['@nuxtjs/tailwindcss'],
+  app: {
+    head: {
+      link: [
+        { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css' }
+      ]
+    }
+  },
   runtimeConfig: {
+    /** Server-only (never exposed to client) */
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
     public: {
-      /** API base URL (e.g. Django backend). Set in .env as NUXT_PUBLIC_API_BASE. Used by dashboard and landing page CMS (techsavvy_app GET /cms/list/). When empty, landing uses local JSON/defaults. */
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
+      /** API base URL. For apiv1 use http://127.0.0.1:8000 (no /api). Set in .env as NUXT_PUBLIC_API_BASE. */
+      apiBase: (process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, ''),
+      googleClientId: process.env.GOOGLE_CLIENT_ID,
     },
   },
   tailwindcss: {

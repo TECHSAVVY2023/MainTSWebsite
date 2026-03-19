@@ -5,13 +5,21 @@ const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
 
-export type LandingNewsItem = { date?: string; title?: string; summary?: string; description?: string; imageUrl?: string; link?: string; id?: string }
+export type LandingNewsItem = { date?: string; title?: string; summary?: string; description?: string; imageUrl?: string; link?: string; id?: string; filters?: string }
+
+const NEWS_CATEGORIES = ['News', 'News Highlights', 'Events', 'Announcements']
+
+function isNewsItem (item: { filters?: string }): boolean {
+  const f = item.filters || ''
+  if (!f.trim()) return true // no category set → treat as news (legacy items)
+  return NEWS_CATEGORIES.some((cat) => f.split(',').map((s) => s.trim()).includes(cat))
+}
 export type LandingProjectItem = { title: string; domain?: string; url: string; image?: string; alt?: string }
 export type LandingCourseItem = { slug: string; title: string; instructor?: string; rating?: string; duration?: string; badge?: string; image?: string }
 export type LandingCalEvent = { date: string; time?: string; title?: string; description?: string; link?: string }
 
 function mapCmsToNewsItem (
-  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; links?: string[]; files?: { name?: string; url?: string }[]; images?: string[]; created_at?: string },
+  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; filters?: string; links?: string[]; files?: { name?: string; url?: string }[]; images?: string[]; created_at?: string },
   baseUrl: string
 ) {
   const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
@@ -28,7 +36,8 @@ function mapCmsToNewsItem (
     summary: cms.descriptions || '',
     description: cms.descriptions || '',
     imageUrl: fileUrl,
-    link: link || '#'
+    link: link || '#',
+    filters: cms.filters || ''
   }
 }
 
@@ -63,7 +72,7 @@ export function useLanding () {
         const data = await $fetch<unknown>(url)
         const list = normalizeCmsList(data)
         return (list as { approval_status?: string }[])
-          .filter((item) => item.approval_status !== 'rejected')
+          .filter((item) => item.approval_status === 'approved')
           .map((item: unknown) => mapCmsToNewsItem(item as Parameters<typeof mapCmsToNewsItem>[0], apiBase))
       } catch {
         return []
@@ -72,7 +81,9 @@ export function useLanding () {
     { server: true, default: () => [] }
   )
 
-  const newsItemsDisplay = computed(() => newsItems.value.slice(0, 4))
+  const newsItemsDisplay = computed(() =>
+    newsItems.value.filter((item) => isNewsItem(item as { filters?: string })).slice(0, 4)
+  )
 
   function scrollToSection (id: string) {
     if (id === '#') return
@@ -102,7 +113,7 @@ export function useLanding () {
         const list = normalizeCmsList(data)
         if (res.ok && list.length > 0) {
           const mapped = (list as { approval_status?: string }[])
-            .filter((item) => item.approval_status !== 'rejected')
+            .filter((item) => item.approval_status === 'approved')
             .map((item: unknown) => mapCmsToNewsItem(item as Parameters<typeof mapCmsToNewsItem>[0], apiBase))
           if (mapped.length > 0) newsItems.value = mapped
         }

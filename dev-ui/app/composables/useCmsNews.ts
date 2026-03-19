@@ -20,10 +20,20 @@ type CmsRawItem = {
   authors?: string
   descriptions?: string
   approval_status?: string
+  filters?: string
   links?: string[]
   files?: { name?: string; url?: string }[]
   images?: string[]
   created_at?: string
+}
+
+const NEWS_CATEGORIES = ['News', 'News Highlights', 'Events', 'Announcements']
+
+function isNewsCategory (filters?: string): boolean {
+  const f = filters || ''
+  if (!f.trim()) return true // no category → legacy item, treat as news
+  const parts = f.split(',').map((s) => s.trim())
+  return NEWS_CATEGORIES.some((cat) => parts.includes(cat))
 }
 
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
@@ -81,7 +91,7 @@ export function useCmsNews () {
       const data = await $fetch<unknown>(url)
       const list = normalizeCmsList(data) as CmsRawItem[]
       return list
-        .filter((item) => item.approval_status !== 'rejected')
+        .filter((item) => item.approval_status === 'approved' && isNewsCategory(item.filters))
         .map((item) => mapCmsToNewsItem(item, apiBase))
     } catch {
       return []
@@ -121,7 +131,7 @@ export function useCmsNews () {
       const data = await $fetch<unknown>(url)
       const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
       const courseItems = list.filter(
-        (item) => item.approval_status !== 'rejected' && (item.filters || '').toLowerCase().includes('course')
+        (item) => item.approval_status === 'approved' && (item.filters || '').toLowerCase().includes('course')
       )
       return courseItems.map((item, idx) => {
         const title = item.title || 'Untitled'
@@ -164,7 +174,7 @@ export function useCmsNews () {
       const data = await $fetch<unknown>(url)
       const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
       const projectItems = list.filter(
-        (item) => item.approval_status !== 'rejected' && (item.filters || '').toLowerCase().includes('project')
+        (item) => item.approval_status === 'approved' && (item.filters || '').toLowerCase().includes('project')
       )
       return projectItems.map((item) => {
         const link = Array.isArray(item.links) && item.links[0] ? item.links[0] : '#'

@@ -29,7 +29,18 @@
               />
               <div class="relative z-10 rounded-xl p-5 sm:p-6 bg-violet">
                 <h1 class="text-lg sm:text-xl font-bold leading-tight mb-2 text-white">{{ article.title }}</h1>
-                <p class="text-sm leading-relaxed text-white/75">{{ article.summary }}</p>
+                <a
+                  v-if="article?.link && article.link !== '#'"
+                  :href="article.link"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-sm leading-relaxed text-[#b5a3ff] hover:text-[#eeeaFF] transition-colors inline-block max-w-full break-words"
+                >
+                  {{ article.link }}
+                </a>
+                <p v-else class="text-sm leading-relaxed text-white/60">
+                  No external link provided.
+                </p>
               </div>
             </div>
             <div class="flex flex-col">

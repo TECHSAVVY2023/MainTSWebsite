@@ -1,0 +1,1617 @@
+<template>
+  <div>
+    <div class="w-full p-6">
+
+      <div class="w-full">
+        <!-- Content Form Section -->
+        <div
+          v-if="showForm"
+          class="rounded-xl border mb-8 transition-colors duration-300 w-full bg-white/[0.03] border-white/[0.08]"
+        >
+          <div class="px-6 py-4 border-b border-white/[0.06]">
+            <div class="lg:flex items-center justify-between">
+              <h2 class="text-base font-bold text-accent-purple">
+                {{ isEditing ? "Edit Content" : "Create New Content" }}
+              </h2>
+            </div>
+          </div>
+
+          <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
+            <!-- Title -->
+            <div>
+              <label class="block text-sm font-medium mb-1 text-white/60">
+                Title <span class="text-red-400">*</span>
+              </label>
+              <input
+                v-model="formData.title"
+                type="text"
+                required
+                placeholder="Enter content title"
+                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+              />
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label class="block text-sm font-medium mb-1 text-white/60">
+                Description <span class="text-red-400">*</span>
+              </label>
+              <textarea
+                v-model="formData.descriptions"
+                required
+                rows="4"
+                placeholder="Provide a detailed description of the content"
+                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 resize-y bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+              ></textarea>
+            </div>
+
+            <!-- Categories -->
+            <div>
+              <label class="block text-sm font-medium mb-3 uppercase text-white/60">
+                Categories
+              </label>
+
+              <!-- Main Categories -->
+              <div class="mb-4">
+                <h4 class="text-xs font-semibold mb-2 uppercase text-white/35">
+                  Main Categories
+                </h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <label
+                    v-for="category in mainCategories"
+                    :key="category.value"
+                    class="flex items-center space-x-2 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="category.value"
+                      v-model="selectedCategories"
+                      class="rounded transition-colors border-white/20 text-accent-purple focus:ring-accent-purple/50 bg-violet/60"
+                    />
+                    <span class="text-sm text-white/80">{{ category.label }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attachments (Links) -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-medium text-white/60">
+                  Attachments (Links)
+                </label>
+                <button
+                  type="button"
+                  @click="addLink"
+                  class="inline-flex items-center px-3 py-1 text-sm rounded-lg transition-colors duration-200 bg-accent-purple/20 border border-accent-purple/30 text-accent-purple hover:bg-accent-purple/30 font-semibold"
+                >
+                  <span class="mr-1">+</span> Add Link
+                </button>
+              </div>
+
+              <!-- Links List -->
+              <div
+                v-if="formData.links && formData.links.length > 0"
+                class="space-y-2 mt-3"
+              >
+                <div
+                  v-for="(link, index) in formData.links"
+                  :key="index"
+                  class="flex items-center gap-2 p-3 bg-white/[0.03] border border-white/[0.08] rounded-lg"
+                >
+                  <input
+                    v-model="formData.links[index]"
+                    type="url"
+                    placeholder="https://example.com/file.pdf"
+                    class="flex-1 px-3 py-2 bg-violet/60 border border-white/[0.1] rounded-lg text-white text-sm placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                  />
+                  <button
+                    type="button"
+                    @click="removeLink(index)"
+                    class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Files -->
+            <div>
+              <p class="text-xs mb-3 text-white/35">
+                Upload files or add file URLs manually. Supported: Images (JPG,
+                PNG), Videos (MP4), PDFs & Other files.
+              </p>
+
+              <div
+                @dragover.prevent="isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @drop.prevent="handleFileDrop"
+                :class="[
+                  'border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200',
+                  isDragging
+                    ? 'border-accent-gold bg-accent-gold/5'
+                    : 'border-white/[0.12] bg-white/[0.02]',
+                ]"
+              >
+                <div class="flex flex-col items-center">
+                  <svg
+                    class="w-12 h-12 mb-3 text-white/25"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  <p
+                    class="text-sm mb-1 text-white/55"
+                  >
+                    <button
+                      type="button"
+                      @click="triggerFileInput"
+                      :class="[
+                        'font-medium transition-colors',
+                        'text-accent-gold hover:text-accent-gold/80',
+                      ]"
+                    >
+                      Click to upload
+                    </button>
+                    or drag and drop
+                  </p>
+                  <p
+                    class="text-xs text-white/30"
+                  >
+                    Up to 500 files, max 500MB per file
+                  </p>
+                </div>
+                <input
+                  ref="fileInput"
+                  type="file"
+                  multiple
+                  @change="handleFileSelect"
+                  accept="image/*,video/*,.pdf,.doc,.docx"
+                  class="hidden"
+                />
+              </div>
+
+              <!-- Selected Files Preview with Grid Layout -->
+              <div v-if="selectedFiles.length > 0" class="mt-4">
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm font-medium text-white/70">
+                    Selected Files ({{ selectedFiles.length }})
+                  </p>
+                  <p class="text-xs text-white/30">
+                    <span class="mr-2">✋ Drag to reorder</span>
+                  </p>
+                </div>
+
+                <div
+                  class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+                >
+                  <div
+                    v-for="(file, index) in selectedFiles"
+                    :key="index"
+                    draggable="true"
+                    @dragstart="handleSelectedDragStart(index)"
+                    @dragover.prevent
+                    @drop="handleSelectedDrop(index)"
+                    @dragenter="handleSelectedDragEnter(index)"
+                    @dragleave="handleSelectedDragLeave"
+                    :class="[
+                      'relative group cursor-move rounded-xl overflow-hidden transition-all duration-300 transform',
+                      draggedSelectedIndex === index
+                        ? 'opacity-50 scale-95 rotate-2'
+                        : 'hover:scale-105 hover:shadow-2xl',
+                      dragOverSelectedIndex === index
+                        ? 'ring-4 ring-green-400 shadow-lg shadow-green-500/50 scale-105'
+                        : 'bg-white/[0.04] border border-white/[0.08] hover:border-accent-gold/40',
+                    ]"
+                  >
+                    <!-- Image Preview or File Icon -->
+                    <div
+                      :class="[
+                        'aspect-square flex items-center justify-center relative overflow-hidden',
+                        'bg-violet/60',
+                      ]"
+                    >
+                      <img
+                        v-if="isImageFile(file.name)"
+                        :src="getFilePreviewUrl(file)"
+                        :alt="file.name"
+                        class="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-110"
+                        @click="
+                          openImageViewer(getFilePreviewUrl(file), file.name)
+                        "
+                      />
+                      <div
+                        v-else
+                        class="flex flex-col items-center justify-center p-4"
+                      >
+                        <svg
+                          :class="[
+                            'w-16 h-16 transition-all duration-300 group-hover:scale-110 text-white/25',
+                          ]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <p class="text-xs mt-2 text-center truncate w-full font-medium text-white/40">
+                          {{ getFileExtension(file.name) }}
+                        </p>
+                      </div>
+
+                      <!-- Overlay on hover -->
+                      <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      ></div>
+
+                      <!-- Drag Handle Icon -->
+                      <div
+                        class="absolute top-2 left-2 rounded-lg p-1.5 backdrop-blur-sm transition-all duration-300 bg-violet/90 group-hover:bg-accent-gold/90"
+                      >
+                        <svg
+                          class="w-4 h-4 transition-colors duration-300 text-white/60 group-hover:text-violet"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 8h16M4 16h16"
+                          />
+                        </svg>
+                      </div>
+
+                      <!-- Zoom Icon for Images -->
+                      <button
+                        v-if="isImageFile(file.name)"
+                        type="button"
+                        @click="
+                          openImageViewer(getFilePreviewUrl(file), file.name)
+                        "
+                        class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg"
+                        title="View full size"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                          />
+                        </svg>
+                      </button>
+
+                      <!-- Index Badge -->
+                      <div
+                        class="absolute bottom-2 left-2 bg-gradient-to-r from-yellow-500 to-amber-600 text-gray-900 text-xs font-bold px-2 py-1 rounded-full shadow-lg"
+                      >
+                        #{{ index + 1 }}
+                      </div>
+                    </div>
+
+                    <!-- File Info -->
+                    <div class="p-3 bg-white/[0.03]">
+                      <p
+                        class="text-xs font-medium truncate mb-2 text-white/70"
+                        :title="file.name"
+                      >
+                        {{ getCleanFilename(file.name) }}
+                      </p>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-white/[0.06] text-white/40">
+                          {{ formatFileSize(file.size) }}
+                        </span>
+                        <button
+                          type="button"
+                          @click="removeSelectedFile(index)"
+                          class="text-xs font-bold px-3 py-1 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-yellow-700 hover:from-red-600 hover:to-red-700 transition-all duration-300 transform hover:scale-105 shadow-md"
+                          title="Remove file"
+                        >
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Manual File Entry Section -->
+              <div
+                v-for="(manualFile, index) in manualFiles"
+                :key="'manual-' + index"
+                :class="[
+                  'p-4 rounded-lg border mb-3 mt-4',
+                  'bg-white/[0.03] border-white/[0.08]',
+                ]"
+              >
+                <div class="flex items-start gap-3">
+                  <div class="flex-1 space-y-3">
+                    <div>
+                      <label class="block text-xs font-medium mb-1 text-white/60">Name</label>
+                      <input
+                        v-model="manualFile.name"
+                        type="text"
+                        placeholder="Enter file name (e.g., product-image.jpg)"
+                        class="w-full px-3 py-2 border rounded-lg text-sm bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-medium mb-1 text-white/60">Url</label>
+                      <input
+                        v-model="manualFile.url"
+                        type="url"
+                        placeholder="https://example.com/path/to/file.jpg"
+                        class="w-full px-3 py-2 border rounded-lg text-sm bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    @click="removeManualFile(index)"
+                    class="mt-6 px-4 py-2 bg-red-500/20 border border-red-500/30 text-red-400 rounded-lg hover:bg-red-500/30 transition-all duration-200 text-sm font-medium"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Uploaded Files (Existing) with Drag & Drop Reordering -->
+              <div
+                v-if="formData.files && formData.files.length > 0"
+                class="mt-4"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-sm font-medium text-white/70">
+                    Uploaded Files ({{ formData.files.length }})
+                  </p>
+                  <p class="text-xs text-white/30">
+                    <span class="mr-2">✋ Drag to reorder</span>
+                  </p>
+                </div>
+
+                <div
+                  class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
+                >
+                  <div
+                    v-for="(file, index) in formData.files"
+                    :key="file.url"
+                    draggable="true"
+                    @dragstart="handleDragStart(index)"
+                    @dragover.prevent
+                    @drop="handleDrop(index)"
+                    @dragenter="handleDragEnter(index)"
+                    @dragleave="handleDragLeave"
+                    :class="[
+                      'relative group cursor-move rounded-xl overflow-hidden transition-all duration-300 transform',
+                      draggedIndex === index
+                        ? 'opacity-50 scale-95 rotate-2'
+                        : 'hover:scale-105 hover:shadow-2xl',
+                      dragOverIndex === index
+                        ? 'ring-4 ring-green-400 shadow-lg shadow-green-500/50 scale-105'
+                        : 'bg-white/[0.04] border border-white/[0.08] hover:border-accent-purple/40',
+                    ]"
+                  >
+                    <!-- Image Preview or File Icon -->
+                    <div
+                      :class="[
+                        'aspect-square flex items-center justify-center relative overflow-hidden bg-violet/60',
+                      ]"
+                    >
+                      <img
+                        v-if="isImageFile(file.name)"
+                        :src="cleanImageUrl(file.url)"
+                        :alt="getCleanFilename(file.name)"
+                        class="w-full h-full object-cover cursor-pointer transition-transform duration-300 group-hover:scale-110"
+                        @click="openImageViewer(file.url, file.name)"
+                        @error="
+                          (e) => {
+                            console.error('Image load error:', file.url);
+                            e.target.style.display = 'none';
+                          }
+                        "
+                        loading="lazy"
+                      />
+                      <div
+                        v-else
+                        class="flex flex-col items-center justify-center p-4"
+                      >
+                        <svg
+                          :class="[
+                            'w-16 h-16 transition-all duration-300 group-hover:scale-110 text-white/25',
+                          ]"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <p class="text-xs mt-2 text-center truncate w-full font-medium text-white/40">
+                          {{ getFileExtension(file.name) }}
+                        </p>
+                      </div>
+
+                      <!-- Overlay on hover -->
+                      <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      ></div>
+
+                      <!-- Drag Handle Icon -->
+                      <div
+                        class="absolute top-2 left-2 rounded-lg p-1.5 backdrop-blur-sm transition-all duration-300 bg-violet/90 group-hover:bg-accent-purple/90"
+                      >
+                        <svg
+                          class="w-4 h-4 transition-colors duration-300 text-white/60 group-hover:text-white"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 8h16M4 16h16"
+                          />
+                        </svg>
+                      </div>
+
+                      <!-- Zoom Icon for Images -->
+                      <button
+                        v-if="isImageFile(file.name)"
+                        type="button"
+                        @click="openImageViewer(file.url, file.name)"
+                        class="absolute top-2 right-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform hover:scale-110 shadow-lg"
+                        title="View full size"
+                      >
+                        <svg
+                          class="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                          />
+                        </svg>
+                      </button>
+
+                      <!-- Index Badge -->
+                      <div
+                        class="absolute bottom-2 left-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg"
+                      >
+                        #{{ index + 1 }}
+                      </div>
+                    </div>
+
+                    <!-- File Info -->
+                    <div class="p-3 bg-white/[0.03]">
+                      <p class="text-xs font-medium truncate mb-2 text-white/70" :title="file.name">
+                        {{ getCleanFilename(file.name) }}
+                      </p>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-accent-purple/10 text-accent-purple">
+                          Uploaded
+                        </span>
+                        <button
+                          type="button"
+                          @click="removeUploadedFile(index)"
+                          class="text-xs font-bold px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30 transition-all duration-300"
+                          title="Remove file"
+                        >
+                          <i class="fa fa-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-4 pt-4 border-t border-white/[0.06]">
+              <button
+                type="submit"
+                :disabled="loading"
+                class="flex-1 px-6 py-3 font-bold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-accent-purple text-violet hover:bg-accent-purple/90 shadow-lg shadow-accent-purple/20"
+              >
+                {{
+                  loading
+                    ? isEditing ? "Saving..." : "Submitting..."
+                    : isEditing ? "Save Changes" : "Submit Content"
+                }}
+              </button>
+              <button
+                type="button"
+                @click="clearForm"
+                class="px-6 py-3 border font-semibold rounded-xl transition-colors duration-200 bg-white/[0.06] border-white/10 text-white/60 hover:bg-white/[0.1]"
+              >
+                <span class="mr-1">↻</span> Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <Teleport to="body">
+      <div
+        v-if="imageViewerOpen"
+        @click="closeImageViewer"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+      >
+        <div class="relative max-w-7xl max-h-screen" @click.stop>
+          <!-- Close Button -->
+          <button
+            @click="closeImageViewer"
+            class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+          >
+            <svg
+              class="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+
+          <!-- Image Title -->
+          <div class="absolute -top-12 left-0 text-white text-sm">
+            {{ currentImageName }}
+          </div>
+
+          <!-- Zoom Controls -->
+          <div
+            class="absolute top-4 right-4 flex gap-2 bg-black/50 rounded-lg p-2"
+          >
+            <button
+              @click.stop="zoomOut"
+              class="text-white hover:text-gray-300 p-2 bg-white/10 rounded"
+              title="Zoom Out"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"
+                />
+              </svg>
+            </button>
+            <button
+              @click.stop="resetZoom"
+              class="text-white hover:text-gray-300 p-2 bg-white/10 rounded text-xs font-medium"
+              title="Reset Zoom"
+            >
+              {{ Math.round(zoomLevel * 100) }}%
+            </button>
+            <button
+              @click.stop="zoomIn"
+              class="text-white hover:text-gray-300 p-2 bg-white/10 rounded"
+              title="Zoom In"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+                />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Image -->
+          <div class="overflow-auto max-h-screen">
+            <img
+              :src="currentImageUrl"
+              :alt="currentImageName"
+              :style="{
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'center',
+              }"
+              class="max-w-full h-auto transition-transform duration-200 cursor-zoom-in"
+              @click.stop="zoomIn"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Toast Notifications -->
+    <Teleport to="body">
+      <div class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Toast Messages -->
+        <TransitionGroup name="toast">
+          <div
+            v-for="toast in toasts"
+            :key="toast.id"
+            :class="[
+              'min-w-[300px] max-w-md rounded-xl shadow-2xl border p-4 flex items-start gap-3 transition-all duration-300 bg-violet-dark backdrop-blur',
+              toast.type === 'success' && 'border-green-500/30 text-green-400',
+              toast.type === 'error' && 'border-red-500/30 text-red-400',
+              toast.type === 'confirm' && 'border-accent-gold/30 text-accent-gold',
+            ]"
+          >
+            <!-- Icon -->
+            <div class="flex-shrink-0">
+              <!-- Success Icon -->
+              <svg
+                v-if="toast.type === 'success'"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+
+              <!-- Error Icon -->
+              <svg
+                v-else-if="toast.type === 'error'"
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+
+              <!-- Warning Icon (for confirm) -->
+              <svg
+                v-else
+                class="w-6 h-6"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1">
+              <p class="text-sm font-medium">{{ toast.message }}</p>
+
+              <!-- Confirm Buttons -->
+              <div v-if="toast.type === 'confirm'" class="mt-3 flex gap-2">
+                <button
+                  @click="toast.onConfirm"
+                  class="px-3 py-1 text-xs font-medium rounded-lg transition-colors bg-red-500 text-white hover:bg-red-600"
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  @click="toast.onCancel"
+                  class="px-3 py-1 text-xs font-medium rounded-lg transition-colors bg-white/10 border border-white/10 text-white/60 hover:bg-white/15"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+
+            <!-- Close Button (for non-confirm toasts) -->
+            <button
+              v-if="toast.type !== 'confirm'"
+              @click="removeToast(toast.id)"
+              class="flex-shrink-0 text-white/40 hover:text-white transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+        </TransitionGroup>
+      </div>
+    </Teleport>
+  </div>
+</template>
+
+<style scoped>
+/* Toast animations */
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(100px) scale(0.8);
+}
+</style>
+
+<script setup>
+import moment from "moment";
+import { useImageUrl } from "~/composables/useImageUrl";
+
+const { cleanImageUrl } = useImageUrl();
+const { user, init } = useAuth();
+
+onMounted(() => {
+  init();
+});
+
+const {
+  posts,
+  loading,
+  error,
+  loadPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  uploadMultipleFiles,
+} = useCMS();
+
+// Form state
+const formData = ref({
+  content_id: "CMS" + moment().valueOf(),
+  title: "",
+  authors: "jorenleeluna24@gmail.com, info@techsavvies.space",
+  filters: "",
+  descriptions: "",
+  approval_status: "pending",
+  links: [],
+  files: [],
+  logs: [],
+});
+
+const selectedFiles = ref([]);
+const manualFiles = ref([]);
+const isDragging = ref(false);
+const isEditing = ref(false);
+const editingId = ref(null);
+const successMessage = ref("");
+const fileInput = ref(null);
+
+// Search state
+const searchQuery = ref("");
+
+// Form visibility state
+const showForm = ref(false);
+
+// Theme state
+const isDarkMode = ref(false);
+
+// Toast notification state
+const toasts = ref([]);
+let toastIdCounter = 0;
+
+// Image viewer state
+const imageViewerOpen = ref(false);
+const currentImageUrl = ref("");
+const currentImageName = ref("");
+const zoomLevel = ref(1);
+
+// Drag and drop state for reordering uploaded files
+const draggedIndex = ref(null);
+const dragOverIndex = ref(null);
+
+// Drag and drop state for reordering selected files
+const draggedSelectedIndex = ref(null);
+const dragOverSelectedIndex = ref(null);
+
+// Main Categories
+const mainCategories = [
+  { value: "News", label: "News" },
+  { value: "News Highlights", label: "News Highlights" },
+  { value: "Events", label: "Events" },
+  { value: "Announcements", label: "Announcements" },
+  { value: "Courses", label: "Courses" },
+  { value: "Featured Projects", label: "Featured Projects" },
+];
+
+// All Categories combined (for filtering)
+const allCategories = [...mainCategories];
+
+const selectedCategories = ref([]);
+
+// Computed property for auto-generating filters from categories
+const computedFilters = computed(() => {
+  const filterParts = [];
+
+  // Add selected categories
+  if (selectedCategories.value.length > 0) {
+    selectedCategories.value.forEach((category) => {
+      filterParts.push(category);
+    });
+  }
+
+  return filterParts.join(", ");
+});
+
+// Watch computedFilters and update formData.filters
+watch(computedFilters, (newValue) => {
+  formData.value.filters = newValue;
+});
+
+// Approval statuses
+const approvalStatuses = [
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
+];
+
+// Check if current user can see approval status
+const canSeeApprovalStatus = computed(() => {
+  return user.value?.email === "jorenleeluna24@gmail.com";
+});
+
+// Theme toggle function
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value;
+  // Save preference to localStorage
+  localStorage.setItem("cms-theme", isDarkMode.value ? "dark" : "light");
+};
+
+// Toast notification functions
+const showToast = (message, type = "success", duration = 3000) => {
+  const id = ++toastIdCounter;
+  toasts.value.push({ id, message, type });
+
+  if (duration > 0) {
+    setTimeout(() => {
+      removeToast(id);
+    }, duration);
+  }
+
+  return id;
+};
+
+const removeToast = (id) => {
+  const index = toasts.value.findIndex((t) => t.id === id);
+  if (index > -1) {
+    toasts.value.splice(index, 1);
+  }
+};
+
+const showConfirmToast = (message, onConfirm) => {
+  const id = ++toastIdCounter;
+
+  const handleConfirm = async () => {
+    removeToast(id);
+    await onConfirm();
+  };
+
+  const handleCancel = () => {
+    removeToast(id);
+  };
+
+  toasts.value.push({
+    id,
+    message,
+    type: "confirm",
+    onConfirm: handleConfirm,
+    onCancel: handleCancel,
+  });
+};
+
+// Computed: Filtered posts based on search query
+const filteredPosts = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return posts.value;
+  }
+
+  const query = searchQuery.value.toLowerCase().trim();
+
+  return posts.value.filter((post) => {
+    // Search in title
+    const titleMatch = post.title?.toLowerCase().includes(query);
+
+    // Search in authors
+    const authorsMatch = post.authors?.toLowerCase().includes(query);
+
+    // Search in filters (handle both array and string)
+    let filtersMatch = false;
+    if (post.filters) {
+      if (Array.isArray(post.filters)) {
+        filtersMatch = post.filters.some((filter) =>
+          filter.toLowerCase().includes(query),
+        );
+      } else {
+        filtersMatch = post.filters.toLowerCase().includes(query);
+      }
+    }
+
+    // Search in descriptions
+    const descriptionsMatch = post.descriptions?.toLowerCase().includes(query);
+
+    // Search in approval status
+    const statusMatch = post.approval_status?.toLowerCase().includes(query);
+
+    return (
+      titleMatch ||
+      authorsMatch ||
+      filtersMatch ||
+      descriptionsMatch ||
+      statusMatch
+    );
+  });
+});
+
+// Load posts on mount
+onMounted(async () => {
+  await loadPosts();
+
+  // Load theme preference
+  const savedTheme = localStorage.getItem("cms-theme");
+  if (savedTheme === "dark") {
+    isDarkMode.value = true;
+  }
+
+  // Add keyboard shortcuts for image viewer
+  window.addEventListener("keydown", handleKeyPress);
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  window.removeEventListener("keydown", handleKeyPress);
+  document.body.style.overflow = "";
+});
+
+// Keyboard shortcuts
+const handleKeyPress = (event) => {
+  if (!imageViewerOpen.value) return;
+
+  switch (event.key) {
+    case "Escape":
+      closeImageViewer();
+      break;
+    case "+":
+    case "=":
+      zoomIn();
+      break;
+    case "-":
+      zoomOut();
+      break;
+    case "0":
+      resetZoom();
+      break;
+  }
+};
+
+// File handling
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+const handleFileSelect = (event) => {
+  const files = Array.from(event.target.files || []);
+  selectedFiles.value.push(...files);
+};
+
+const handleFileDrop = (event) => {
+  isDragging.value = false;
+  const files = Array.from(event.dataTransfer.files || []);
+  selectedFiles.value.push(...files);
+};
+
+const removeSelectedFile = (index) => {
+  selectedFiles.value.splice(index, 1);
+};
+
+const removeUploadedFile = (index) => {
+  formData.value.files.splice(index, 1);
+};
+
+// Manual file entry functions
+const addManualFile = () => {
+  manualFiles.value.push({ name: "", url: "" });
+};
+
+const removeManualFile = (index) => {
+  manualFiles.value.splice(index, 1);
+};
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+};
+
+// Check if file is an image
+const isImageFile = (filename) => {
+  if (!filename) return false;
+
+  // Remove query parameters first
+  const cleanFilename = filename.split("?")[0];
+
+  const imageExtensions = [
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".bmp",
+  ];
+  const ext = cleanFilename
+    .toLowerCase()
+    .substring(cleanFilename.lastIndexOf("."));
+  return imageExtensions.includes(ext);
+};
+
+// Get file extension
+const getFileExtension = (filename) => {
+  if (!filename) return "";
+
+  // Remove query parameters first
+  const cleanFilename = filename.split("?")[0];
+
+  const ext = cleanFilename
+    .substring(cleanFilename.lastIndexOf(".") + 1)
+    .toUpperCase();
+  return ext;
+};
+
+// Clean filename - extract only filename up to extension, remove query params and hashes
+const getCleanFilename = (filename) => {
+  if (!filename) return "";
+
+  // First, remove query parameters (everything after ?)
+  let cleanName = filename.split("?")[0];
+
+  // Extract the actual filename from URL path if it's a full URL
+  if (cleanName.includes("/")) {
+    cleanName = cleanName.split("/").pop();
+  }
+
+  // Pattern to match: filename_HASH.extension or just filename.extension
+  // This will extract the first occurrence of a valid filename with extension
+  // Examples:
+  // "615253807_122115229365105864_504322.jpg" -> "615253807.jpg"
+  // "photo_12345678901234567890.png" -> "photo.png"
+  // "document.pdf" -> "document.pdf"
+
+  // Try to find pattern: anything before underscore + extension
+  const underscoreMatch = cleanName.match(/^([^_]+)_.*?\.([a-zA-Z0-9]+)$/);
+  if (underscoreMatch) {
+    return `${underscoreMatch[1]}.${underscoreMatch[2]}`;
+  }
+
+  // If no underscore pattern, just get filename.extension (remove any hash after extension)
+  const simpleMatch = cleanName.match(/^(.+?)\.([a-zA-Z0-9]+)/);
+  if (simpleMatch) {
+    return `${simpleMatch[1]}.${simpleMatch[2]}`;
+  }
+
+  // If no extension found, return the cleaned name
+  return cleanName;
+};
+
+// Handle image loading errors
+const handleImageError = (event, file) => {
+  console.error("Image failed to load:", {
+    url: file.url,
+    name: file.name,
+    error: event,
+  });
+  // Set a placeholder or retry logic here if needed
+  event.target.src =
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EError%3C/text%3E%3C/svg%3E';
+};
+
+// Image Viewer Functions
+const openImageViewer = (url, name) => {
+  currentImageUrl.value = url;
+  currentImageName.value = name;
+  imageViewerOpen.value = true;
+  zoomLevel.value = 1;
+  // Prevent body scroll when modal is open
+  document.body.style.overflow = "hidden";
+};
+
+const closeImageViewer = () => {
+  imageViewerOpen.value = false;
+  currentImageUrl.value = "";
+  currentImageName.value = "";
+  zoomLevel.value = 1;
+  // Restore body scroll
+  document.body.style.overflow = "";
+};
+
+const zoomIn = () => {
+  if (zoomLevel.value < 3) {
+    zoomLevel.value += 0.25;
+  }
+};
+
+const zoomOut = () => {
+  if (zoomLevel.value > 0.5) {
+    zoomLevel.value -= 0.25;
+  }
+};
+
+const resetZoom = () => {
+  zoomLevel.value = 1;
+};
+
+// Drag and Drop Reordering Functions for Uploaded Files
+const handleDragStart = (index) => {
+  draggedIndex.value = index;
+};
+
+const handleDragEnter = (index) => {
+  dragOverIndex.value = index;
+};
+
+const handleDragLeave = () => {
+  // Small delay to prevent flickering
+  setTimeout(() => {
+    dragOverIndex.value = null;
+  }, 50);
+};
+
+const handleDrop = (dropIndex) => {
+  if (draggedIndex.value === null || draggedIndex.value === dropIndex) {
+    draggedIndex.value = null;
+    dragOverIndex.value = null;
+    return;
+  }
+
+  // Reorder the files array
+  const files = [...formData.value.files];
+  const draggedFile = files[draggedIndex.value];
+
+  // Remove from old position
+  files.splice(draggedIndex.value, 1);
+
+  // Insert at new position
+  files.splice(dropIndex, 0, draggedFile);
+
+  // Update formData
+  formData.value.files = files;
+
+  // Reset drag state
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+};
+
+// Drag and Drop Reordering Functions for Selected Files
+const handleSelectedDragStart = (index) => {
+  draggedSelectedIndex.value = index;
+};
+
+const handleSelectedDragEnter = (index) => {
+  dragOverSelectedIndex.value = index;
+};
+
+const handleSelectedDragLeave = () => {
+  setTimeout(() => {
+    dragOverSelectedIndex.value = null;
+  }, 50);
+};
+
+const handleSelectedDrop = (dropIndex) => {
+  if (
+    draggedSelectedIndex.value === null ||
+    draggedSelectedIndex.value === dropIndex
+  ) {
+    draggedSelectedIndex.value = null;
+    dragOverSelectedIndex.value = null;
+    return;
+  }
+
+  // Reorder the selected files array
+  const files = [...selectedFiles.value];
+  const draggedFile = files[draggedSelectedIndex.value];
+
+  // Remove from old position
+  files.splice(draggedSelectedIndex.value, 1);
+
+  // Insert at new position
+  files.splice(dropIndex, 0, draggedFile);
+
+  // Update selectedFiles
+  selectedFiles.value = files;
+
+  // Reset drag state
+  draggedSelectedIndex.value = null;
+  dragOverSelectedIndex.value = null;
+};
+
+// Get preview URL for File object
+const getFilePreviewUrl = (file) => {
+  if (file instanceof File) {
+    return URL.createObjectURL(file);
+  }
+  return file.url || "";
+};
+
+// Links handling
+const addLink = () => {
+  if (!formData.value.links) {
+    formData.value.links = [];
+  }
+  formData.value.links.push("");
+};
+
+const removeLink = (index) => {
+  formData.value.links.splice(index, 1);
+};
+
+// Form submission
+const handleSubmit = async () => {
+  try {
+    successMessage.value = "";
+    error.value = "";
+
+    console.log("=== FORM SUBMISSION START ===");
+    console.log(
+      "Form Data Before Processing:",
+      JSON.parse(JSON.stringify(formData.value)),
+    );
+    console.log("Selected Files:", selectedFiles.value.length);
+
+    // Upload files first if any
+    if (selectedFiles.value.length > 0) {
+      console.log("Uploading files...");
+      const uploadedFiles = await uploadMultipleFiles(selectedFiles.value);
+      console.log("Uploaded files:", uploadedFiles);
+
+      if (!formData.value.files) {
+        formData.value.files = [];
+      }
+      formData.value.files.push(...uploadedFiles);
+      selectedFiles.value = [];
+    }
+
+    // Add manual files to formData.files
+    if (manualFiles.value.length > 0) {
+      console.log("Adding manual files...");
+      const validManualFiles = manualFiles.value.filter(
+        (file) => file.name && file.url,
+      );
+      console.log("Valid manual files:", validManualFiles);
+
+      if (!formData.value.files) {
+        formData.value.files = [];
+      }
+      formData.value.files.push(...validManualFiles);
+      manualFiles.value = [];
+    }
+
+    // Filters are already auto-generated via computedFilters and watch
+    // No need to manually build filters here anymore
+
+    // Prepare final data
+    const submitData = {
+      ...formData.value,
+      // Ensure JSON fields are properly formatted
+      links: formData.value.links || [],
+      files: formData.value.files || [],
+      logs: formData.value.logs || [],
+    };
+
+    console.log("Final Submit Data:", JSON.parse(JSON.stringify(submitData)));
+
+    // Create or update post
+    if (isEditing.value && editingId.value) {
+      console.log("Updating post:", editingId.value);
+      await updatePost(editingId.value, submitData);
+      showToast("Content updated successfully!", "success");
+    } else {
+      console.log("Creating new post...");
+      const response = await createPost(submitData);
+      console.log("Create response:", response);
+      showToast("Content created successfully!", "success");
+    }
+
+    // Clear form and reload
+    clearForm();
+    await loadPosts();
+  } catch (err) {
+    console.error("=== FORM SUBMISSION ERROR ===");
+    console.error("Error:", err);
+    console.error("Error message:", err.message);
+    console.error("Error data:", err.data);
+
+    // Display error to user
+    let errorMessage = "Failed to submit form";
+    if (err.data && err.data.errors) {
+      errorMessage = "Validation errors: " + JSON.stringify(err.data.errors);
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    showToast(errorMessage, "error", 5000);
+  }
+};
+
+// Edit post
+const editPost = (post) => {
+  isEditing.value = true;
+  editingId.value = post.id;
+  showForm.value = true; // Show the form when editing
+
+  // Parse filters to extract categories
+  const filters = post.filters || "";
+  const filterParts = filters.split(", ").filter((f) => f.trim());
+
+  const extractedCategories = [];
+
+  filterParts.forEach((part) => {
+    // Check if it's a category
+    const categoryItem = allCategories.find((c) => c.value === part);
+    if (categoryItem) {
+      extractedCategories.push(categoryItem.value);
+    }
+  });
+
+  formData.value = {
+    content_id: post.content_id || "",
+    title: post.title || "",
+    authors: post.authors || "",
+    filters: post.filters || "",
+    descriptions: post.descriptions || "",
+    date: post.date || "",
+    links: post.links || [],
+    files: post.files || [],
+    logs: post.logs || [],
+  };
+
+  // Set selected categories
+  selectedCategories.value = extractedCategories;
+
+  // Scroll to form
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+// Delete post
+const confirmDelete = async (id) => {
+  showConfirmToast(
+    "Are you sure you want to delete this content?",
+    async () => {
+      try {
+        await deletePost(id);
+        showToast("Content deleted successfully!", "success");
+        await loadPosts();
+      } catch (err) {
+        console.error("Delete error:", err);
+        showToast("Failed to delete content", "error");
+      }
+    },
+  );
+};
+
+// Update approval status
+const updateApprovalStatus = async (id, status) => {
+  try {
+    console.log("Updating approval status:", id, status);
+    await updatePost(id, { approval_status: status });
+    showToast(`Approval status updated to ${status}!`, "success");
+    await loadPosts();
+  } catch (err) {
+    console.error("Update approval status error:", err);
+    showToast("Failed to update approval status", "error");
+  }
+};
+
+// Open new content form
+const openNewContentForm = () => {
+  clearForm();
+  showForm.value = true;
+};
+
+// Clear form
+const clearForm = () => {
+  isEditing.value = false;
+  editingId.value = null;
+  selectedFiles.value = [];
+  manualFiles.value = [];
+  selectedCategories.value = [];
+
+  formData.value = {
+    content_id: "CMS" + moment().valueOf(),
+    title: "",
+    authors: "jorenleeluna24@gmail.com, info@techsavvies.space",
+    filters: "",
+    descriptions: "",
+    date: "",
+    approval_status: "pending",
+    links: [],
+    files: [],
+    logs: [],
+  };
+
+  if (fileInput.value) {
+    fileInput.value.value = "";
+  }
+};
+
+// Helper function to detect if a URL is a video link
+const isVideoUrl = (url) => {
+  if (!url) return false;
+  const videoPatterns = [
+    /youtube\.com\/watch/i,
+    /youtube\.com\/embed/i,
+    /youtube\.com\/shorts/i,
+    /youtu\.be\//i,
+    /facebook\.com\/.*\/videos/i,
+    /facebook\.com\/share\/r\//i, // Facebook Reels share links
+    /facebook\.com\/share\/v\//i, // Facebook video share links
+    /fb\.watch/i,
+    /facebook\.com\/reel/i,
+    /instagram\.com\/reel/i,
+    /vimeo\.com/i,
+    /tiktok\.com/i,
+  ];
+  return videoPatterns.some((pattern) => pattern.test(url));
+};
+
+// Helper function to convert video URLs to embed format
+const getYouTubeEmbedUrl = (url) => {
+  if (!url) return "";
+
+  // YouTube - handle various formats including Shorts
+  if (url.includes("youtube.com") || url.includes("youtu.be")) {
+    // Already an embed URL
+    if (url.includes("/embed/")) {
+      return url;
+    }
+
+    // Extract video ID from various YouTube URL formats
+    let videoId = "";
+
+    // Format: https://youtu.be/VIDEO_ID
+    if (url.includes("youtu.be/")) {
+      videoId = url.split("youtu.be/")[1].split("?")[0].split("&")[0];
+    }
+    // Format: https://www.youtube.com/shorts/VIDEO_ID
+    else if (url.includes("/shorts/")) {
+      videoId = url.split("/shorts/")[1].split("?")[0].split("&")[0];
+    }
+    // Format: https://www.youtube.com/watch?v=VIDEO_ID
+    else if (url.includes("watch?v=")) {
+      videoId = url.split("watch?v=")[1].split("&")[0];
+    }
+    // Format: https://www.youtube.com/watch?list=...&v=VIDEO_ID
+    else if (url.includes("&v=")) {
+      videoId = url.split("&v=")[1].split("&")[0];
+    }
+
+    // If we found a video ID, return the embed URL
+    if (videoId) {
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+  }
+
+  // Facebook Video/Reel - handle all formats including share links
+  if (url.includes("facebook.com") || url.includes("fb.watch")) {
+    // For share links like https://www.facebook.com/share/r/1RX7NaNFHe/
+    // We need to use the Facebook video plugin which handles all types
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false&width=734`;
+  }
+
+  // Instagram Reel
+  if (url.includes("instagram.com/reel")) {
+    const reelId = url.split("/reel/")[1]?.split("/")[0];
+    if (reelId) {
+      return `https://www.instagram.com/reel/${reelId}/embed`;
+    }
+  }
+
+  // Vimeo
+  if (url.includes("vimeo.com")) {
+    const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+    if (videoId) {
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+  }
+
+  // Return original URL if we couldn't parse it
+  return url;
+};
+
+defineExpose({ editPost, openNewContentForm, confirmDelete, loadPosts, posts });
+</script>
+
+<style scoped>
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Smooth transitions for drag and drop */
+.cursor-move {
+  cursor: move;
+}
+
+/* Image viewer animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fixed.inset-0 {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Prevent text selection during drag */
+[draggable="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+</style>

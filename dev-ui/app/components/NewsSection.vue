@@ -29,9 +29,16 @@
             <article
               v-for="(item, i) in safeItems"
               :key="i"
-              class="group flex flex-col bg-neutral-card text-gray-900 rounded-xl overflow-hidden shadow-none h-[380px] max-h-[380px] self-start animate-fade-in"
+              class="group relative flex flex-col bg-neutral-card text-gray-900 rounded-xl overflow-hidden shadow-none h-[380px] max-h-[380px] self-start animate-fade-in"
               :style="{ animationDelay: `${i * 0.1}s` }"
             >
+              <!-- Clickable overlay (opens the detail page) -->
+              <NuxtLink
+                :to="`/news/${getNewsSlug(item)}`"
+                class="absolute inset-0 z-0"
+                aria-label="Open news detail"
+              />
+
               <div class="w-full h-40 overflow-hidden shrink-0 transition-[height] duration-350 group-hover:h-[7.5rem]">
                 <img
                   :src="item.imageUrl || defaultImage"
@@ -53,19 +60,9 @@
                     {{ (item as { description?: string }).description || item.summary }}
                   </p>
                 </div>
-                <a
-                  v-if="isExternalLink(item)"
-                  :href="(item as { link?: string }).link"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-block text-xs font-bold tracking-widest uppercase text-gray-900 no-underline order-4 mt-auto transition-colors hover:text-accent-gold"
-                >
-                  READ MORE
-                </a>
                 <NuxtLink
-                  v-else
                   :to="`/news/${getNewsSlug(item)}`"
-                  class="inline-block text-xs font-bold tracking-widest uppercase text-gray-900 no-underline order-4 mt-auto transition-colors hover:text-accent-gold"
+                  class="relative z-10 inline-block text-xs font-bold tracking-widest uppercase text-gray-900 no-underline order-4 mt-auto transition-colors hover:text-accent-gold"
                 >
                   READ MORE
                 </NuxtLink>
@@ -106,9 +103,4 @@ const safeItems = computed(() => {
 const { formatDate } = useFormatters()
 const { getNewsSlug } = useNewsSlug()
 const onImageError = useImageFallback(props.defaultImage)
-
-function isExternalLink(item: { link?: string }) {
-  const href = item?.link?.trim()
-  return !!href && (href.startsWith('http://') || href.startsWith('https://'))
-}
 </script>

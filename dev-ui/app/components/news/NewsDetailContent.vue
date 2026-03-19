@@ -28,10 +28,6 @@
         <span class="block text-sm font-medium text-white/90">{{ formatDate(article.date) }}</span>
       </li>
     </ul>
-    <NuxtLink to="/news" class="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-[#b5a3ff] no-underline hover:text-[#eeeaFF] transition-colors">
-      Back to News &amp; Updates
-      <i class="fas fa-arrow-right text-xs" />
-    </NuxtLink>
   </div>
 </template>
 
