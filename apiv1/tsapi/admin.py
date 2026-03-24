@@ -9,6 +9,7 @@ class CmsItemAdmin(admin.ModelAdmin):
     list_filter = ("approval_status", "filters", "created_at")
     search_fields = ("title", "descriptions", "authors", "content_id", "filters")
     ordering = ("-created_at",)
+    readonly_fields = ("filters",)
 
 
 @admin.register(TechsavvyMembers)

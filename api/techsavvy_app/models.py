@@ -59,10 +59,27 @@ class DataPostingCMSModel(models.Model):
             }
         }
     }
+    FILTERS_SCHEMA = {
+        'type': 'object',
+        'keys': {
+            'category': {'type': 'string'},
+            'tagline': {'type': 'string'},
+            'course_level': {'type': 'string'},
+            'course_duration': {'type': 'string'},
+            'course_type': {'type': 'string'},
+            'project_client': {'type': 'string'},
+            'project_status': {'type': 'string'},
+            'project_year': {'type': 'string'},
+            'technologies': {
+                'type': 'array',
+                'items': {'type': 'string'}
+            }
+        }
+    }
     content_id = models.CharField(max_length=255, blank=True, null=True, default='')
     title = models.CharField(max_length=255, blank=True, null=True, default='')
     authors = models.CharField(max_length=255, blank=True, null=True, default='')
-    filters = models.CharField(max_length=255, blank=True, null=True, default='')
+    filters = JSONField(schema=FILTERS_SCHEMA, blank=True, null=True, default=dict)
     descriptions = models.TextField(blank=True, null=True, default='')
     approval_status = models.CharField(max_length=255, blank=True, null=True, default='')
     links = JSONField(schema=LINK_URL, blank=True, null=True)
