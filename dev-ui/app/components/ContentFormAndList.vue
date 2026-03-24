@@ -45,32 +45,40 @@
               ></textarea>
             </div>
 
-            <!-- Categories -->
+            <!-- Category-specific filters -->
             <div>
               <label class="block text-sm font-medium mb-3 uppercase text-white/60">
-                Categories
+                Category & Filters
               </label>
-
-              <!-- Main Categories -->
               <div class="mb-4">
-                <h4 class="text-xs font-semibold mb-2 uppercase text-white/35">
-                  Main Categories
-                </h4>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <label
-                    v-for="category in mainCategories"
-                    :key="category.value"
-                    class="flex items-center space-x-2 cursor-pointer"
+                <select
+                  v-model="formData.filters.category"
+                  class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                >
+                  <option value="">Select category</option>
+                  <option
+                    v-for="category in categoryOptions"
+                    :key="category"
+                    :value="category"
                   >
-                    <input
-                      type="checkbox"
-                      :value="category.value"
-                      v-model="selectedCategories"
-                      class="rounded transition-colors border-white/20 text-accent-purple focus:ring-accent-purple/50 bg-violet/60"
-                    />
-                    <span class="text-sm text-white/80">{{ category.label }}</span>
-                  </label>
-                </div>
+                    {{ category }}
+                  </option>
+                </select>
+              </div>
+              <div
+                v-for="field in activeCategoryFields"
+                :key="field.key"
+                class="mb-3"
+              >
+                <label class="block text-xs font-semibold mb-1 uppercase text-white/35">
+                  {{ field.label }}
+                </label>
+                <input
+                  v-model="formData.filters[field.key]"
+                  type="text"
+                  :placeholder="field.placeholder"
+                  class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                />
               </div>
             </div>
 
@@ -808,7 +816,16 @@ const formData = ref({
   content_id: "CMS" + moment().valueOf(),
   title: "",
   authors: "jorenleeluna24@gmail.com, info@techsavvies.space",
-  filters: "",
+  filters: {
+    category: "",
+    tagline: "",
+    course_level: "",
+    course_duration: "",
+    course_type: "",
+    project_client: "",
+    project_status: "",
+    project_year: "",
+  },
   descriptions: "",
   approval_status: "pending",
   links: [],
@@ -851,38 +868,80 @@ const dragOverIndex = ref(null);
 const draggedSelectedIndex = ref(null);
 const dragOverSelectedIndex = ref(null);
 
-// Main Categories
-const mainCategories = [
-  { value: "News", label: "News" },
-  { value: "News Highlights", label: "News Highlights" },
-  { value: "Events", label: "Events" },
-  { value: "Announcements", label: "Announcements" },
-  { value: "Courses", label: "Courses" },
-  { value: "Featured Projects", label: "Featured Projects" },
-];
+const categoryOptions = ["News and update", "Courses", "Featured Projects"];
+const categoryFieldConfig = {
+  "News and update": [
+    { key: "tagline", label: "Tagline", placeholder: "Enter news tagline" },
+  ],
+  Courses: [
+    { key: "tagline", label: "Tagline", placeholder: "Enter course tagline" },
+    { key: "course_level", label: "Course Level", placeholder: "Beginner / Intermediate / Advanced" },
+    { key: "course_duration", label: "Course Duration", placeholder: "e.g. 8 weeks" },
+    { key: "course_type", label: "Course Type", placeholder: "Online / Hybrid / Onsite" },
+  ],
+  "Featured Projects": [
+    { key: "tagline", label: "Tagline", placeholder: "Enter project tagline" },
+    { key: "project_client", label: "Project Client", placeholder: "Who is the client?" },
+    { key: "project_status", label: "Project Status", placeholder: "Ongoing / Completed" },
+    { key: "project_year", label: "Project Year", placeholder: "e.g. 2026" },
+  ],
+};
 
-// All Categories combined (for filtering)
-const allCategories = [...mainCategories];
-
-const selectedCategories = ref([]);
-
-// Computed property for auto-generating filters from categories
-const computedFilters = computed(() => {
-  const filterParts = [];
-
-  // Add selected categories
-  if (selectedCategories.value.length > 0) {
-    selectedCategories.value.forEach((category) => {
-      filterParts.push(category);
-    });
-  }
-
-  return filterParts.join(", ");
+const createEmptyFilters = () => ({
+  category: "",
+  tagline: "",
+  course_level: "",
+  course_duration: "",
+  course_type: "",
+  project_client: "",
+  project_status: "",
+  project_year: "",
 });
 
-// Watch computedFilters and update formData.filters
-watch(computedFilters, (newValue) => {
-  formData.value.filters = newValue;
+const parseLegacyFilters = (rawFilters) => {
+  if (!rawFilters) {
+    return createEmptyFilters();
+  }
+
+  if (typeof rawFilters === "object") {
+    return {
+      ...createEmptyFilters(),
+      ...rawFilters,
+    };
+  }
+
+  const parsed = createEmptyFilters();
+  const parts = String(rawFilters)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (parts.length > 0) {
+    parsed.category = parts[0];
+  }
+  return parsed;
+};
+
+const normalizeFiltersForSubmit = (filters) => {
+  const parsed = parseLegacyFilters(filters);
+  const category = parsed.category;
+
+  if (!category) {
+    return {};
+  }
+
+  const allowedKeys = (categoryFieldConfig[category] || []).map((item) => item.key);
+  const normalized = { category };
+  allowedKeys.forEach((key) => {
+    if (parsed[key]) {
+      normalized[key] = parsed[key];
+    }
+  });
+  return normalized;
+};
+
+const activeCategoryFields = computed(() => {
+  const category = formData.value?.filters?.category || "";
+  return categoryFieldConfig[category] || [];
 });
 
 // Approval statuses
@@ -961,17 +1020,11 @@ const filteredPosts = computed(() => {
     // Search in authors
     const authorsMatch = post.authors?.toLowerCase().includes(query);
 
-    // Search in filters (handle both array and string)
-    let filtersMatch = false;
-    if (post.filters) {
-      if (Array.isArray(post.filters)) {
-        filtersMatch = post.filters.some((filter) =>
-          filter.toLowerCase().includes(query),
-        );
-      } else {
-        filtersMatch = post.filters.toLowerCase().includes(query);
-      }
-    }
+    const filtersSearchable =
+      typeof post.filters === "object"
+        ? JSON.stringify(post.filters).toLowerCase()
+        : String(post.filters || "").toLowerCase();
+    const filtersMatch = filtersSearchable.includes(query);
 
     // Search in descriptions
     const descriptionsMatch = post.descriptions?.toLowerCase().includes(query);
@@ -1339,6 +1392,7 @@ const handleSubmit = async () => {
     // Prepare final data
     const submitData = {
       ...formData.value,
+      filters: normalizeFiltersForSubmit(formData.value.filters),
       // Ensure JSON fields are properly formatted
       links: formData.value.links || [],
       files: formData.value.files || [],
@@ -1386,34 +1440,17 @@ const editPost = (post) => {
   editingId.value = post.id;
   showForm.value = true; // Show the form when editing
 
-  // Parse filters to extract categories
-  const filters = post.filters || "";
-  const filterParts = filters.split(", ").filter((f) => f.trim());
-
-  const extractedCategories = [];
-
-  filterParts.forEach((part) => {
-    // Check if it's a category
-    const categoryItem = allCategories.find((c) => c.value === part);
-    if (categoryItem) {
-      extractedCategories.push(categoryItem.value);
-    }
-  });
-
   formData.value = {
     content_id: post.content_id || "",
     title: post.title || "",
     authors: post.authors || "",
-    filters: post.filters || "",
+    filters: parseLegacyFilters(post.filters),
     descriptions: post.descriptions || "",
     date: post.date || "",
     links: post.links || [],
     files: post.files || [],
     logs: post.logs || [],
   };
-
-  // Set selected categories
-  selectedCategories.value = extractedCategories;
 
   // Scroll to form
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1461,13 +1498,11 @@ const clearForm = () => {
   editingId.value = null;
   selectedFiles.value = [];
   manualFiles.value = [];
-  selectedCategories.value = [];
-
   formData.value = {
     content_id: "CMS" + moment().valueOf(),
     title: "",
     authors: "jorenleeluna24@gmail.com, info@techsavvies.space",
-    filters: "",
+    filters: createEmptyFilters(),
     descriptions: "",
     date: "",
     approval_status: "pending",

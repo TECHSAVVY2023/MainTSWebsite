@@ -5,25 +5,38 @@ const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
 
-export type LandingNewsItem = { date?: string; title?: string; summary?: string; description?: string; imageUrl?: string; link?: string; id?: string; filters?: string }
+export type LandingNewsItem = { date?: string; title?: string; summary?: string; description?: string; imageUrl?: string; link?: string; id?: string; filters?: string | Record<string, unknown> | null }
 
 const NEWS_CATEGORIES = ['News', 'News Highlights', 'Events', 'Announcements']
 
-function isNewsItem (item: { filters?: string }): boolean {
-  const f = item.filters || ''
+function toFilterText (filters?: string | Record<string, unknown> | null): string {
+  if (!filters) return ''
+  if (typeof filters === 'string') return filters
+  return JSON.stringify(filters)
+}
+
+function getFirstFileUrl (files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null): string {
+  if (!files) return ''
+  if (Array.isArray(files)) return files[0]?.url || ''
+  if (typeof files === 'object') return files.url || ''
+  return ''
+}
+
+function isNewsItem (item: { filters?: string | Record<string, unknown> | null }): boolean {
+  const f = toFilterText(item.filters)
   if (!f.trim()) return true // no category set → treat as news (legacy items)
-  return NEWS_CATEGORIES.some((cat) => f.split(',').map((s) => s.trim()).includes(cat))
+  return NEWS_CATEGORIES.some((cat) => f.split(',').map((s) => s.trim()).includes(cat)) || f.toLowerCase().includes('news and update')
 }
 export type LandingProjectItem = { title: string; domain?: string; url: string; image?: string; alt?: string }
 export type LandingCourseItem = { slug: string; title: string; instructor?: string; rating?: string; duration?: string; badge?: string; image?: string }
 export type LandingCalEvent = { date: string; time?: string; title?: string; description?: string; link?: string }
 
 function mapCmsToNewsItem (
-  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; filters?: string; links?: string[]; files?: { name?: string; url?: string }[]; images?: string[]; created_at?: string },
+  cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; filters?: string | Record<string, unknown> | null; links?: string[]; files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null; images?: string[]; created_at?: string },
   baseUrl: string
 ) {
   const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
-  let fileUrl = imgFromImages || (Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : '')
+  let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
   if (fileUrl && baseUrl && !fileUrl.startsWith('http')) {
     const origin = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '')
     fileUrl = `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
@@ -37,7 +50,7 @@ function mapCmsToNewsItem (
     description: cms.descriptions || '',
     imageUrl: fileUrl,
     link: link || '#',
-    filters: cms.filters || ''
+    filters: cms.filters || null
   }
 }
 
@@ -82,7 +95,7 @@ export function useLanding () {
   )
 
   const newsItemsDisplay = computed(() =>
-    newsItems.value.filter((item) => isNewsItem(item as { filters?: string })).slice(0, 4)
+    newsItems.value.filter((item) => isNewsItem(item as { filters?: string | Record<string, unknown> | null })).slice(0, 4)
   )
 
   function scrollToSection (id: string) {

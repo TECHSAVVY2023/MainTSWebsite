@@ -20,20 +20,33 @@ type CmsRawItem = {
   authors?: string
   descriptions?: string
   approval_status?: string
-  filters?: string
+  filters?: string | Record<string, unknown> | null
   links?: string[]
-  files?: { name?: string; url?: string }[]
+  files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null
   images?: string[]
   created_at?: string
 }
 
 const NEWS_CATEGORIES = ['News', 'News Highlights', 'Events', 'Announcements']
 
-function isNewsCategory (filters?: string): boolean {
-  const f = filters || ''
+function toFilterText (filters?: string | Record<string, unknown> | null): string {
+  if (!filters) return ''
+  if (typeof filters === 'string') return filters
+  return JSON.stringify(filters)
+}
+
+function getFirstFileUrl (files: CmsRawItem['files']): string {
+  if (!files) return ''
+  if (Array.isArray(files)) return files[0]?.url || ''
+  if (typeof files === 'object') return files.url || ''
+  return ''
+}
+
+function isNewsCategory (filters?: string | Record<string, unknown> | null): boolean {
+  const f = toFilterText(filters)
   if (!f.trim()) return true // no category → legacy item, treat as news
   const parts = f.split(',').map((s) => s.trim())
-  return NEWS_CATEGORIES.some((cat) => parts.includes(cat))
+  return NEWS_CATEGORIES.some((cat) => parts.includes(cat)) || f.toLowerCase().includes('news and update')
 }
 
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
@@ -63,13 +76,15 @@ export function useCmsNews () {
   function mapCmsToNewsItem (cms: CmsRawItem, baseUrl?: string): CmsNewsItem {
     const base = baseUrl ?? apiBase
     const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
-    let fileUrl = imgFromImages || (Array.isArray(cms.files) && cms.files[0]?.url ? cms.files[0].url : '')
+    let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
     if (fileUrl && base && !fileUrl.startsWith('http')) {
       fileUrl = resolveMediaUrl(fileUrl, base)
     }
     const rawImageUrls = Array.isArray(cms.images) && cms.images.length > 0
       ? cms.images.filter(Boolean) as string[]
-      : (Array.isArray(cms.files) ? cms.files.map((f) => f?.url).filter(Boolean) as string[] : [])
+      : (Array.isArray(cms.files)
+          ? cms.files.map((f) => f?.url).filter(Boolean) as string[]
+          : (cms.files && typeof cms.files === 'object' && cms.files.url ? [cms.files.url] : []))
     const images = rawImageUrls.map((u) => resolveMediaUrl(u, base))
     const link = Array.isArray(cms.links) && cms.links[0] ? cms.links[0] : ''
     return {
@@ -129,17 +144,17 @@ export function useCmsNews () {
     try {
       const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
       const data = await $fetch<unknown>(url)
-      const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
+      const list = normalizeCmsList(data) as Array<CmsRawItem>
       const courseItems = list.filter(
-        (item) => item.approval_status === 'approved' && (item.filters || '').toLowerCase().includes('course')
+        (item) => item.approval_status === 'approved' && toFilterText(item.filters).toLowerCase().includes('course')
       )
       return courseItems.map((item, idx) => {
         const title = item.title || 'Untitled'
         const slug = slugify(title) || `course-${item.id ?? idx}`
         const imgFromImages = Array.isArray(item.images) && item.images[0] ? item.images[0] : ''
-        const fileUrl = imgFromImages || (Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : '')
+        const fileUrl = imgFromImages || getFirstFileUrl(item.files)
         const img = fileUrl ? resolveMediaUrl(fileUrl, apiBase) : ''
-        const filters = (item.filters || '').toLowerCase()
+        const filters = toFilterText(item.filters).toLowerCase()
         const category = filters.includes('fullstack') ? 'fullstack'
           : filters.includes('frontend') ? 'frontend'
           : filters.includes('backend') ? 'backend'
@@ -172,9 +187,9 @@ export function useCmsNews () {
     try {
       const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
       const data = await $fetch<unknown>(url)
-      const list = normalizeCmsList(data) as Array<CmsRawItem & { filters?: string }>
+      const list = normalizeCmsList(data) as Array<CmsRawItem>
       const projectItems = list.filter(
-        (item) => item.approval_status === 'approved' && (item.filters || '').toLowerCase().includes('project')
+        (item) => item.approval_status === 'approved' && toFilterText(item.filters).toLowerCase().includes('project')
       )
       return projectItems.map((item) => {
         const link = Array.isArray(item.links) && item.links[0] ? item.links[0] : '#'
@@ -185,7 +200,7 @@ export function useCmsNews () {
           domain = link
         }
         const imgFromImages = Array.isArray(item.images) && item.images[0] ? item.images[0] : ''
-        const fileUrl = imgFromImages || (Array.isArray(item.files) && item.files[0]?.url ? item.files[0].url : '')
+        const fileUrl = imgFromImages || getFirstFileUrl(item.files)
         const img = fileUrl ? resolveMediaUrl(fileUrl, apiBase) : ''
         return {
           title: item.title || 'Untitled',

@@ -279,7 +279,7 @@
                 </td>
                 <td class="px-4 py-3.5">
                   <span class="text-[11px] px-2 py-0.5 rounded-full bg-accent-purple/10 text-accent-purple border border-accent-purple/20 font-medium whitespace-nowrap">
-                    {{ (item.filters || 'News').split(',')[0].trim() }}
+                    {{ getPrimaryCategory(item.filters) }}
                   </span>
                 </td>
                 <td class="px-4 py-3.5">
@@ -435,7 +435,7 @@ function updateTime () {
 interface CmsRaw {
   id: number
   title: string
-  filters?: string
+  filters?: string | Record<string, unknown> | null
   approval_status?: string
   created_at?: string
 }
@@ -457,17 +457,35 @@ async function fetchItems () {
   }
 }
 
+function getFiltersText (filters: CmsRaw['filters']): string {
+  if (!filters) return ''
+  if (typeof filters === 'string') return filters
+  if (typeof filters === 'object') return JSON.stringify(filters)
+  return String(filters)
+}
+
+function getPrimaryCategory (filters: CmsRaw['filters']): string {
+  if (!filters) return 'News'
+  if (typeof filters === 'object') {
+    const category = filters.category
+    return typeof category === 'string' && category.trim() ? category.trim() : 'News'
+  }
+  const text = String(filters)
+  if (!text.trim()) return 'News'
+  return text.split(',')[0]?.trim() || 'News'
+}
+
 // ── Stat cards ──────────────────────────────────────────────────
 const newsCount = computed(() =>
   allItems.value.filter(i => {
-    const f = i.filters || ''
+    const f = getFiltersText(i.filters)
     if (!f.trim()) return true
-    return ['News', 'News Highlights', 'Events', 'Announcements'].some(c =>
+    return ['News', 'News Highlights', 'Events', 'Announcements', 'News and update'].some(c =>
       f.split(',').map(s => s.trim()).includes(c))
   }).length
 )
-const coursesCount = computed(() => allItems.value.filter(i => (i.filters || '').toLowerCase().includes('course')).length)
-const projectsCount = computed(() => allItems.value.filter(i => (i.filters || '').toLowerCase().includes('project')).length)
+const coursesCount = computed(() => allItems.value.filter(i => getFiltersText(i.filters).toLowerCase().includes('course')).length)
+const projectsCount = computed(() => allItems.value.filter(i => getFiltersText(i.filters).toLowerCase().includes('project')).length)
 const pendingCount = computed(() => allItems.value.filter(i => i.approval_status === 'pending').length)
 
 const statCards = computed(() => [
@@ -518,7 +536,7 @@ const filteredContentItems = computed(() => {
   if (!q) return allItems.value
   return allItems.value.filter(i =>
     i.title?.toLowerCase().includes(q) ||
-    (i.filters || '').toLowerCase().includes(q)
+    getFiltersText(i.filters).toLowerCase().includes(q)
   )
 })
 
