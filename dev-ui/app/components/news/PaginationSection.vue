@@ -42,7 +42,7 @@
       Next <i class="fas fa-chevron-right ml-1" />
     </span>
   </div>
-  <p v-if="safeTotalItems > 0" class="mt-4 text-center text-xs sm:text-sm text-white/50">
+  <p v-if="safeTotalItems > 0" class="mt-4 text-center text-xs sm:text-sm text-dark/60">
     Page {{ safeCurrentPage }} of {{ safeTotalPages }} ({{ safeTotalItems }} total{{ searchLabel ? ' matching' : '' }})
   </p>
 </template>

@@ -1,8 +1,8 @@
 <template>
   <header class="fixed top-0 left-0 right-0 z-50">
     <nav
-      class="relative bg-violet/95 backdrop-blur-[16px] border-b border-white/5 transition-colors duration-200"
-      :class="{ 'bg-violet': headerScrolled }"
+      class="relative bg-white/95 backdrop-blur-[16px] border-b border-neutral-border transition-colors duration-200"
+      :class="{ 'bg-white': headerScrolled }"
     >
       <div class="container mx-auto px-5 sm:px-8">
         <div class="flex items-center justify-between h-16">
@@ -14,29 +14,30 @@
             <img
               :src="logoUrl"
               alt="CODEDEV Solutions"
-              class="h-10 md:h-11 w-auto object-contain opacity-95 hover:opacity-100 transition-opacity"
+              class="h-11 w-11 md:h-12 md:w-12 rounded-full object-cover border border-neutral-border opacity-95 hover:opacity-100 transition-opacity"
             />
           </NuxtLink>
 
           <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8">
-            <a href="#news" class="text-white/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-white hover:border-accent-purple" @click.prevent="scrollToSection('#news')">News</a>
-            <a href="#courses" class="text-white/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-white hover:border-accent-purple" @click.prevent="scrollToSection('#courses')">Courses</a>
-            <a href="#about" class="text-white/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-white hover:border-accent-purple" @click.prevent="scrollToSection('#about')">About</a>
-            <a href="#projects" class="text-white/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-white hover:border-accent-purple" @click.prevent="scrollToSection('#projects')">Projects</a>
-            <a href="#calendar" class="text-white/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-white hover:border-accent-purple" @click.prevent="scrollToSection('#calendar')">Calendar</a>
+            <a href="#news" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#news')">News</a>
+            <a href="#courses" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#courses')">Courses</a>
+            <a href="#about" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#about')">About</a>
+            <a href="#projects" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#projects')">Projects</a>
+            <a href="#merch" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#merch')">Merch</a>
+            <a href="#events-reminders" class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple" @click.prevent="scrollToSection('#events-reminders')">Events Reminder</a>
           </div>
 
           <div class="hidden md:flex shrink-0 pl-4 items-center">
             <form role="search" class="group relative flex items-center min-w-0" @submit.prevent="onSearch">
               <label for="header-search" class="absolute w-px h-px p-0 -m-[1px] overflow-hidden whitespace-nowrap border-0 clip-[rect(0,0,0,0)]">Search news, courses, and featured projects</label>
-              <i class="fas fa-search absolute left-3.5 text-white/50 text-sm pointer-events-none transition-colors group-focus-within:text-accent-purple/90" aria-hidden="true" />
+              <i class="fas fa-search absolute left-3.5 text-dark/65 text-sm pointer-events-none transition-colors group-focus-within:text-accent-purple" aria-hidden="true" />
               <input
                 id="header-search"
                 v-model="headerSearchQuery"
                 type="search"
                 autocomplete="off"
                 placeholder="Search news, courses, projects..."
-                class="w-full min-w-[11rem] max-w-[14rem] py-2 pl-9 pr-4 rounded-full bg-violet-border/70 border border-accent-purple/20 text-white text-sm font-medium tracking-wide outline-none transition-colors placeholder:text-white/45 hover:bg-violet-light/80 hover:border-accent-purple/30 focus:border-accent-purple/50 focus:ring-[3px] focus:ring-accent-purple/15"
+                class="w-full min-w-[12rem] max-w-[16rem] py-2.5 pl-9 pr-4 rounded-full bg-white border border-dark/20 text-dark text-sm font-semibold tracking-wide shadow-sm shadow-black/5 outline-none transition-all placeholder:text-dark/60 hover:border-accent-purple/40 hover:shadow-md hover:shadow-accent-purple/10 focus:border-accent-purple/60 focus:ring-[3px] focus:ring-accent-purple/20"
                 aria-label="Search news, courses, and featured projects"
               />
             </form>
@@ -44,7 +45,7 @@
 
           <button
             type="button"
-            class="md:hidden p-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/5 transition-colors"
+            class="md:hidden p-2.5 rounded-lg text-dark/70 hover:text-dark hover:bg-neutral-gray transition-colors"
             aria-label="Open menu"
             :aria-expanded="mobileMenuOpen"
             aria-controls="mobileMenu"
@@ -71,7 +72,7 @@
     <!-- Mobile menu -->
     <div
       id="mobileMenu"
-      class="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] z-40 bg-violet/98 backdrop-blur-xl py-12 px-6 overflow-y-auto shadow-2xl transition-transform duration-300 md:hidden text-center"
+      class="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] z-40 bg-white/98 backdrop-blur-xl py-12 px-6 overflow-y-auto shadow-2xl transition-transform duration-300 md:hidden text-center"
       role="dialog"
       aria-label="Navigation menu"
       :aria-hidden="!mobileMenuOpen"
@@ -79,28 +80,29 @@
     >
       <button
         type="button"
-        class="absolute top-4 right-4 p-2 text-white/80 bg-transparent border-none cursor-pointer text-2xl leading-none"
+        class="absolute top-4 right-4 p-2 text-dark/80 bg-transparent border-none cursor-pointer text-2xl leading-none"
         aria-label="Close menu"
         @click="mobileMenuOpen = false"
       >
         <i class="fas fa-times" />
       </button>
       <form role="search" class="relative flex items-center w-full mb-3" @submit.prevent="onSearch">
-        <i class="fas fa-search absolute left-4 text-white/50 text-sm pointer-events-none" aria-hidden="true" />
+        <i class="fas fa-search absolute left-4 text-dark/65 text-sm pointer-events-none" aria-hidden="true" />
         <input
           v-model="headerSearchQuery"
           type="search"
           autocomplete="off"
           placeholder="Search news, courses, projects..."
-          class="w-full py-2.5 pl-10 pr-4 rounded-xl bg-white/10 border border-accent-purple/25 text-white text-[0.9375rem] outline-none transition-colors placeholder:text-white/45 focus:border-accent-purple/50 focus:ring-[3px] focus:ring-accent-purple/10"
+          class="w-full py-2.5 pl-10 pr-4 rounded-xl bg-white border border-dark/20 text-dark text-[0.9375rem] font-medium shadow-sm shadow-black/5 outline-none transition-all placeholder:text-dark/60 hover:border-accent-purple/35 focus:border-accent-purple/60 focus:ring-[3px] focus:ring-accent-purple/20"
           aria-label="Search"
         />
       </form>
-      <a href="#news" class="block py-3 text-[0.9375rem] font-medium text-white/90 no-underline border-b border-white/10 text-center transition-colors hover:text-white" @click.prevent="go('#news')">News</a>
-      <a href="#courses" class="block py-3 text-[0.9375rem] font-medium text-white/90 no-underline border-b border-white/10 text-center transition-colors hover:text-white" @click.prevent="go('#courses')">Courses</a>
-      <a href="#about" class="block py-3 text-[0.9375rem] font-medium text-white/90 no-underline border-b border-white/10 text-center transition-colors hover:text-white" @click.prevent="go('#about')">About</a>
-      <a href="#projects" class="block py-3 text-[0.9375rem] font-medium text-white/90 no-underline border-b border-white/10 text-center transition-colors hover:text-white" @click.prevent="go('#projects')">Projects</a>
-      <a href="#calendar" class="block py-3 text-[0.9375rem] font-medium text-white/90 no-underline border-b border-white/10 text-center transition-colors hover:text-white" @click.prevent="go('#calendar')">Calendar</a>
+      <a href="#news" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#news')">News</a>
+      <a href="#courses" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#courses')">Courses</a>
+      <a href="#about" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#about')">About</a>
+      <a href="#projects" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#projects')">Projects</a>
+      <a href="#merch" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#merch')">Merch</a>
+      <a href="#events-reminders" class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark" @click.prevent="go('#events-reminders')">Events Reminder</a>
     </div>
   </header>
 </template>

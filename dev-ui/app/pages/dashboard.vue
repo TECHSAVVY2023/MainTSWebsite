@@ -1,5 +1,5 @@
 <template>
-  <div class="font-inter text-white min-h-screen bg-violet">
+  <div class="font-inter text-dark min-h-screen bg-neutral-gray">
 
     <!-- ── Mobile drawer overlay ──────────────────────────────── -->
     <Teleport to="body">
@@ -13,47 +13,47 @@
       <Transition name="drawer">
         <aside
           v-if="drawerOpen"
-          class="fixed top-0 left-0 h-full w-72 z-50 bg-violet-dark border-r border-white/[0.07] flex flex-col lg:hidden"
+          class="fixed top-0 left-0 h-full w-72 z-50 bg-white border-r border-neutral-border flex flex-col lg:hidden"
         >
           <!-- Drawer header -->
-          <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-border">
             <div class="flex items-center gap-2.5">
               <img :src="logoUrl" alt="Logo" class="h-10 w-auto object-contain" />
-              <span class="font-bold text-sm text-white">Dashboard</span>
+              <span class="font-bold text-sm text-dark">Dashboard</span>
             </div>
-            <button @click="drawerOpen = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors">
+            <button @click="drawerOpen = false" class="w-8 h-8 flex items-center justify-center rounded-lg text-dark/40 hover:text-dark hover:bg-neutral-gray transition-colors">
               <i class="fas fa-times" />
             </button>
           </div>
 
           <!-- User mini profile -->
-          <div class="px-5 py-4 border-b border-white/[0.06] flex items-center gap-3">
+          <div class="px-5 py-4 border-b border-neutral-border flex items-center gap-3">
             <div class="relative shrink-0">
               <img v-if="profileImage" :src="profileImage" alt="Profile"
                 class="w-10 h-10 rounded-xl border border-accent-purple/30 object-cover"
                 @error="handleImageError" />
-              <div v-else class="w-10 h-10 rounded-xl border border-accent-purple/30 bg-violet flex items-center justify-center">
+              <div v-else class="w-10 h-10 rounded-xl border border-accent-purple/30 bg-neutral-gray flex items-center justify-center">
                 <span class="text-accent-purple text-xs font-bold">{{ userInitials }}</span>
               </div>
-              <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-violet-dark" />
+              <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-semibold text-white truncate">{{ user?.name || 'User' }}</p>
-              <p class="text-[11px] text-white/40 truncate">{{ user?.email }}</p>
+              <p class="text-sm font-semibold text-dark truncate">{{ user?.name || 'User' }}</p>
+              <p class="text-[11px] text-dark/55 truncate">{{ user?.email }}</p>
             </div>
           </div>
 
           <!-- Stat cards in drawer -->
           <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-            <p class="text-[10px] font-semibold text-white/30 uppercase tracking-widest px-1 mb-2">Overview</p>
+            <p class="text-[10px] font-semibold text-dark/40 uppercase tracking-widest px-1 mb-2">Overview</p>
             <div
               v-for="stat in statCards" :key="stat.label"
-              class="group relative overflow-hidden rounded-xl bg-white/[0.04] border border-white/[0.07] p-4 hover:border-accent-purple/20 transition-all duration-200"
+              class="group relative overflow-hidden rounded-xl bg-neutral-gray border border-neutral-border p-4 hover:border-accent-purple/20 transition-all duration-200"
             >
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-[11px] text-white/40 uppercase font-medium tracking-wider">{{ stat.label }}</p>
-                  <p class="text-2xl font-bold text-white mt-0.5 leading-none">{{ stat.value }}</p>
+                  <p class="text-[11px] text-dark/55 uppercase font-medium tracking-wider">{{ stat.label }}</p>
+                  <p class="text-2xl font-bold text-dark mt-0.5 leading-none">{{ stat.value }}</p>
                   <p v-if="stat.change" class="text-[11px] mt-1.5 font-medium" :class="stat.positive ? 'text-green-400' : 'text-red-400'">
                     {{ stat.change }}
                   </p>
@@ -66,10 +66,10 @@
           </div>
 
           <!-- Drawer footer -->
-          <div class="px-4 py-4 border-t border-white/[0.06] space-y-2">
+          <div class="px-4 py-4 border-t border-neutral-border space-y-2">
             <button
               @click="drawerOpen = false; handleNewContent()"
-              class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold bg-accent-purple text-violet hover:bg-accent-purple/90 transition-colors"
+              class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold bg-primary text-white hover:bg-secondary transition-colors"
             >
               <i class="fas fa-plus text-xs" /> New Content
             </button>
@@ -85,20 +85,20 @@
     </Teleport>
 
     <!-- ── Header ─────────────────────────────────────────────── -->
-    <header class="sticky top-0 z-40 bg-violet/95 backdrop-blur-[16px] border-b border-white/[0.06]">
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-[16px] border-b border-neutral-border">
       <div class="px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
 
         <!-- Left: hamburger (mobile) + logo + title -->
         <div class="flex items-center gap-3">
           <button
             @click="drawerOpen = true"
-            class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/60 hover:text-white transition-colors"
+            class="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg bg-neutral-gray border border-neutral-border text-dark/60 hover:text-dark transition-colors"
           >
             <i class="fas fa-bars text-sm" />
           </button>
           <div class="flex items-center gap-2">
             <img :src="logoUrl" alt="Logo" class="h-10 w-auto object-contain shrink-0" />
-            <span class="font-bold text-sm text-white">Dashboard</span>
+            <span class="font-bold text-sm text-dark">Dashboard</span>
           </div>
         </div>
 
@@ -109,16 +109,16 @@
             <img v-if="profileImage" :src="profileImage" alt="Profile"
               class="w-8 h-8 rounded-full border border-accent-purple/40 object-cover"
               @error="handleImageError" />
-            <div v-else class="w-8 h-8 rounded-full border border-accent-purple/40 bg-violet-dark flex items-center justify-center">
+            <div v-else class="w-8 h-8 rounded-full border border-accent-purple/40 bg-neutral-gray flex items-center justify-center">
               <span class="text-accent-purple text-[10px] font-bold">{{ userInitials }}</span>
             </div>
             <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-violet" />
           </div>
-          <button class="hidden sm:flex w-8 h-8 items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/40 hover:text-white transition-colors">
+          <button class="hidden sm:flex w-8 h-8 items-center justify-center rounded-lg bg-neutral-gray border border-neutral-border text-dark/40 hover:text-dark transition-colors">
             <i class="fas fa-cog text-sm" />
           </button>
           <button @click="handleLogout"
-            class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/40 hover:text-red-400 transition-colors">
+            class="w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-gray border border-neutral-border text-dark/40 hover:text-red-400 transition-colors">
             <i class="fas fa-sign-out-alt text-sm" />
           </button>
         </div>
@@ -132,14 +132,14 @@
       <section class="hidden lg:grid grid-cols-4 gap-4">
         <div
           v-for="stat in statCards" :key="stat.label"
-          class="group relative overflow-hidden rounded-2xl bg-violet-dark border border-white/[0.07] p-5 hover:border-accent-purple/25 hover:-translate-y-0.5 transition-all duration-300"
+          class="group relative overflow-hidden rounded-2xl bg-white border border-neutral-border p-5 hover:border-accent-purple/25 hover:-translate-y-0.5 transition-all duration-300"
         >
           <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
             :style="`background: radial-gradient(ellipse at 80% -10%, ${stat.glow} 0%, transparent 60%);`" />
           <div class="relative flex items-start justify-between">
             <div>
-              <p class="text-[11px] text-white/40 tracking-widest uppercase font-medium">{{ stat.label }}</p>
-              <p class="text-[1.75rem] font-bold text-white mt-1 leading-none tracking-tight">{{ stat.value }}</p>
+              <p class="text-[11px] text-dark/55 tracking-widest uppercase font-medium">{{ stat.label }}</p>
+              <p class="text-[1.75rem] font-bold text-dark mt-1 leading-none tracking-tight">{{ stat.value }}</p>
               <p v-if="stat.change" class="text-xs mt-2 font-medium" :class="stat.positive ? 'text-green-400' : 'text-red-400'">
                 {{ stat.change }}
               </p>
@@ -155,7 +155,7 @@
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         <!-- Welcome banner -->
-        <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-violet-dark border border-white/[0.07] p-5 sm:p-8">
+        <div class="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white border border-neutral-border p-5 sm:p-8">
           <div class="absolute inset-0 bg-gradient-to-br from-accent-purple/15 via-transparent to-accent-gold/5 pointer-events-none" />
           <div class="absolute -top-12 -right-12 w-56 h-56 bg-accent-purple/10 rounded-full blur-[70px] pointer-events-none" />
           <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-accent-gold/[0.08] rounded-full blur-[60px] pointer-events-none" />
@@ -165,24 +165,24 @@
               <img v-if="profileImage" :src="profileImage" alt="Profile"
                 class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl border-2 border-accent-purple/30 object-cover shadow-lg shadow-accent-purple/15"
                 @error="handleImageError" />
-              <div v-else class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl border-2 border-accent-purple/30 bg-violet flex items-center justify-center shadow-lg shadow-accent-purple/15">
+              <div v-else class="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl border-2 border-accent-purple/30 bg-neutral-gray flex items-center justify-center shadow-lg shadow-accent-purple/15">
                 <span class="text-accent-purple text-xl sm:text-2xl font-bold">{{ userInitials }}</span>
               </div>
-              <div class="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-400 rounded-full border-[3px] border-violet-dark" />
+              <div class="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-400 rounded-full border-[3px] border-white" />
             </div>
             <div class="min-w-0">
               <p class="text-[11px] font-semibold tracking-[0.18em] uppercase text-accent-gold mb-1">Welcome back,</p>
-              <h1 class="text-lg sm:text-3xl font-bold tracking-tight text-white truncate">{{ user?.name || 'User' }}</h1>
-              <p class="text-[11px] sm:text-sm text-white/45 mt-1 truncate">{{ user?.email }}</p>
-              <p class="text-[11px] sm:text-sm text-white/35 mt-1.5">Good {{ greeting }}! Glad to see you again.</p>
+              <h1 class="text-lg sm:text-3xl font-bold tracking-tight text-dark truncate">{{ user?.name || 'User' }}</h1>
+              <p class="text-[11px] sm:text-sm text-dark/60 mt-1 truncate">{{ user?.email }}</p>
+              <p class="text-[11px] sm:text-sm text-dark/55 mt-1.5">Good {{ greeting }}! Glad to see you again.</p>
             </div>
           </div>
 
           <div class="relative z-10 mt-5 flex flex-wrap items-center gap-3">
-            <div class="bg-white/[0.07] border border-white/10 rounded-xl px-3 sm:px-4 py-2">
-              <span class="text-sm sm:text-xl font-bold font-mono text-white tracking-tight">{{ currentTime }}</span>
+            <div class="bg-neutral-gray border border-neutral-border rounded-xl px-3 sm:px-4 py-2">
+              <span class="text-sm sm:text-xl font-bold font-mono text-dark tracking-tight">{{ currentTime }}</span>
             </div>
-            <div class="text-[11px] sm:text-sm text-white/35 flex items-center gap-1.5">
+            <div class="text-[11px] sm:text-sm text-dark/60 flex items-center gap-1.5">
               <i class="fas fa-calendar-alt" />
               {{ currentDate }}
             </div>
@@ -191,18 +191,18 @@
 
         <!-- Content status panel -->
         <div class="flex flex-col gap-4">
-          <div class="flex-1 rounded-2xl bg-violet-dark border border-white/[0.07] p-5">
+          <div class="flex-1 rounded-2xl bg-white border border-neutral-border p-5">
             <div class="flex items-center justify-between mb-4">
-              <p class="text-sm font-bold text-white">Content Status</p>
-              <span class="text-[10px] text-white/35 bg-white/[0.05] border border-white/[0.07] px-2.5 py-0.5 rounded-full">Overview</span>
+              <p class="text-sm font-bold text-dark">Content Status</p>
+              <span class="text-[10px] text-dark/60 bg-neutral-gray border border-neutral-border px-2.5 py-0.5 rounded-full">Overview</span>
             </div>
             <div class="space-y-3.5">
               <div v-for="s in contentStatus" :key="s.label">
                 <div class="flex justify-between text-xs mb-1.5">
-                  <span class="text-white/55">{{ s.label }}</span>
+                  <span class="text-dark/65">{{ s.label }}</span>
                   <span class="font-bold" :class="s.color">{{ s.count }}</span>
                 </div>
-                <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                <div class="h-1.5 rounded-full bg-neutral-gray overflow-hidden">
                   <div class="h-full rounded-full transition-all duration-700 ease-out" :class="s.barColor" :style="{ width: s.pct + '%' }" />
                 </div>
               </div>
@@ -213,11 +213,11 @@
       </section>
 
       <!-- Recent content table ────────────────────────────────── -->
-      <section ref="contentTableRef" class="rounded-2xl bg-violet-dark border border-white/[0.07] overflow-hidden">
-        <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/[0.06] gap-3">
+      <section ref="contentTableRef" class="rounded-2xl bg-white border border-neutral-border overflow-hidden">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-border gap-3">
           <div class="min-w-0">
-            <h2 class="text-xs sm:text-sm font-bold text-white">Recent Content</h2>
-            <p class="text-[11px] text-white/35 mt-0.5 hidden sm:block">Latest posts from the CMS</p>
+            <h2 class="text-xs sm:text-sm font-bold text-dark">Recent Content</h2>
+            <p class="text-[11px] text-dark/60 mt-0.5 hidden sm:block">Latest posts from the CMS</p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <span class="text-[11px] text-accent-purple bg-accent-purple/10 border border-accent-purple/20 px-2.5 py-1 rounded-full font-semibold hidden sm:block">
@@ -225,7 +225,7 @@
             </span>
             <button
               @click="handleNewContent"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-accent-purple text-violet hover:bg-accent-purple/90 transition-colors whitespace-nowrap"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-primary text-white hover:bg-secondary transition-colors whitespace-nowrap"
             >
               <i class="fas fa-plus text-[10px]" /> Add New
             </button>
@@ -233,17 +233,17 @@
         </div>
 
         <!-- Search -->
-        <div class="px-4 sm:px-6 py-3 border-b border-white/[0.05]">
+        <div class="px-4 sm:px-6 py-3 border-b border-neutral-border">
           <div class="relative w-full sm:max-w-sm">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-white/25 text-xs" />
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-dark/35 text-xs" />
             <input
               v-model="contentSearch"
               type="text"
               placeholder="Search by title or category..."
-              class="w-full pl-9 pr-8 py-2 rounded-lg text-xs sm:text-sm bg-violet/50 border border-white/[0.08] text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-accent-purple/40 focus:border-accent-purple/30"
+              class="w-full pl-9 pr-8 py-2 rounded-lg text-xs sm:text-sm bg-neutral-gray border border-neutral-border text-dark placeholder:text-dark/40 focus:outline-none focus:ring-2 focus:ring-accent-purple/40 focus:border-accent-purple/30"
             />
             <button v-if="contentSearch" @click="contentSearch = ''"
-              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/25 hover:text-accent-purple">
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-dark/35 hover:text-accent-purple">
               <i class="fas fa-times text-xs" />
             </button>
           </div>
@@ -253,29 +253,29 @@
         <div class="overflow-x-auto">
           <table class="w-full min-w-[520px]">
             <thead>
-              <tr class="border-b border-white/[0.05] bg-white/[0.02]">
-                <th class="text-left text-[10px] font-semibold text-white/30 uppercase tracking-widest px-4 sm:px-6 py-3">Title</th>
-                <th class="text-left text-[10px] font-semibold text-white/30 uppercase tracking-widest px-4 py-3">Category</th>
-                <th class="text-left text-[10px] font-semibold text-white/30 uppercase tracking-widest px-4 py-3">Status</th>
-                <th class="text-left text-[10px] font-semibold text-white/30 uppercase tracking-widest px-4 py-3 hidden md:table-cell">Date</th>
-                <th class="text-left text-[10px] font-semibold text-white/30 uppercase tracking-widest px-4 py-3">Actions</th>
+              <tr class="border-b border-neutral-border bg-neutral-gray">
+                <th class="text-left text-[10px] font-semibold text-dark/45 uppercase tracking-widest px-4 sm:px-6 py-3">Title</th>
+                <th class="text-left text-[10px] font-semibold text-dark/45 uppercase tracking-widest px-4 py-3">Category</th>
+                <th class="text-left text-[10px] font-semibold text-dark/45 uppercase tracking-widest px-4 py-3">Status</th>
+                <th class="text-left text-[10px] font-semibold text-dark/45 uppercase tracking-widest px-4 py-3 hidden md:table-cell">Date</th>
+                <th class="text-left text-[10px] font-semibold text-dark/45 uppercase tracking-widest px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="loadingItems">
-                <td colspan="5" class="px-6 py-10 text-center text-white/25 text-sm">Loading…</td>
+                <td colspan="5" class="px-6 py-10 text-center text-dark/45 text-sm">Loading…</td>
               </tr>
               <tr v-else-if="filteredContentItems.length === 0">
-                <td colspan="5" class="px-6 py-10 text-center text-white/25 text-sm">
+                <td colspan="5" class="px-6 py-10 text-center text-dark/45 text-sm">
                   {{ contentSearch ? 'No results found' : 'No content yet' }}
                 </td>
               </tr>
               <tr
                 v-for="item in filteredContentItems" :key="item.id"
-                class="border-b border-white/[0.04] hover:bg-white/[0.025] transition-colors"
+                class="border-b border-neutral-border hover:bg-neutral-gray transition-colors"
               >
                 <td class="px-4 sm:px-6 py-3.5 max-w-[140px] sm:max-w-[240px]">
-                  <p class="text-xs sm:text-sm font-medium text-white/90 truncate">{{ item.title }}</p>
+                  <p class="text-xs sm:text-sm font-medium text-dark/90 truncate">{{ item.title }}</p>
                 </td>
                 <td class="px-4 py-3.5">
                   <span class="text-[11px] px-2 py-0.5 rounded-full bg-accent-purple/10 text-accent-purple border border-accent-purple/20 font-medium whitespace-nowrap">
@@ -288,7 +288,7 @@
                     {{ item.approval_status }}
                   </span>
                 </td>
-                <td class="px-4 py-3.5 text-[11px] text-white/35 hidden md:table-cell whitespace-nowrap">{{ formatItemDate(item.created_at) }}</td>
+                <td class="px-4 py-3.5 text-[11px] text-dark/55 hidden md:table-cell whitespace-nowrap">{{ formatItemDate(item.created_at) }}</td>
                 <td class="px-4 py-3.5 whitespace-nowrap">
                   <button @click="handleEdit(item)" class="mr-3 text-accent-purple hover:text-accent-light transition-colors" title="Edit">
                     <i class="fas fa-pen text-xs" />
@@ -311,15 +311,15 @@
       <!-- Content Form (hidden by default, shown on Add New / Edit) -->
       <Transition name="form-slide">
         <section v-if="showContentForm" ref="formSectionRef">
-          <div class="rounded-2xl bg-violet-dark border border-white/[0.07] overflow-hidden">
-            <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/[0.06]">
+          <div class="rounded-2xl bg-white border border-neutral-border overflow-hidden">
+            <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-border">
               <div>
-                <h2 class="text-xs sm:text-sm font-bold text-white">Content Form</h2>
-                <p class="text-[11px] text-white/35 mt-0.5 hidden sm:block">Manage content for Tech Savvy</p>
+                <h2 class="text-xs sm:text-sm font-bold text-dark">Content Form</h2>
+                <p class="text-[11px] text-dark/55 mt-0.5 hidden sm:block">Manage content for Tech Savvy</p>
               </div>
               <button
                 @click="showContentForm = false"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-white/[0.06] border border-white/10 text-white/50 hover:text-red-400 hover:border-red-400/20 hover:bg-red-400/5 transition-all"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-neutral-gray border border-neutral-border text-dark/60 hover:text-red-400 hover:border-red-400/20 hover:bg-red-400/5 transition-all"
               >
                 <i class="fas fa-times text-[10px]" /> Close Form
               </button>
@@ -335,16 +335,16 @@
       <Transition name="modal">
         <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeleteModal = false" />
-          <div class="relative bg-violet-dark border border-red-500/20 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
+          <div class="relative bg-white border border-red-500/20 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
             <div class="text-center">
               <div class="mx-auto w-14 h-14 rounded-full bg-red-500/10 border border-red-500/25 flex items-center justify-center mb-5">
                 <i class="fas fa-trash text-red-400 text-xl" />
               </div>
-              <h3 class="text-lg font-bold text-white mb-2">Delete Content</h3>
-              <p class="text-sm text-white/40 mb-6">Are you sure? This cannot be undone.</p>
+              <h3 class="text-lg font-bold text-dark mb-2">Delete Content</h3>
+              <p class="text-sm text-dark/60 mb-6">Are you sure? This cannot be undone.</p>
               <div class="flex gap-3">
                 <button @click="showDeleteModal = false"
-                  class="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.07] border border-white/10 text-white font-semibold text-sm hover:bg-white/[0.12] transition-colors">
+                  class="flex-1 px-4 py-2.5 rounded-xl bg-neutral-gray border border-neutral-border text-dark font-semibold text-sm hover:bg-neutral-gray/80 transition-colors">
                   Cancel
                 </button>
                 <button @click="confirmDeleteItem"
@@ -363,16 +363,16 @@
       <Transition name="modal">
         <div v-if="showLogoutModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showLogoutModal = false" />
-          <div class="relative bg-violet-dark border border-accent-purple/20 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
+          <div class="relative bg-white border border-accent-purple/20 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
             <div class="text-center">
               <div class="mx-auto w-14 h-14 rounded-full bg-red-500/10 border border-red-500/25 flex items-center justify-center mb-5">
                 <i class="fas fa-sign-out-alt text-red-400 text-xl" />
               </div>
-              <h3 class="text-lg font-bold text-white mb-2">Confirm Logout</h3>
-              <p class="text-sm text-white/40 mb-6">Are you sure you want to sign out?</p>
+              <h3 class="text-lg font-bold text-dark mb-2">Confirm Logout</h3>
+              <p class="text-sm text-dark/60 mb-6">Are you sure you want to sign out?</p>
               <div class="flex gap-3">
                 <button @click="showLogoutModal = false"
-                  class="flex-1 px-4 py-2.5 rounded-xl bg-white/[0.07] border border-white/10 text-white font-semibold text-sm hover:bg-white/[0.12] transition-colors">
+                  class="flex-1 px-4 py-2.5 rounded-xl bg-neutral-gray border border-neutral-border text-dark font-semibold text-sm hover:bg-neutral-gray/80 transition-colors">
                   Cancel
                 </button>
                 <button @click="confirmLogout"
@@ -513,7 +513,7 @@ function getStatusClass (status?: string) {
   if (status === 'approved' || status === 'verified') return 'text-green-400'
   if (status === 'pending') return 'text-amber-400'
   if (status === 'rejected') return 'text-red-400'
-  return 'text-white/40'
+  return 'text-dark/50'
 }
 function getStatusDot (status?: string) {
   if (status === 'approved' || status === 'verified') return 'bg-green-400'

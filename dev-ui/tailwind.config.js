@@ -11,26 +11,27 @@ export default {
     theme: {
       extend: {
         colors: {
-          primary: "#6366f1",
-          secondary: "#8b5cf6",
-          dark: "#0f172a",
-          light: "#f8fafc",
+          primary: '#2E1368',
+          secondary: '#6126B1',
+          dark: '#1A1A1D',
+          light: '#FFFFFF',
           violet: {
-            DEFAULT: '#14082E',
-            dark: '#231559',
-            border: '#3D2A6E',
-            light: '#2A1A5E'
+            DEFAULT: '#F5F7FA',
+            dark: '#ECEFF4',
+            border: '#D8DEE8',
+            light: '#FFFFFF'
           },
           accent: {
-            purple: '#B5A3FF',
-            light: '#EEEAFF',
-            gold: '#FFD74A'
+            purple: '#6126B1',
+            light: '#B18AF3',
+            gold: '#B18AF3'
           },
           neutral: {
-            gray: '#D3D3D4',
-            card: '#C8C8CC',
-            border: '#E5E7EB',
-            dark: '#041122'
+            gray: '#F4F4F6',
+            card: '#FFFFFF',
+            border: '#E0E0E0',
+            dark: '#1A1A1D',
+            steel: '#9E9E9E'
           }
         },
         fontFamily: {

@@ -1,7 +1,7 @@
 <template>
-  <div class="font-inter text-white min-h-screen bg-violet">
+  <div class="font-inter text-dark min-h-screen bg-neutral-gray">
     <LayoutPageHeader back-text="Back to Home" />
-    <main class="bg-violet pt-6 pb-16 sm:pt-8 sm:pb-20 md:pt-12 md:pb-24 relative overflow-hidden flex flex-col">
+    <main class="bg-neutral-gray pt-6 pb-16 sm:pt-8 sm:pb-20 md:pt-12 md:pb-24 relative overflow-hidden flex flex-col">
       <SectionWires gradient-id-prefix="swg-search" variant="compact" />
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative flex-1 flex flex-col">

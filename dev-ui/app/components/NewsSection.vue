@@ -1,23 +1,23 @@
 <template>
   <section
     id="news"
-    class="min-h-screen flex flex-col pt-16 pb-12 md:pt-24 md:pb-24 relative overflow-hidden bg-violet"
+    class="scroll-mt-20 min-h-screen flex flex-col pt-16 pb-12 md:pt-24 md:pb-24 relative overflow-hidden bg-neutral-gray"
   >
     <SectionWires gradient-id-prefix="swg-news" />
     <div class="relative z-10 isolate flex-1 flex flex-col">
       <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-8 sm:mb-12">
           <div class="mb-0">
-            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-white mb-1">
+            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
               News & Updates
             </h2>
-            <p class="text-sm sm:text-base text-white/60 max-w-[42rem] leading-relaxed">
+            <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
               Latest from the community
             </p>
           </div>
           <NuxtLink
             to="/news"
-            class="inline-flex items-center gap-2 py-2 px-4 sm:py-2.5 sm:px-5 rounded-full bg-violet-border border border-accent-purple/25 text-accent-purple font-medium text-sm sm:text-base transition-colors hover:bg-violet-light hover:border-accent-purple/40 hover:text-accent-light no-underline shrink-0"
+            class="inline-flex items-center gap-2 py-2 px-4 sm:py-2.5 sm:px-5 rounded-full bg-violet-border border border-accent-purple/25 text-accent-purple font-medium text-sm sm:text-base transition-colors hover:bg-[#D9CCFA] hover:border-[#9575CD] hover:text-[#283593] no-underline shrink-0"
           >
             View all
             <i class="fas fa-arrow-right text-xs" />
@@ -29,7 +29,7 @@
             <article
               v-for="(item, i) in safeItems"
               :key="i"
-              class="group relative flex flex-col bg-neutral-card text-gray-900 rounded-xl overflow-hidden shadow-none h-[380px] max-h-[380px] self-start animate-fade-in"
+              class="group relative flex flex-col bg-white border text-gray-900 rounded-xl overflow-hidden card-outline-violet-glow h-[380px] max-h-[380px] self-start animate-fade-in"
               :style="{ animationDelay: `${i * 0.1}s` }"
             >
               <!-- Clickable overlay (opens the detail page) -->

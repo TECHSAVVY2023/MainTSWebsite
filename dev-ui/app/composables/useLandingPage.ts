@@ -25,6 +25,31 @@ export function useLandingPage () {
     return Array.isArray(arr) ? arr : []
   })
 
+  const eventRemindersForSection = computed(() => {
+    const arr = unwrapRef(landing.eventReminders)
+    return Array.isArray(arr) ? arr : []
+  })
+
+  const communityRoleStatsForSection = computed(() => {
+    const arr = unwrapRef(landing.communityRoleStats)
+    return Array.isArray(arr) ? arr : []
+  })
+
+  const speakersForSection = computed(() => {
+    const arr = unwrapRef(landing.speakers)
+    return Array.isArray(arr) ? arr : []
+  })
+
+  const sponsorsForSection = computed(() => {
+    const arr = unwrapRef(landing.sponsors)
+    return Array.isArray(arr) ? arr : []
+  })
+
+  const partnersForSection = computed(() => {
+    const arr = unwrapRef(landing.partners)
+    return Array.isArray(arr) ? arr : []
+  })
+
   onMounted(() => landing.loadData())
 
   useHead({
@@ -48,6 +73,11 @@ export function useLandingPage () {
     newsItemsForSection,
     coursesForSection,
     projectsForSection,
-    eventsForSection
+    eventsForSection,
+    eventRemindersForSection,
+    communityRoleStatsForSection,
+    speakersForSection,
+    sponsorsForSection,
+    partnersForSection
   }
 }

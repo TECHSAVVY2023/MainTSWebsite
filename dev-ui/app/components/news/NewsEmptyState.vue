@@ -1,5 +1,5 @@
 <template>
-  <div class="text-center py-16 text-white/60">
+  <div class="text-center py-16 text-dark/60">
     <p v-if="hasSearchQuery">
       No news match "{{ searchQuery }}". Try a different search or
       <NuxtLink to="/news" class="text-accent-gold hover:underline">view all</NuxtLink>.

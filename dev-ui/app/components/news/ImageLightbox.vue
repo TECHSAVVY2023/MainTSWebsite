@@ -13,7 +13,7 @@
       >
         <button
           type="button"
-          class="absolute top-4 right-4 z-[100] w-11 h-11 rounded-full bg-white/90 text-[#1a0a2e] border-0 cursor-pointer flex items-center justify-center text-xl transition-all hover:bg-white hover:scale-105 shadow-lg"
+          class="absolute top-4 right-4 z-[100] w-11 h-11 rounded-full bg-[#ECEFF1]/95 text-[#283593] border-0 cursor-pointer flex items-center justify-center text-xl transition-all hover:bg-[#DDE4EE] hover:scale-105 shadow-lg"
           aria-label="Close"
           @click="$emit('close')"
         >
@@ -22,7 +22,7 @@
         <button
           v-if="images.length > 1"
           type="button"
-          class="absolute left-6 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-white/90 text-[#1a0a2e] border-0 cursor-pointer flex items-center justify-center text-2xl transition-all hover:bg-white hover:scale-105 shadow-lg"
+          class="absolute left-6 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-[#ECEFF1]/95 text-[#283593] border-0 cursor-pointer flex items-center justify-center text-2xl transition-all hover:bg-[#DDE4EE] hover:scale-105 shadow-lg"
           aria-label="Previous image"
           @click.stop="$emit('prev')"
         >
@@ -42,7 +42,7 @@
         <button
           v-if="images.length > 1"
           type="button"
-          class="absolute right-6 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-white/90 text-[#1a0a2e] border-0 cursor-pointer flex items-center justify-center text-2xl transition-all hover:bg-white hover:scale-105 shadow-lg"
+          class="absolute right-6 top-1/2 -translate-y-1/2 z-[100] w-14 h-14 rounded-full bg-[#ECEFF1]/95 text-[#283593] border-0 cursor-pointer flex items-center justify-center text-2xl transition-all hover:bg-[#DDE4EE] hover:scale-105 shadow-lg"
           aria-label="Next image"
           @click.stop="$emit('next')"
         >

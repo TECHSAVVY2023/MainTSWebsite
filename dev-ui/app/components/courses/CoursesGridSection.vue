@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="courses.length === 0" class="text-center py-16 text-white/60">
+    <div v-if="courses.length === 0" class="text-center py-16 text-dark/60">
       <i class="fas fa-graduation-cap text-4xl mb-4 opacity-50" :aria-hidden="true" />
       <p>No courses match your search. Try a different filter.</p>
     </div>
@@ -8,7 +8,7 @@
       <article
         v-for="course in courses"
         :key="course.id"
-        class="w-full max-w-[280px] mx-2 sm:mx-3 group bg-[rgba(35,21,89,0.95)] rounded-lg sm:rounded-xl overflow-hidden border border-white/20 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-white/25"
+        class="w-full max-w-[280px] mx-2 sm:mx-3 group bg-[rgba(35,21,89,0.95)] rounded-lg sm:rounded-xl overflow-hidden border border-white/20 card-violet-glow-aura transition-all duration-200 hover:-translate-y-0.5"
       >
         <NuxtLink :to="`/courses/${course.slug}`" class="block no-underline text-inherit">
           <div class="relative aspect-[4/3] overflow-hidden bg-[rgba(35,21,89,0.95)]">

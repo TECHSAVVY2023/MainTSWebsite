@@ -1,27 +1,27 @@
 <template>
   <section
     id="calendar"
-    class="min-h-screen pt-8 pb-16 md:pt-12 md:pb-24 bg-violet relative overflow-hidden"
+    class="min-h-screen flex flex-col pt-16 pb-12 md:pt-24 md:pb-24 bg-neutral-gray relative overflow-hidden"
   >
     <SectionWires gradient-id-prefix="swg-calendar" />
     <div class="relative z-10 isolate flex-1 flex flex-col">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div class="mb-6 md:mb-8">
-          <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-white mb-1">
+      <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative">
+        <div class="mb-8 sm:mb-12">
+          <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
             Community Calendar
           </h2>
-          <p class="text-sm sm:text-base text-white/60 max-w-[42rem] leading-relaxed">
+          <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
             Stay updated with workshops, meetups, and events
           </p>
         </div>
 
-        <div class="rounded-2xl overflow-hidden bg-violet-dark/95 backdrop-blur-[10px] border border-accent-purple/20">
+        <div class="rounded-2xl overflow-hidden bg-white backdrop-blur-[10px] border border-neutral-border">
           <!-- Toolbar -->
-          <div class="flex flex-wrap items-center justify-between gap-3 p-4 md:p-5 border-b border-white/10 bg-violet-dark/95">
+          <div class="flex flex-wrap items-center justify-between gap-3 p-4 md:p-5 border-b border-neutral-border bg-neutral-gray">
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="py-2 px-3.5 rounded-lg text-sm font-medium bg-violet-dark/95 border border-accent-purple/20 text-white/90 transition-colors hover:bg-violet-light hover:border-accent-purple/30"
+                class="py-2 px-3.5 rounded-lg text-sm font-medium bg-white border border-neutral-border text-dark/90 transition-colors hover:bg-neutral-gray hover:border-accent-purple/30"
                 @click="goToday"
               >
                 Today
@@ -29,7 +29,7 @@
               <div class="flex items-center gap-1">
                 <button
                   type="button"
-                  class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-white/80 bg-violet-dark/95 border border-accent-purple/20 transition-colors hover:bg-violet-light hover:text-white"
+                  class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-dark/80 bg-white border border-neutral-border transition-colors hover:bg-neutral-gray hover:text-dark"
                   aria-label="Previous month"
                   @click="prevMonth"
                 >
@@ -37,7 +37,7 @@
                 </button>
                 <button
                   type="button"
-                  class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-white/80 bg-violet-dark/95 border border-accent-purple/20 transition-colors hover:bg-violet-light hover:text-white"
+                  class="w-9 h-9 inline-flex items-center justify-center rounded-lg text-dark/80 bg-white border border-neutral-border transition-colors hover:bg-neutral-gray hover:text-dark"
                   aria-label="Next month"
                   @click="nextMonth"
                 >
@@ -45,14 +45,14 @@
                 </button>
               </div>
             </div>
-            <h3 class="text-xl font-bold text-white">
+            <h3 class="text-xl font-bold text-dark">
               {{ monthLabel }}
             </h3>
             <a
               href="https://calendar.google.com/calendar/embed?src=en.philippines%23holiday%40group.v.calendar.google.com&ctz=Asia%2FManila&mode=AGENDA"
               target="_blank"
               rel="noopener"
-              class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-white/80 hover:text-white border border-white/20 hover:border-white/30 transition-colors"
+              class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-dark/80 hover:text-dark border border-neutral-border hover:border-accent-purple/30 transition-colors"
             >
               <i class="fas fa-external-link-alt mr-2" />
               Google Calendar
@@ -60,12 +60,12 @@
           </div>
 
           <!-- Day headers -->
-          <div class="grid grid-cols-7 text-center text-xs font-semibold text-white/60 uppercase tracking-wider border-b border-white/10 bg-violet-dark/95">
+          <div class="grid grid-cols-7 text-center text-xs font-semibold text-dark/60 uppercase tracking-wider border-b border-neutral-border bg-neutral-gray">
             <div v-for="d in dayLabels" :key="d" class="py-3">{{ d }}</div>
           </div>
 
           <!-- Month grid -->
-          <div class="bg-violet-dark/92">
+          <div class="bg-white">
             <div
               v-for="(week, wi) in grid"
               :key="wi"
@@ -74,9 +74,9 @@
               <div
                 v-for="(day, di) in week"
                 :key="di"
-                class="border-b border-r border-white/10 p-1.5 sm:p-2 flex flex-col bg-violet-dark/95 last:border-r-0"
+                class="border-b border-r border-neutral-border p-1.5 sm:p-2 flex flex-col bg-white last:border-r-0"
                 :class="{
-                  'bg-white/5': day.isCurrentMonth && day.isToday,
+                  'bg-accent-purple/10': day.isCurrentMonth && day.isToday,
                   'opacity-50': !day.isCurrentMonth
                 }"
               >
@@ -84,11 +84,11 @@
                   <span
                     v-if="day.date"
                     class="text-sm font-medium"
-                    :class="day.isToday ? 'calendar-cell-today inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-purple/35 text-white font-bold' : 'text-white/90'"
+                    :class="day.isToday ? 'calendar-cell-today inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent-purple/35 text-dark font-bold' : 'text-dark/90'"
                   >
                     {{ day.dayNum }}
                   </span>
-                  <span v-if="day.date && day.isCurrentMonth" class="text-[10px] text-white/50 hidden sm:inline">{{ day.monthLabel }}</span>
+                  <span v-if="day.date && day.isCurrentMonth" class="text-[10px] text-dark/50 hidden sm:inline">{{ day.monthLabel }}</span>
                 </div>
                 <div class="flex-1 space-y-1 overflow-hidden">
                   <template v-for="(ev, ei) in day.events" :key="ei">

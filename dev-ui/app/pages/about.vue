@@ -1,7 +1,7 @@
 <template>
-  <div class="font-inter text-white min-h-screen bg-violet">
+  <div class="font-inter text-dark min-h-screen bg-neutral-gray">
     <LayoutPageHeader />
-    <main class="bg-violet pt-8 pb-20 sm:pt-12 sm:pb-24 md:pt-16 md:pb-32 relative overflow-hidden flex flex-col">
+    <main class="bg-neutral-gray pt-8 pb-20 sm:pt-12 sm:pb-24 md:pt-16 md:pb-32 relative overflow-hidden flex flex-col">
       <SectionWires gradient-id-prefix="swg-about" />
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl relative flex-1 flex flex-col">
