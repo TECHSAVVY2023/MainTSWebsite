@@ -1,6 +1,16 @@
 /**
  * Landing page composable: news, projects, courses, calendar, scroll, search.
  */
+import {
+  SAMPLE_NEWS,
+  SAMPLE_PROJECTS,
+  SAMPLE_COURSES,
+  SAMPLE_BRAND_LOGOS,
+  DEFAULT_NEWS_IMAGE,
+  DEFAULT_COURSE_IMAGE,
+  DEFAULT_PROJECT_IMAGE
+} from '~/constants/sampleMedia'
+
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
@@ -55,7 +65,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Code Camp Batch Opens',
     summary: 'Applications are now open for the next full-stack learning batch.',
     description: 'Applications are now open for the next full-stack learning batch with guided mentorship and practical project work.',
-    imageUrl: '/assets/no-image.png',
+    imageUrl: SAMPLE_NEWS.codecamp,
     link: '/news'
   },
   {
@@ -64,7 +74,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Community Demo Night',
     summary: 'Learners showcased portfolio projects to mentors and peers.',
     description: 'Learners showcased portfolio projects to mentors and peers during our monthly community demo night.',
-    imageUrl: '/assets/no-image.png',
+    imageUrl: SAMPLE_NEWS.demoNight,
     link: '/news'
   },
   {
@@ -73,7 +83,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Mentor Spotlight Series',
     summary: 'A new talk series on modern frontend and backend workflows.',
     description: 'A new talk series featuring practical sessions on modern frontend and backend development workflows.',
-    imageUrl: '/assets/no-image.png',
+    imageUrl: SAMPLE_NEWS.mentor,
     link: '/news'
   },
   {
@@ -82,7 +92,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Student Success Stories',
     summary: 'Graduates shared real project journeys and career progress.',
     description: 'Recent graduates shared real project journeys, lessons learned, and their career progress in tech.',
-    imageUrl: '/assets/no-image.png',
+    imageUrl: SAMPLE_NEWS.success,
     link: '/news'
   }
 ]
@@ -92,28 +102,28 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     title: 'CampusMart E-commerce',
     domain: 'Retail Platform',
     url: '/projects',
-    image: '/assets/no-image.png',
+    image: SAMPLE_PROJECTS.ecommerce,
     alt: 'Sample e-commerce project preview'
   },
   {
     title: 'BookNook Marketplace',
     domain: 'Online Book Store',
     url: '/projects',
-    image: '/assets/no-image.png',
+    image: SAMPLE_PROJECTS.books,
     alt: 'Sample marketplace project preview'
   },
   {
     title: 'Farm2Door Shop',
     domain: 'Local Produce Store',
     url: '/projects',
-    image: '/assets/no-image.png',
+    image: SAMPLE_PROJECTS.farm,
     alt: 'Sample produce store project preview'
   },
   {
     title: 'LearnHub LMS',
     domain: 'Education Platform',
     url: '/projects',
-    image: '/assets/no-image.png',
+    image: SAMPLE_PROJECTS.lms,
     alt: 'Sample learning platform preview'
   }
 ]
@@ -126,7 +136,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '6 weeks',
     badge: 'Beginner',
-    image: '/assets/no-image.png'
+    image: SAMPLE_COURSES.frontend
   },
   {
     slug: 'backend-api-practical',
@@ -135,7 +145,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.9',
     duration: '8 weeks',
     badge: 'Intermediate',
-    image: '/assets/no-image.png'
+    image: SAMPLE_COURSES.backend
   },
   {
     slug: 'nuxt-fullstack-lab',
@@ -144,7 +154,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.7',
     duration: '7 weeks',
     badge: 'Project-based',
-    image: '/assets/no-image.png'
+    image: SAMPLE_COURSES.nuxt
   },
   {
     slug: 'deployment-and-devops',
@@ -153,7 +163,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '5 weeks',
     badge: 'Advanced',
-    image: '/assets/no-image.png'
+    image: SAMPLE_COURSES.devops
   }
 ]
 
@@ -378,13 +388,13 @@ export function useLanding () {
         name: 'Tech Savvy Community Partners',
         tier: 'Community Sponsor',
         description: 'Helping fund educational programs and developer activities.',
-        logo: '/assets/codebev-logo.png'
+        logo: SAMPLE_BRAND_LOGOS.codebev
       },
       {
         name: 'CloudStack Asia',
         tier: 'Infrastructure Sponsor',
         description: 'Credits and tooling for learning environments.',
-        logo: '/assets/no-image.png'
+        logo: SAMPLE_BRAND_LOGOS.cloud
       }
     ]
     partners.value = [
@@ -393,13 +403,13 @@ export function useLanding () {
         tier: 'Venue Partner',
         description: 'Host venue supporting workshops, talks, and build sessions.',
         link: 'https://www.techsavvies.space',
-        logo: '/assets/no-image.png'
+        logo: SAMPLE_BRAND_LOGOS.venue
       },
       {
         name: 'Misamis Digital Guild',
         tier: 'Education Partner',
         description: 'Scholarships and learning resources for cohort members.',
-        logo: '/assets/no-image.png'
+        logo: SAMPLE_BRAND_LOGOS.education
       }
     ]
   }
@@ -565,8 +575,8 @@ export function useLanding () {
     scrollToSection,
     onHeaderSearch,
     loadData,
-    DEFAULT_NEWS_IMAGE: '/assets/no-image.png',
-    DEFAULT_PROJECT_IMAGE: '/assets/no-image.png',
-    DEFAULT_COURSE_IMAGE: '/assets/no-image.png'
+    DEFAULT_NEWS_IMAGE,
+    DEFAULT_PROJECT_IMAGE,
+    DEFAULT_COURSE_IMAGE
   }
 }

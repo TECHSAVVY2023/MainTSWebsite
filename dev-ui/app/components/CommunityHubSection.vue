@@ -8,12 +8,14 @@
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
           <div class="mb-8 sm:mb-12">
-            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-              Event Reminders
-            </h2>
-            <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
-              Upcoming events and schedules for the community.
-            </p>
+            <SectionWireShield>
+              <h2 class="mb-1 text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
+                Event Reminders
+              </h2>
+              <p class="max-w-[42rem] text-sm leading-relaxed text-dark/60 sm:text-base">
+                Upcoming events and schedules for the community.
+              </p>
+            </SectionWireShield>
           </div>
           <EventsReminderSection :reminders="safeReminders" />
         </div>
@@ -28,12 +30,14 @@
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
           <div class="mb-8 sm:mb-12">
-            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-              Sponsors &amp; partners
-            </h2>
-            <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
-              Sponsors and community partners supporting our initiatives.
-            </p>
+            <SectionWireShield>
+              <h2 class="mb-1 text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
+                Sponsors &amp; partners
+              </h2>
+              <p class="max-w-[42rem] text-sm leading-relaxed text-dark/60 sm:text-base">
+                Sponsors and community partners supporting our initiatives.
+              </p>
+            </SectionWireShield>
           </div>
           <SponsorsSection :sponsors="safeSponsors" :partners="safePartners" />
         </div>
@@ -48,12 +52,14 @@
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
           <div class="mb-8 sm:mb-12">
-            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-              Community Members & Speakers
-            </h2>
-            <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
-              Community members breakdown with a modern speaker showcase.
-            </p>
+            <SectionWireShield>
+              <h2 class="mb-1 text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
+                Community Members & Speakers
+              </h2>
+              <p class="max-w-[42rem] text-sm leading-relaxed text-dark/60 sm:text-base">
+                Community members breakdown with a modern speaker showcase.
+              </p>
+            </SectionWireShield>
           </div>
           <SpeakersSection :speakers="safeSpeakers" />
         </div>
@@ -66,6 +72,7 @@
 import EventsReminderSection from '~/components/community/EventsReminderSection.vue'
 import SponsorsSection from '~/components/community/SponsorsSection.vue'
 import SpeakersSection from '~/components/community/SpeakersSection.vue'
+import { SAMPLE_BRAND_LOGOS } from '~/constants/sampleMedia'
 
 type EventReminderItem = {
   title?: string
@@ -141,29 +148,26 @@ const FALLBACK_SPEAKERS: SpeakerItem[] = [
   { name: 'Nina Patel', role: 'Speaker', topic: 'AI tooling for developers without the hype' }
 ]
 
-const LOGO = '/assets/no-image.png'
-const LOGO_BRAND = '/assets/codebev-logo.png'
-
 const FALLBACK_SPONSORS_ONLY: SponsorItem[] = [
-  { name: 'Tech Savvy Community Partners', tier: 'Community Sponsor', description: 'Supporting education, events, and developer growth.', logo: LOGO_BRAND },
-  { name: 'CloudStack Asia', tier: 'Infrastructure', description: 'Credits for learning environments.', logo: LOGO },
-  { name: 'Women in Tech PH — Mindanao', tier: 'Diversity Sponsor', description: 'Mentorship circles and scholarship fund.', logo: LOGO },
-  { name: 'Youth Code Initiative', tier: 'Outreach Sponsor', description: 'High school coding bootcamps and kits.', logo: LOGO },
-  { name: 'Open Source Pilipinas', tier: 'Community Sponsor', description: 'Documentation sprints and speaker outreach.', logo: LOGO },
-  { name: 'Green Tech Collective', tier: 'Sustainability', description: 'Low-energy hosting tips for student projects.', logo: LOGO },
-  { name: 'DevRel Meetup Network', tier: 'Events Sponsor', description: 'Cross-chapter promotion and speakers.', logo: LOGO },
-  { name: 'Print & Brand Studio Ozamiz', tier: 'Creative Sponsor', description: 'Banners, stickers, and event branding.', logo: LOGO }
+  { name: 'Tech Savvy Community Partners', tier: 'Community Sponsor', description: 'Supporting education, events, and developer growth.', logo: SAMPLE_BRAND_LOGOS.codebev },
+  { name: 'CloudStack Asia', tier: 'Infrastructure', description: 'Credits for learning environments.', logo: SAMPLE_BRAND_LOGOS.cloud },
+  { name: 'Women in Tech PH — Mindanao', tier: 'Diversity Sponsor', description: 'Mentorship circles and scholarship fund.', logo: SAMPLE_BRAND_LOGOS.diversity },
+  { name: 'Youth Code Initiative', tier: 'Outreach Sponsor', description: 'High school coding bootcamps and kits.', logo: SAMPLE_BRAND_LOGOS.youth },
+  { name: 'Open Source Pilipinas', tier: 'Community Sponsor', description: 'Documentation sprints and speaker outreach.', logo: SAMPLE_BRAND_LOGOS.openSource },
+  { name: 'Green Tech Collective', tier: 'Sustainability', description: 'Low-energy hosting tips for student projects.', logo: SAMPLE_BRAND_LOGOS.green },
+  { name: 'DevRel Meetup Network', tier: 'Events Sponsor', description: 'Cross-chapter promotion and speakers.', logo: SAMPLE_BRAND_LOGOS.devrel },
+  { name: 'Print & Brand Studio Ozamiz', tier: 'Creative Sponsor', description: 'Banners, stickers, and event branding.', logo: SAMPLE_BRAND_LOGOS.print }
 ]
 
 const FALLBACK_PARTNERS_ONLY: SponsorItem[] = [
-  { name: 'Workflow Co-Working Space', tier: 'Venue Partner', description: 'Hosting workshops, talks, and local developer sessions.', link: 'https://www.techsavvies.space', logo: LOGO },
-  { name: 'Misamis Digital Guild', tier: 'Education Partner', description: 'Scholarships and learning resources for cohort members.', logo: LOGO },
-  { name: 'Northern Mindanao IT Council', tier: 'Advocacy Partner', description: 'Regional tech policy and industry connections.', logo: LOGO },
-  { name: 'CodeBev Solutions', tier: 'Technology Partner', description: 'Tools and hosting support for community projects.', logo: LOGO_BRAND },
-  { name: 'Local Coffee Roasters Co.', tier: 'In-kind Partner', description: 'Beverages and venue snacks for meetups.', logo: LOGO },
-  { name: 'Campus IT Student Union', tier: 'Academic Partner', description: 'Student volunteers and campus event space.', logo: LOGO },
-  { name: 'Regional Startup Hub', tier: 'Innovation Partner', description: 'Pitch nights and founder office hours.', logo: LOGO },
-  { name: 'Freelancers Guild MO', tier: 'Professional Partner', description: 'Contract templates and client ethics workshops.', logo: LOGO }
+  { name: 'Workflow Co-Working Space', tier: 'Venue Partner', description: 'Hosting workshops, talks, and local developer sessions.', link: 'https://www.techsavvies.space', logo: SAMPLE_BRAND_LOGOS.venue },
+  { name: 'Misamis Digital Guild', tier: 'Education Partner', description: 'Scholarships and learning resources for cohort members.', logo: SAMPLE_BRAND_LOGOS.education },
+  { name: 'Northern Mindanao IT Council', tier: 'Advocacy Partner', description: 'Regional tech policy and industry connections.', logo: SAMPLE_BRAND_LOGOS.advocacy },
+  { name: 'CodeBev Solutions', tier: 'Technology Partner', description: 'Tools and hosting support for community projects.', logo: SAMPLE_BRAND_LOGOS.codebev },
+  { name: 'Local Coffee Roasters Co.', tier: 'In-kind Partner', description: 'Beverages and venue snacks for meetups.', logo: SAMPLE_BRAND_LOGOS.coffee },
+  { name: 'Campus IT Student Union', tier: 'Academic Partner', description: 'Student volunteers and campus event space.', logo: SAMPLE_BRAND_LOGOS.campus },
+  { name: 'Regional Startup Hub', tier: 'Innovation Partner', description: 'Pitch nights and founder office hours.', logo: SAMPLE_BRAND_LOGOS.startup },
+  { name: 'Freelancers Guild MO', tier: 'Professional Partner', description: 'Contract templates and client ethics workshops.', logo: SAMPLE_BRAND_LOGOS.freelance }
 ]
 
 /** 2 rows × md:grid-cols-4 in SpeakersSection / each sponsors & partners grid */

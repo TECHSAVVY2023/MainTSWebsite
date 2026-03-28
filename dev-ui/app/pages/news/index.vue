@@ -8,7 +8,7 @@
           <NewsTitleSection v-model="newsSearchInputValue" />
           <NewsGridSection
             :items="paginatedNewsArray"
-            default-image="/assets/no-image.png"
+            :default-image="DEFAULT_NEWS_IMAGE"
           />
           <NewsEmptyState
             v-if="filteredNewsItemsArray.length === 0"
@@ -32,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
+
 const {
   news,
   newsSearchInputValue,

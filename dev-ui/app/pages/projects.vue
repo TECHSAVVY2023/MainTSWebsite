@@ -8,7 +8,7 @@
           <ProjectsTitleSection v-model="projectSearchInputValue" />
           <ProjectsGridSection
             :projects="filteredProjectsArray"
-            default-image="/assets/no-image.png"
+            :default-image="DEFAULT_PROJECT_IMAGE"
           />
           <ProjectsEmptyState
             v-if="filteredProjectsArray.length === 0"
@@ -22,5 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_PROJECT_IMAGE } from '~/constants/sampleMedia'
+
 const { projectSearchInputValue, filteredProjectsArray, searchQueryValue } = useProjectsPage()
 </script>

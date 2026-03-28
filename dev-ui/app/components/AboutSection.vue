@@ -7,12 +7,14 @@
     <div class="relative z-10 isolate flex-1 flex flex-col">
       <div class="container mx-auto px-8 sm:px-12 lg:px-20 flex-shrink-0 relative">
         <div class="mb-8 sm:mb-12">
-          <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1 text-left">
-            What is Tech Savvy?
-          </h2>
-          <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] text-left leading-relaxed">
-            Our vision, mission, and how we support developers in Misamis Occidental.
-          </p>
+          <SectionWireShield>
+            <h2 class="mb-1 text-left text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
+              What is Tech Savvy?
+            </h2>
+            <p class="max-w-[42rem] text-left text-sm leading-relaxed text-dark/60 sm:text-base">
+              Our vision, mission, and how we support developers in Misamis Occidental.
+            </p>
+          </SectionWireShield>
         </div>
       </div>
       <div

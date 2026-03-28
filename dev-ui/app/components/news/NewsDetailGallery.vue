@@ -92,7 +92,7 @@
         aria-label="Image loading"
       >
         <img
-          :src="(imagesArray[0] || '/assets/no-image.png')"
+          :src="(imagesArray[0] || fallbackImage)"
           :alt="`${props.title} – image 1`"
           class="w-full h-full min-h-[280px] object-cover block"
           loading="eager"
@@ -123,7 +123,7 @@ defineEmits<{
   'open-lightbox': [idx: number]
 }>()
 
-const onImageError = useImageFallback('/assets/no-image.png')
+const onImageError = useImageFallback(DEFAULT_NEWS_IMAGE)
 
 const currentIndex = ref(0)
 

@@ -12,7 +12,7 @@
           />
           <CoursesGridSection
             :courses="filteredCoursesArray"
-            default-image="/assets/no-image.png"
+            :default-image="DEFAULT_COURSE_IMAGE"
           />
         </div>
       </div>
@@ -21,5 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_COURSE_IMAGE } from '~/constants/sampleMedia'
+
 const { courses, searchQueryValue, selectedCategoryValue, filteredCoursesArray } = useCoursesPage()
 </script>

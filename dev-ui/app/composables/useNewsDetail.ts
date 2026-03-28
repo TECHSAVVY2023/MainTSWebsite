@@ -1,6 +1,8 @@
 /**
  * News detail page composable: article, images, lightbox.
  */
+import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
+
 export type NewsDetailItem = {
   id?: string
   date?: string
@@ -13,7 +15,7 @@ export type NewsDetailItem = {
 }
 
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
-const DEFAULT_IMAGE = '/assets/no-image.png'
+const DEFAULT_IMAGE = DEFAULT_NEWS_IMAGE
 
 export function useNewsDetail () {
   const route = useRoute()

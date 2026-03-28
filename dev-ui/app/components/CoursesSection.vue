@@ -6,22 +6,26 @@
     <SectionWires gradient-id-prefix="swg-courses" />
     <div class="relative z-10 isolate flex-1 flex flex-col">
       <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-8 sm:mb-12">
-          <div class="mb-0">
-            <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-              Courses
-            </h2>
-            <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
-              Learn full-stack web development with hands-on projects
-            </p>
-          </div>
-          <NuxtLink
-            to="/courses"
-            class="inline-flex items-center gap-2 py-2 px-4 sm:py-2.5 sm:px-5 rounded-full bg-violet-border border border-accent-purple/25 text-accent-purple font-medium text-sm sm:text-base transition-colors hover:bg-[#D9CCFA] hover:border-[#9575CD] hover:text-[#283593] no-underline shrink-0"
-          >
-            Browse all courses
-            <i class="fas fa-arrow-right text-xs" />
-          </NuxtLink>
+        <div class="mb-8 sm:mb-12">
+          <SectionWireShield>
+            <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
+            <div class="mb-0">
+              <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
+                Courses
+              </h2>
+              <p class="max-w-[42rem] text-sm leading-relaxed text-dark/60 sm:text-base">
+                Learn full-stack web development with hands-on projects
+              </p>
+            </div>
+            <NuxtLink
+              to="/courses"
+              class="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent-purple/25 bg-violet-border py-2 px-4 text-sm font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:py-2.5 sm:px-5 sm:text-base"
+            >
+              Browse all courses
+              <i class="fas fa-arrow-right text-xs" />
+            </NuxtLink>
+            </div>
+          </SectionWireShield>
         </div>
 
         <div class="w-full max-w-[72rem] mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-start">
@@ -73,6 +77,8 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_COURSE_IMAGE } from '~/constants/sampleMedia'
+
 type CourseItem = {
   slug: string
   title: string
@@ -88,7 +94,7 @@ const props = withDefaults(
     courses?: CourseItem[] | unknown
     defaultImage?: string
   }>(),
-  { defaultImage: '/assets/no-image.png' }
+  { defaultImage: DEFAULT_COURSE_IMAGE }
 )
 
 const safeCourses = computed(() => {

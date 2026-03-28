@@ -13,7 +13,7 @@
               <div>
                 <CourseDetailHero
                   :course="course.course"
-                  default-image="/assets/no-image.png"
+                  :default-image="DEFAULT_COURSE_IMAGE"
                 />
               </div>
               <aside class="lg:sticky lg:top-24">
@@ -28,5 +28,7 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_COURSE_IMAGE } from '~/constants/sampleMedia'
+
 const { course } = useCourseDetailPage()
 </script>
