@@ -1,23 +1,21 @@
 /**
- * Shared merch catalog for the landing Merch section and /merchandise page.
+ * Merch catalog: approved CMS items with category "Merchandise", merged with static fallback.
  */
 import { SAMPLE_MERCH } from '~/constants/sampleMedia'
 
 export type MerchItem = {
-  /** Stable id for cart / checkout */
   id: string
   name: string
   priceLabel: string
-  /** Unit price in PHP for cart totals (demo checkout) */
   unitAmountPhp: number
   subtitle?: string
   image?: string
   alt?: string
-  /** Optional external product or form link */
   href?: string
 }
 
-export const MERCH_CATALOG: MerchItem[] = [
+/** Initial / offline catalog (also used when API returns no merch rows). */
+export const MERCH_CATALOG_STATIC: MerchItem[] = [
   {
     id: 'season-4-tee',
     name: 'Season 4 community tee',
@@ -92,6 +90,130 @@ export const MERCH_CATALOG: MerchItem[] = [
   }
 ]
 
+/** @deprecated Use MERCH_CATALOG_STATIC */
+export const MERCH_CATALOG = MERCH_CATALOG_STATIC
+
+export const MERCH_CATALOG_STATE_KEY = 'merch-catalog-cms'
+
+type CmsRaw = {
+  id?: number
+  title?: string
+  descriptions?: string
+  content_id?: string
+  approval_status?: string
+  filters?: string | Record<string, unknown> | null
+  links?: string[]
+  files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null
+  images?: string[]
+}
+
+function normalizeCmsList (body: unknown): unknown[] {
+  if (Array.isArray(body)) return body
+  if (body && typeof body === 'object' && !Array.isArray(body)) {
+    const o = body as Record<string, unknown>
+    if (Array.isArray(o.data)) return o.data
+    if (Array.isArray(o.results)) return o.results
+    if (Array.isArray(o.items)) return o.items
+  }
+  return []
+}
+
+function getCategoryFromFilters (filters: CmsRaw['filters']): string {
+  if (!filters) return ''
+  if (typeof filters === 'object' && filters !== null && 'category' in filters) {
+    return String((filters as Record<string, unknown>).category || '').trim().toLowerCase()
+  }
+  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      const o = JSON.parse(filters) as Record<string, unknown>
+      return String(o.category || '').trim().toLowerCase()
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+
+function getFirstFileUrl (files: CmsRaw['files']): string {
+  if (!files) return ''
+  if (Array.isArray(files)) return files[0]?.url || ''
+  if (typeof files === 'object') return files.url || ''
+  return ''
+}
+
+function resolveMediaUrl (url: string, apiBase: string): string {
+  if (!url || url.startsWith('http')) return url
+  const origin = apiBase.replace(/\/api\/?$/, '').replace(/\/$/, '')
+  return origin ? `${origin}${url.startsWith('/') ? '' : '/'}${url}` : url
+}
+
+function mapCmsItemToMerch (cms: CmsRaw, apiBase: string): MerchItem | null {
+  if (getCategoryFromFilters(cms.filters) !== 'merchandise') return null
+  if (String(cms.approval_status || '').toLowerCase() !== 'approved') return null
+
+  const filters =
+    typeof cms.filters === 'object' && cms.filters !== null
+      ? (cms.filters as Record<string, unknown>)
+      : {}
+
+  const rawId = String(cms.content_id || `cms-${cms.id ?? 0}`).trim()
+  const id =
+    rawId
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-_]/gi, '') || `cms-${cms.id}`
+
+  const rawPrice = filters.unit_amount_php
+  const rawStr =
+    rawPrice === undefined || rawPrice === null ? '' : String(rawPrice).trim()
+  const unitRaw = Number(rawStr)
+  const hasPrice = rawStr !== '' && Number.isFinite(unitRaw) && unitRaw >= 0
+  const unitAmountPhp = hasPrice ? unitRaw : 0
+  const priceLabel = hasPrice ? `₱${Math.round(unitAmountPhp)}` : 'Price on request'
+
+  const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
+  let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
+  if (fileUrl) fileUrl = resolveMediaUrl(fileUrl, apiBase)
+
+  return {
+    id,
+    name: cms.title || 'Product',
+    priceLabel,
+    unitAmountPhp,
+    subtitle: (cms.descriptions || '').trim().slice(0, 280) || String(filters.tagline || ''),
+    image: fileUrl || undefined,
+    alt: cms.title || 'Product'
+  }
+}
+
 export function useMerchCatalog () {
-  return { items: MERCH_CATALOG }
+  const config = useRuntimeConfig()
+  const apiBase = (config.public?.apiBase as string) || ''
+  const catalogState = useState<MerchItem[]>(MERCH_CATALOG_STATE_KEY, () => [...MERCH_CATALOG_STATIC])
+
+  useAsyncData(
+    'merch-catalog-cms',
+    async () => {
+      if (!apiBase) return null
+      try {
+        const url = `${apiBase.replace(/\/$/, '')}/techsavvy_app/cms/list/`
+        const data = await $fetch<unknown>(url)
+        const list = normalizeCmsList(data) as CmsRaw[]
+        const mapped = list
+          .map((item) => mapCmsItemToMerch(item, apiBase))
+          .filter((x): x is MerchItem => x != null)
+        if (mapped.length > 0) {
+          catalogState.value = mapped
+        }
+        return mapped
+      } catch {
+        return null
+      }
+    },
+    { server: true }
+  )
+
+  const items = computed(() => (catalogState.value.length > 0 ? catalogState.value : MERCH_CATALOG_STATIC))
+
+  return { items }
 }

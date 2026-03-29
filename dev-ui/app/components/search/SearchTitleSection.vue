@@ -1,37 +1,40 @@
 <template>
-  <section class="flex flex-wrap items-end justify-between gap-4 sm:gap-6 mb-8 sm:mb-12">
-    <div class="min-w-0">
-      <h1 class="text-[clamp(1.75rem,4vw,2.5rem)] font-extrabold tracking-[-0.03em] leading-tight mb-2 bg-gradient-to-r from-accent-purple to-accent-gold bg-clip-text text-transparent">
+  <section class="mb-8 flex flex-col gap-5 sm:mb-10 md:flex-row md:items-center md:justify-between md:gap-8">
+    <div class="min-w-0 flex-1">
+      <h1 class="mb-2 bg-gradient-to-r from-accent-purple to-[#9575CD] bg-clip-text text-[clamp(1.75rem,4vw,2.5rem)] font-extrabold leading-tight tracking-[-0.03em] text-transparent">
         Search
       </h1>
-      <p class="text-[0.9375rem] text-white/70 leading-relaxed mb-0">
-        Find content in News &amp; Updates, Courses, and Featured Projects
+      <p class="mb-0 max-w-xl text-[0.9375rem] leading-relaxed text-dark/70">
+        Find content in News &amp; Updates, Courses, and Featured Projects.
       </p>
     </div>
-    <div class="shrink-0 min-w-[200px] max-w-[320px] w-full sm:w-[280px] ml-auto">
+    <div class="w-full shrink-0 md:max-w-[min(100%,22rem)] lg:max-w-md">
       <form
         role="search"
-        class="flex items-stretch gap-0 max-w-[28rem] rounded-[14px] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+        class="flex max-w-full items-stretch overflow-hidden rounded-xl border border-neutral-border bg-white shadow-[0_4px_24px_rgba(46,19,104,0.08)] focus-within:border-accent-purple/35 focus-within:ring-2 focus-within:ring-accent-purple/15"
         @submit.prevent="$emit('submit')"
       >
-        <div class="group flex-1 relative flex items-center bg-[rgba(56,42,82,0.9)] border border-accent-purple/25 border-r-0 focus-within:border-accent-purple/50 focus-within:shadow-[0_0_0_2px_rgba(181,163,255,0.15)] transition-colors">
-          <i class="fas fa-search absolute left-[1.125rem] text-white/50 text-base pointer-events-none group-focus-within:text-accent-purple transition-colors" aria-hidden="true" />
+        <div class="group relative flex flex-1 items-center border-r border-neutral-border/80 bg-white">
+          <i
+            class="fas fa-search pointer-events-none absolute left-3.5 text-base text-dark/40 transition-colors group-focus-within:text-accent-purple"
+            aria-hidden="true"
+          />
           <input
             :model-value="modelValue"
             type="search"
             autocomplete="off"
-            placeholder="Search news, courses, projects..."
-            class="w-full py-3.5 pl-10 pr-4 bg-transparent border-none text-white text-[0.9375rem] outline-none placeholder:text-white/45 transition-colors"
+            placeholder="Search news, courses, projects…"
+            class="w-full border-none bg-transparent py-3 pl-10 pr-3 text-[0.9375rem] text-dark outline-none placeholder:text-dark/40"
             aria-label="Search"
             @update:model-value="$emit('update:modelValue', $event)"
           />
         </div>
         <button
           type="submit"
-          class="inline-flex items-center gap-2 px-6 bg-accent-gold text-violet font-bold text-sm border-none cursor-pointer transition-all hover:bg-[#ffe066] hover:translate-x-0.5"
+          class="inline-flex shrink-0 cursor-pointer items-center gap-2 border-none bg-[#2E1368] px-5 py-3 text-sm font-bold text-white transition-all hover:bg-[#6126B1] sm:px-6"
         >
           Search
-          <i class="fas fa-arrow-right text-xs opacity-90" />
+          <i class="fas fa-arrow-right text-xs opacity-90" aria-hidden="true" />
         </button>
       </form>
     </div>

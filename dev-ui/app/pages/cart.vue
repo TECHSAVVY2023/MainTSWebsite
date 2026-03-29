@@ -45,6 +45,9 @@
                       :src="line.image || defaultImage"
                       :alt="line.name"
                       class="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      @error="onLineImgError"
                     >
                   </div>
                   <div class="min-w-0 flex-1">
@@ -114,6 +117,13 @@ import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
 
 const { lines, subtotalPhp, setQuantity, removeItem } = useCart()
 const defaultImage = DEFAULT_MEDIA_FALLBACK
+
+function onLineImgError (e: Event) {
+  const el = e.target as HTMLImageElement | null
+  if (!el || el.dataset.fallback === '1') return
+  el.dataset.fallback = '1'
+  el.src = defaultImage
+}
 
 function formatPhp (n: number) {
   return `₱${n.toLocaleString('en-PH')}`

@@ -1,6 +1,7 @@
 /**
  * News detail page composable: article, images, lightbox.
  */
+import { ref, computed, watch } from 'vue'
 import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
 
 export type NewsDetailItem = {
@@ -31,6 +32,17 @@ export function useNewsDetail () {
 
   const newsItems = ref<NewsDetailItem[]>([])
   const lightboxIndex = ref<number | null>(null)
+
+  /** Hydrate list as soon as useAsyncData resolves (SSR + client) so detail view isn’t blank until onMounted. */
+  watch(
+    cmsListFromApi,
+    (v) => {
+      if (Array.isArray(v) && v.length > 0) {
+        newsItems.value = v as NewsDetailItem[]
+      }
+    },
+    { immediate: true }
+  )
 
   const slugParam = computed(() => String(route.params.slug || ''))
 

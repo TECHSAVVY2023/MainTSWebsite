@@ -1,10 +1,12 @@
 <template>
-  <div class="text-center py-12 px-6 relative z-10">
-    <div class="w-16 h-16 mx-auto mb-5 flex items-center justify-center rounded-full bg-accent-gold/10 text-accent-gold/50 text-2xl">
+  <div class="relative z-10 px-6 py-12 text-center">
+    <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-accent-purple/10 text-2xl text-accent-purple/70">
       <i class="fas fa-search" aria-hidden="true" />
     </div>
-    <p class="text-lg font-semibold text-white mb-2">No results for "{{ query }}"</p>
-    <p class="text-[0.9375rem] text-white/60 leading-relaxed max-w-[28rem] mx-auto">
+    <p class="mb-2 text-lg font-semibold text-dark">
+      No results for "{{ query }}"
+    </p>
+    <p class="mx-auto max-w-[28rem] text-[0.9375rem] leading-relaxed text-dark/65">
       Try a different term or browse
       <NuxtLink to="/news" class="text-accent-purple font-medium no-underline hover:text-accent-gold hover:underline">News</NuxtLink>,
       <NuxtLink to="/courses" class="text-accent-purple font-medium no-underline hover:text-accent-gold hover:underline">Courses</NuxtLink>, or

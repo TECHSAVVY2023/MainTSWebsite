@@ -89,6 +89,7 @@ type SpeakerItem = {
   role?: string
   topic?: string
   link?: string
+  image?: string
 }
 
 type SponsorItem = {

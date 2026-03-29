@@ -1,12 +1,14 @@
 <template>
   <div class="relative z-10">
-    <div class="inline-flex items-baseline gap-2 py-2 px-4 mb-3 bg-accent-purple/10 border border-accent-purple/20 rounded-full">
-      <span class="text-xl font-extrabold text-accent-gold">{{ totalCount }}</span>
-      <span class="text-[0.8125rem] text-white/80 font-medium">
+    <div class="mb-3 inline-flex flex-wrap items-baseline gap-2 rounded-full border border-accent-purple/25 bg-accent-purple/[0.08] px-4 py-2">
+      <span class="text-xl font-extrabold text-accent-purple">{{ totalCount }}</span>
+      <span class="text-[0.8125rem] font-medium text-dark/80">
         result{{ totalCount !== 1 ? 's' : '' }} in {{ categoryCount }} {{ categoryCount === 1 ? 'section' : 'sections' }}
       </span>
     </div>
-    <p class="text-sm text-white/55 mb-6">Choose a section below to see all matching results:</p>
+    <p class="mb-6 text-sm text-dark/65">
+      Choose a section below to see all matching results.
+    </p>
   </div>
 </template>
 

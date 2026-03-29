@@ -6,9 +6,9 @@
         <!-- Content Form Section -->
         <div
           v-if="showForm"
-          class="rounded-xl border mb-8 transition-colors duration-300 w-full bg-white/[0.03] border-white/[0.08]"
+          class="mb-8 w-full rounded-xl border border-neutral-border bg-neutral-gray/30 transition-colors duration-300"
         >
-          <div class="px-6 py-4 border-b border-white/[0.06]">
+          <div class="border-b border-neutral-border px-6 py-4">
             <div class="lg:flex items-center justify-between">
               <h2 class="text-base font-bold text-accent-purple">
                 {{ isEditing ? "Edit Content" : "Create New Content" }}
@@ -19,7 +19,7 @@
           <form @submit.prevent="handleSubmit" class="p-6 space-y-6">
             <!-- Title -->
             <div>
-              <label class="block text-sm font-medium mb-1 text-white/60">
+              <label class="mb-1 block text-sm font-medium text-dark/80">
                 Title <span class="text-red-400">*</span>
               </label>
               <input
@@ -27,13 +27,13 @@
                 type="text"
                 required
                 placeholder="Enter content title"
-                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-white border-neutral-border text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
               />
             </div>
 
             <!-- Description -->
             <div>
-              <label class="block text-sm font-medium mb-1 text-white/60">
+              <label class="mb-1 block text-sm font-medium text-dark/80">
                 Description <span class="text-red-400">*</span>
               </label>
               <textarea
@@ -41,19 +41,19 @@
                 required
                 rows="4"
                 placeholder="Provide a detailed description of the content"
-                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 resize-y bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 resize-y bg-white border-neutral-border text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
               ></textarea>
             </div>
 
             <!-- Category-specific filters -->
             <div>
-              <label class="block text-sm font-medium mb-3 uppercase text-white/60">
+              <label class="mb-3 block text-sm font-medium uppercase tracking-wide text-dark/80">
                 Category & Filters
               </label>
               <div class="mb-4">
                 <select
                   v-model="formData.filters.category"
-                  class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                  class="w-full rounded-lg border border-neutral-border bg-white px-4 py-2 text-dark transition-colors duration-200 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
                 >
                   <option value="">Select category</option>
                   <option
@@ -70,14 +70,14 @@
                 :key="field.key"
                 class="mb-3"
               >
-                <label class="block text-xs font-semibold mb-1 uppercase text-white/35">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-dark/60">
                   {{ field.label }}
                 </label>
                 <input
                   v-model="formData.filters[field.key]"
-                  type="text"
+                  :type="field.inputType || 'text'"
                   :placeholder="field.placeholder"
-                  class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                  class="w-full px-4 py-2 border rounded-lg transition-colors duration-200 bg-white border-neutral-border text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
                 />
               </div>
             </div>
@@ -85,7 +85,7 @@
             <!-- Attachments (Links) -->
             <div>
               <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-medium text-white/60">
+                <label class="block text-sm font-medium text-dark/80">
                   Attachments (Links)
                 </label>
                 <button
@@ -105,13 +105,13 @@
                 <div
                   v-for="(link, index) in formData.links"
                   :key="index"
-                  class="flex items-center gap-2 p-3 bg-white/[0.03] border border-white/[0.08] rounded-lg"
+                  class="flex items-center gap-2 rounded-lg border border-neutral-border bg-neutral-gray/40 p-3"
                 >
                   <input
                     v-model="formData.links[index]"
                     type="url"
                     placeholder="https://example.com/file.pdf"
-                    class="flex-1 px-3 py-2 bg-violet/60 border border-white/[0.1] rounded-lg text-white text-sm placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                    class="flex-1 rounded-lg border border-neutral-border bg-white px-3 py-2 text-sm text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
                   />
                   <button
                     type="button"
@@ -126,7 +126,7 @@
 
             <!-- Upload Files -->
             <div>
-              <p class="text-xs mb-3 text-white/35">
+              <p class="mb-3 text-xs text-dark/60">
                 Upload files or add file URLs manually. Supported: Images (JPG,
                 PNG), Videos (MP4), PDFs & Other files.
               </p>
@@ -139,12 +139,12 @@
                   'border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200',
                   isDragging
                     ? 'border-accent-gold bg-accent-gold/5'
-                    : 'border-white/[0.12] bg-white/[0.02]',
+                    : 'border-neutral-border bg-neutral-gray/40',
                 ]"
               >
                 <div class="flex flex-col items-center">
                   <svg
-                    class="w-12 h-12 mb-3 text-white/25"
+                    class="mb-3 h-12 w-12 text-dark/35"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -157,7 +157,7 @@
                     />
                   </svg>
                   <p
-                    class="text-sm mb-1 text-white/55"
+                    class="mb-1 text-sm text-dark/75"
                   >
                     <button
                       type="button"
@@ -172,7 +172,7 @@
                     or drag and drop
                   </p>
                   <p
-                    class="text-xs text-white/30"
+                    class="text-xs text-dark/50"
                   >
                     Up to 500 files, max 500MB per file
                   </p>
@@ -190,10 +190,10 @@
               <!-- Selected Files Preview with Grid Layout -->
               <div v-if="selectedFiles.length > 0" class="mt-4">
                 <div class="flex items-center justify-between mb-2">
-                  <p class="text-sm font-medium text-white/70">
+                  <p class="text-sm font-medium text-dark/85">
                     Selected Files ({{ selectedFiles.length }})
                   </p>
-                  <p class="text-xs text-white/30">
+                  <p class="text-xs text-dark/50">
                     <span class="mr-2">✋ Drag to reorder</span>
                   </p>
                 </div>
@@ -217,14 +217,14 @@
                         : 'hover:scale-105 hover:shadow-2xl',
                       dragOverSelectedIndex === index
                         ? 'ring-4 ring-green-400 shadow-lg shadow-green-500/50 scale-105'
-                        : 'bg-white/[0.04] border border-white/[0.08] hover:border-accent-gold/40',
+                        : 'border border-neutral-border bg-neutral-gray/40 hover:border-accent-gold/40',
                     ]"
                   >
                     <!-- Image Preview or File Icon -->
                     <div
                       :class="[
                         'aspect-square flex items-center justify-center relative overflow-hidden',
-                        'bg-violet/60',
+                        'bg-neutral-gray',
                       ]"
                     >
                       <img
@@ -242,7 +242,7 @@
                       >
                         <svg
                           :class="[
-                            'w-16 h-16 transition-all duration-300 group-hover:scale-110 text-white/25',
+                            'h-16 w-16 text-dark/35 transition-all duration-300 group-hover:scale-110',
                           ]"
                           fill="none"
                           stroke="currentColor"
@@ -255,7 +255,7 @@
                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                           />
                         </svg>
-                        <p class="text-xs mt-2 text-center truncate w-full font-medium text-white/40">
+                        <p class="mt-2 w-full truncate text-center text-xs font-medium text-dark/65">
                           {{ getFileExtension(file.name) }}
                         </p>
                       </div>
@@ -267,10 +267,10 @@
 
                       <!-- Drag Handle Icon -->
                       <div
-                        class="absolute top-2 left-2 rounded-lg p-1.5 backdrop-blur-sm transition-all duration-300 bg-violet/90 group-hover:bg-accent-gold/90"
+                        class="absolute left-2 top-2 rounded-lg border border-neutral-border/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-accent-gold/20"
                       >
                         <svg
-                          class="w-4 h-4 transition-colors duration-300 text-white/60 group-hover:text-violet"
+                          class="h-4 w-4 text-dark/70 transition-colors duration-300 group-hover:text-accent-purple"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -318,15 +318,15 @@
                     </div>
 
                     <!-- File Info -->
-                    <div class="p-3 bg-white/[0.03]">
+                    <div class="border-t border-neutral-border bg-neutral-gray/50 p-3">
                       <p
-                        class="text-xs font-medium truncate mb-2 text-white/70"
+                        class="mb-2 truncate text-xs font-medium text-dark/85"
                         :title="file.name"
                       >
                         {{ getCleanFilename(file.name) }}
                       </p>
                       <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium px-2 py-1 rounded-full bg-white/[0.06] text-white/40">
+                        <span class="rounded-full bg-neutral-gray px-2 py-1 text-xs font-medium text-dark/60">
                           {{ formatFileSize(file.size) }}
                         </span>
                         <button
@@ -348,28 +348,27 @@
                 v-for="(manualFile, index) in manualFiles"
                 :key="'manual-' + index"
                 :class="[
-                  'p-4 rounded-lg border mb-3 mt-4',
-                  'bg-white/[0.03] border-white/[0.08]',
+                  'mb-3 mt-4 rounded-lg border border-neutral-border bg-neutral-gray/40 p-4',
                 ]"
               >
                 <div class="flex items-start gap-3">
                   <div class="flex-1 space-y-3">
                     <div>
-                      <label class="block text-xs font-medium mb-1 text-white/60">Name</label>
+                      <label class="mb-1 block text-xs font-medium text-dark/75">Name</label>
                       <input
                         v-model="manualFile.name"
                         type="text"
                         placeholder="Enter file name (e.g., product-image.jpg)"
-                        class="w-full px-3 py-2 border rounded-lg text-sm bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                        class="w-full px-3 py-2 border rounded-lg text-sm bg-white border-neutral-border text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-medium mb-1 text-white/60">Url</label>
+                      <label class="mb-1 block text-xs font-medium text-dark/75">Url</label>
                       <input
                         v-model="manualFile.url"
                         type="url"
                         placeholder="https://example.com/path/to/file.jpg"
-                        class="w-full px-3 py-2 border rounded-lg text-sm bg-violet/60 border-white/[0.1] text-white placeholder-white/25 focus:ring-2 focus:ring-accent-purple/50 focus:border-accent-purple/40 outline-none"
+                        class="w-full px-3 py-2 border rounded-lg text-sm bg-white border-neutral-border text-dark placeholder:text-dark/45 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
                       />
                     </div>
                   </div>
@@ -389,10 +388,10 @@
                 class="mt-4"
               >
                 <div class="flex items-center justify-between mb-2">
-                  <p class="text-sm font-medium text-white/70">
+                  <p class="text-sm font-medium text-dark/85">
                     Uploaded Files ({{ formData.files.length }})
                   </p>
-                  <p class="text-xs text-white/30">
+                  <p class="text-xs text-dark/50">
                     <span class="mr-2">✋ Drag to reorder</span>
                   </p>
                 </div>
@@ -416,13 +415,13 @@
                         : 'hover:scale-105 hover:shadow-2xl',
                       dragOverIndex === index
                         ? 'ring-4 ring-green-400 shadow-lg shadow-green-500/50 scale-105'
-                        : 'bg-white/[0.04] border border-white/[0.08] hover:border-accent-purple/40',
+                        : 'border border-neutral-border bg-neutral-gray/40 hover:border-accent-purple/40',
                     ]"
                   >
                     <!-- Image Preview or File Icon -->
                     <div
                       :class="[
-                        'aspect-square flex items-center justify-center relative overflow-hidden bg-violet/60',
+                        'relative flex aspect-square items-center justify-center overflow-hidden bg-neutral-gray',
                       ]"
                     >
                       <img
@@ -445,7 +444,7 @@
                       >
                         <svg
                           :class="[
-                            'w-16 h-16 transition-all duration-300 group-hover:scale-110 text-white/25',
+                            'h-16 w-16 text-dark/35 transition-all duration-300 group-hover:scale-110',
                           ]"
                           fill="none"
                           stroke="currentColor"
@@ -458,7 +457,7 @@
                             d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                           />
                         </svg>
-                        <p class="text-xs mt-2 text-center truncate w-full font-medium text-white/40">
+                        <p class="mt-2 w-full truncate text-center text-xs font-medium text-dark/65">
                           {{ getFileExtension(file.name) }}
                         </p>
                       </div>
@@ -470,10 +469,10 @@
 
                       <!-- Drag Handle Icon -->
                       <div
-                        class="absolute top-2 left-2 rounded-lg p-1.5 backdrop-blur-sm transition-all duration-300 bg-violet/90 group-hover:bg-accent-purple/90"
+                        class="absolute left-2 top-2 rounded-lg border border-neutral-border/80 bg-white/95 p-1.5 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover:bg-accent-purple/15"
                       >
                         <svg
-                          class="w-4 h-4 transition-colors duration-300 text-white/60 group-hover:text-white"
+                          class="h-4 w-4 text-dark/70 transition-colors duration-300 group-hover:text-accent-purple"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -519,8 +518,8 @@
                     </div>
 
                     <!-- File Info -->
-                    <div class="p-3 bg-white/[0.03]">
-                      <p class="text-xs font-medium truncate mb-2 text-white/70" :title="file.name">
+                    <div class="border-t border-neutral-border bg-neutral-gray/50 p-3">
+                      <p class="mb-2 truncate text-xs font-medium text-dark/85" :title="file.name">
                         {{ getCleanFilename(file.name) }}
                       </p>
                       <div class="flex items-center justify-between">
@@ -543,11 +542,11 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center gap-4 pt-4 border-t border-white/[0.06]">
+            <div class="flex items-center gap-4 border-t border-neutral-border pt-4">
               <button
                 type="submit"
                 :disabled="loading"
-                class="flex-1 px-6 py-3 font-bold rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-accent-purple text-violet hover:bg-accent-purple/90 shadow-lg shadow-accent-purple/20"
+                class="flex-1 rounded-xl bg-accent-purple px-6 py-3 font-bold text-white shadow-lg shadow-accent-purple/20 transition-all duration-300 hover:bg-accent-purple/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {{
                   loading
@@ -558,7 +557,7 @@
               <button
                 type="button"
                 @click="clearForm"
-                class="px-6 py-3 border font-semibold rounded-xl transition-colors duration-200 bg-white/[0.06] border-white/10 text-white/60 hover:bg-white/[0.1]"
+                class="rounded-xl border border-neutral-border bg-neutral-gray px-6 py-3 font-semibold text-dark/80 transition-colors duration-200 hover:bg-neutral-gray/80"
               >
                 <span class="mr-1">↻</span> Clear
               </button>
@@ -678,18 +677,25 @@
             v-for="toast in toasts"
             :key="toast.id"
             :class="[
-              'min-w-[300px] max-w-md rounded-xl shadow-2xl border p-4 flex items-start gap-3 transition-all duration-300 bg-violet-dark backdrop-blur',
-              toast.type === 'success' && 'border-green-500/30 text-green-400',
-              toast.type === 'error' && 'border-red-500/30 text-red-400',
-              toast.type === 'confirm' && 'border-accent-gold/30 text-accent-gold',
+              'flex min-w-[300px] max-w-md items-start gap-3 rounded-xl border border-neutral-border bg-white p-4 text-dark shadow-lg transition-all duration-300',
+              toast.type === 'success' && 'border-green-200',
+              toast.type === 'error' && 'border-red-200',
+              toast.type === 'confirm' && 'border-amber-200',
             ]"
           >
             <!-- Icon -->
-            <div class="flex-shrink-0">
+            <div
+              class="flex-shrink-0"
+              :class="{
+                'text-green-600': toast.type === 'success',
+                'text-red-600': toast.type === 'error',
+                'text-amber-600': toast.type === 'confirm',
+              }"
+            >
               <!-- Success Icon -->
               <svg
                 v-if="toast.type === 'success'"
-                class="w-6 h-6"
+                class="h-6 w-6"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -703,7 +709,7 @@
               <!-- Error Icon -->
               <svg
                 v-else-if="toast.type === 'error'"
-                class="w-6 h-6"
+                class="h-6 w-6"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -717,7 +723,7 @@
               <!-- Warning Icon (for confirm) -->
               <svg
                 v-else
-                class="w-6 h-6"
+                class="h-6 w-6"
                 fill="currentColor"
                 viewBox="0 0 20 20"
               >
@@ -731,7 +737,7 @@
 
             <!-- Content -->
             <div class="flex-1">
-              <p class="text-sm font-medium">{{ toast.message }}</p>
+              <p class="text-sm font-medium text-dark/90">{{ toast.message }}</p>
 
               <!-- Confirm Buttons -->
               <div v-if="toast.type === 'confirm'" class="mt-3 flex gap-2">
@@ -743,7 +749,7 @@
                 </button>
                 <button
                   @click="toast.onCancel"
-                  class="px-3 py-1 text-xs font-medium rounded-lg transition-colors bg-white/10 border border-white/10 text-white/60 hover:bg-white/15"
+                  class="rounded-lg border border-neutral-border bg-neutral-gray px-3 py-1 text-xs font-medium text-dark/80 transition-colors hover:bg-neutral-border/40"
                 >
                   Cancel
                 </button>
@@ -754,7 +760,7 @@
             <button
               v-if="toast.type !== 'confirm'"
               @click="removeToast(toast.id)"
-              class="flex-shrink-0 text-white/40 hover:text-white transition-colors"
+              class="flex-shrink-0 text-dark/40 transition-colors hover:text-dark"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -868,7 +874,13 @@ const dragOverIndex = ref(null);
 const draggedSelectedIndex = ref(null);
 const dragOverSelectedIndex = ref(null);
 
-const categoryOptions = ["News and update", "Courses", "Featured Projects"];
+const categoryOptions = [
+  "News and update",
+  "Courses",
+  "Featured Projects",
+  "Merchandise",
+  "Events",
+];
 const categoryFieldConfig = {
   "News and update": [
     { key: "tagline", label: "Tagline", placeholder: "Enter news tagline" },
@@ -885,6 +897,32 @@ const categoryFieldConfig = {
     { key: "project_status", label: "Project Status", placeholder: "Ongoing / Completed" },
     { key: "project_year", label: "Project Year", placeholder: "e.g. 2026" },
   ],
+  Merchandise: [
+    {
+      key: "unit_amount_php",
+      label: "Price (PHP)",
+      placeholder: "549",
+      inputType: "number",
+    },
+    { key: "tagline", label: "Tagline", placeholder: "Short product line" },
+  ],
+  Events: [
+    {
+      key: "event_date",
+      label: "Event date",
+      placeholder: "",
+      inputType: "date",
+    },
+    { key: "event_time", label: "Start time", placeholder: "10:30 AM" },
+    { key: "end_time", label: "End time", placeholder: "11:45 AM" },
+    { key: "venue", label: "Venue", placeholder: "Online / address" },
+    { key: "tagline", label: "Tagline", placeholder: "Headline" },
+    {
+      key: "event_kind",
+      label: "Kind",
+      placeholder: "event | reminder | task | appointment",
+    },
+  ],
 };
 
 const createEmptyFilters = () => ({
@@ -896,6 +934,12 @@ const createEmptyFilters = () => ({
   project_client: "",
   project_status: "",
   project_year: "",
+  unit_amount_php: "",
+  event_date: "",
+  event_time: "",
+  end_time: "",
+  venue: "",
+  event_kind: "",
 });
 
 const parseLegacyFilters = (rawFilters) => {
@@ -932,9 +976,10 @@ const normalizeFiltersForSubmit = (filters) => {
   const allowedKeys = (categoryFieldConfig[category] || []).map((item) => item.key);
   const normalized = { category };
   allowedKeys.forEach((key) => {
-    if (parsed[key]) {
-      normalized[key] = parsed[key];
-    }
+    const v = parsed[key];
+    if (v === undefined || v === null) return;
+    if (typeof v === "string" && v.trim() === "") return;
+    normalized[key] = v;
   });
   return normalized;
 };

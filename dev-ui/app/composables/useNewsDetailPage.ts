@@ -1,29 +1,29 @@
 /**
  * News detail page composable: article, images, lightbox, head.
  */
+import { computed, unref } from 'vue'
+import type { NewsDetailItem } from './useNewsDetail'
+
 export function useNewsDetailPage () {
   const detail = useNewsDetail()
 
-  const article = computed(() => {
-    const r = detail.article
-    return (r && typeof r === 'object' && 'value' in r) ? (r as { value: { title?: string; summary?: string; date?: string } | undefined }).value : undefined
-  })
+  /** Unwrap ref/computed reliably (avoids bad heuristics when parent is reactive). */
+  const article = computed(() =>
+    unref(detail.article) as NewsDetailItem | undefined
+  )
 
   const articleImagesArray = computed(() => {
-    const r = detail.articleImages
-    const v = (r && typeof r === 'object' && 'value' in r) ? (r as { value: unknown }).value : r
+    const v = unref(detail.articleImages)
     return Array.isArray(v) ? v : []
   })
 
   const lightboxIndexValue = computed(() => {
-    const r = detail.lightboxIndex
-    const v = (r && typeof r === 'object' && 'value' in r) ? (r as { value: number | null }).value : r
+    const v = unref(detail.lightboxIndex)
     return v !== null && typeof v === 'number' ? v : 0
   })
 
   const lightboxVisible = computed(() => {
-    const r = detail.lightboxIndex
-    const v = (r && typeof r === 'object' && 'value' in r) ? (r as { value: number | null }).value : r
+    const v = unref(detail.lightboxIndex)
     return v !== null
   })
 

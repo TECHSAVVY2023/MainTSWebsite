@@ -79,22 +79,33 @@
                 </p>
               </SectionWireShield>
             </div>
-            <div class="mt-3 flex flex-col items-stretch gap-1.5 sm:items-center">
-              <button
-                v-if="!item.href"
-                type="button"
-                class="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#2E1368] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#6126B1] sm:w-auto sm:min-w-[9.25rem] sm:text-[0.8125rem]"
-                @click="addToCart(item)"
-              >
-                <i class="fas fa-cart-plus text-[10px]" aria-hidden="true" />
-                Add to cart
-              </button>
+            <div class="mt-3 grid w-full grid-cols-2 gap-2">
+              <template v-if="!item.href">
+                <button
+                  type="button"
+                  class="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-1 rounded-full bg-[#2E1368] px-2 py-2 text-[11px] font-semibold leading-tight text-white shadow-sm transition-colors hover:bg-[#6126B1] sm:gap-1.5 sm:px-3 sm:text-xs"
+                  @click="addToCart(item)"
+                >
+                  <i class="fas fa-cart-plus shrink-0 text-[9px] sm:text-[10px]" aria-hidden="true" />
+                  <span class="truncate text-center">Add to cart</span>
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-1 rounded-full border border-accent-purple/40 bg-violet-border px-2 py-2 text-[11px] font-semibold leading-tight text-accent-purple shadow-sm transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:gap-1.5 sm:px-3 sm:text-xs"
+                  aria-label="Add to cart and open cart to checkout"
+                  title="Review cart and continue to checkout"
+                  @click="addToCartAndGoToCart(item)"
+                >
+                  <i class="fas fa-shopping-bag shrink-0 text-[9px] sm:text-[10px]" aria-hidden="true" />
+                  <span class="truncate text-center">Checkout</span>
+                </button>
+              </template>
               <a
                 v-else
                 :href="item.href"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex w-full items-center justify-center rounded-full border border-neutral-border px-3 py-2 text-xs font-medium text-dark no-underline transition-colors hover:border-accent-purple sm:w-auto"
+                class="col-span-2 inline-flex min-h-[2.5rem] w-full items-center justify-center rounded-full border border-neutral-border px-3 py-2 text-xs font-medium text-dark no-underline transition-colors hover:border-accent-purple"
               >
                 View link
               </a>
@@ -125,19 +136,29 @@ const { items: catalogDefaults } = useMerchCatalog()
 const { addItem } = useCart()
 
 const displayItems = computed(() =>
-  props.items && props.items.length > 0 ? props.items : catalogDefaults
+  props.items && props.items.length > 0 ? props.items : catalogDefaults.value
 )
 
-function addToCart (item: MerchItem) {
-  if (item.href) return
-  addItem({
+function merchPayload (item: MerchItem) {
+  return {
     id: item.id,
     name: item.name,
     priceLabel: item.priceLabel,
     unitAmountPhp: item.unitAmountPhp,
     image: item.image
-  })
+  }
+}
+
+function addToCart (item: MerchItem) {
+  if (item.href) return
+  addItem(merchPayload(item))
   navigateTo('/merchandise')
+}
+
+function addToCartAndGoToCart (item: MerchItem) {
+  if (item.href) return
+  addItem(merchPayload(item))
+  navigateTo('/cart')
 }
 
 function onImgError (e: Event) {

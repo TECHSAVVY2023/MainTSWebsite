@@ -13,7 +13,7 @@
       </div>
       <NuxtLink
         :to="sectionLink"
-        class="text-[0.8125rem] font-semibold text-accent-purple no-underline inline-flex items-center gap-1.5 transition-all hover:text-accent-gold hover:translate-x-0.5 [&>i]:text-[0.7rem]"
+        class="inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-accent-gold no-underline transition-all hover:text-white hover:translate-x-0.5 [&>i]:text-[0.7rem]"
       >
         View all
         <i class="fas fa-arrow-right" />

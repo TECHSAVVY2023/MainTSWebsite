@@ -35,6 +35,24 @@ function toFilterText (filters?: string | Record<string, unknown> | null): strin
   return JSON.stringify(filters)
 }
 
+function getFilterCategory (filters?: string | Record<string, unknown> | null): string {
+  if (!filters) return ''
+  if (typeof filters === 'object' && filters !== null && 'category' in filters) {
+    return String((filters as Record<string, unknown>).category || '').trim().toLowerCase()
+  }
+  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      const o = JSON.parse(filters) as Record<string, unknown>
+      return String(o.category || '').trim().toLowerCase()
+    } catch {
+      return ''
+    }
+  }
+  return ''
+}
+
+const NON_NEWS_CATEGORIES = new Set(['merchandise', 'events', 'courses', 'featured projects'])
+
 function getFirstFileUrl (files: CmsRawItem['files']): string {
   if (!files) return ''
   if (Array.isArray(files)) return files[0]?.url || ''
@@ -43,10 +61,14 @@ function getFirstFileUrl (files: CmsRawItem['files']): string {
 }
 
 function isNewsCategory (filters?: string | Record<string, unknown> | null): boolean {
+  const cat = getFilterCategory(filters)
+  if (cat && NON_NEWS_CATEGORIES.has(cat)) return false
+  if (cat === 'news and update') return true
+
   const f = toFilterText(filters)
-  if (!f.trim()) return true // no category → legacy item, treat as news
+  if (!f.trim()) return true
   const parts = f.split(',').map((s) => s.trim())
-  return NEWS_CATEGORIES.some((cat) => parts.includes(cat)) || f.toLowerCase().includes('news and update')
+  return NEWS_CATEGORIES.some((c) => parts.includes(c)) || f.toLowerCase().includes('news and update')
 }
 
 const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
@@ -127,6 +149,7 @@ export function useCmsNews () {
     badge?: string
     image: string
     description: string
+    learnItems?: string[]
   }
 
   function slugify (text: string): string {
@@ -161,6 +184,17 @@ export function useCmsNews () {
           : filters.includes('development') ? 'development'
           : 'fullstack'
         const badge = filters.includes('popular') ? 'Popular' : filters.includes('essential') ? 'Essential' : undefined
+        const descRaw = (item.descriptions || '').trim()
+        let learnItems: string[] | undefined
+        if (descRaw) {
+          const byLine = descRaw.split(/\n+/).map((s) => s.trim()).filter(Boolean)
+          if (byLine.length >= 2) {
+            learnItems = byLine.slice(0, 8)
+          } else {
+            const sentences = descRaw.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter((s) => s.length > 15)
+            learnItems = sentences.length ? sentences.slice(0, 6) : [descRaw.length > 220 ? `${descRaw.slice(0, 217)}…` : descRaw]
+          }
+        }
         return {
           id: String(item.id ?? idx),
           slug,
@@ -174,7 +208,8 @@ export function useCmsNews () {
           level: 'Beginner',
           badge,
           image: img,
-          description: item.descriptions || ''
+          description: item.descriptions || '',
+          learnItems
         }
       })
     } catch {

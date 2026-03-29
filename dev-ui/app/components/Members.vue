@@ -37,6 +37,7 @@
               <th class="p-3">Last</th>
               <th class="p-3">Birthdate</th>
               <th class="p-3">Role</th>
+              <th class="p-3">Speaker topic</th>
               <th class="p-3">Mobile</th>
               <th class="p-3">Email</th>
               <th class="p-3">Website</th>
@@ -147,6 +148,16 @@
                 <input v-model="member.role"
                   @blur="updateField(member.id,'role',member.role)"
                   class="input"/>
+              </td>
+
+              <!-- SPEAKER TOPIC (TechSavvy members — shown on community speakers) -->
+              <td class="p-2">
+                <input
+                  v-model="member.speaker_topic"
+                  @blur="updateField(member.id,'speaker_topic',member.speaker_topic)"
+                  class="input"
+                  placeholder="Talk focus (optional)"
+                />
               </td>
 
               <!-- MOBILE -->

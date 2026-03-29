@@ -1,7 +1,4 @@
-/**
- * Thematic stock images for demo / fallback content (stable Unsplash URLs).
- * Replace with CMS or local /public/assets files in production as needed.
- */
+
 const q = 'auto=format&fit=crop&q=80'
 
 /** When a thumbnail is missing or fails to load */
@@ -13,13 +10,14 @@ export const DEFAULT_PROJECT_IMAGE = `https://images.unsplash.com/photo-14609258
 
 export const SAMPLE_MERCH = {
   tee: `https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?${q}&w=800`,
-  hoodie: `https://images.unsplash.com/photo-1620799140408-fcc09b81e6e2?${q}&w=800`,
+  /** Laptop / build session — prior Unsplash asset 404’d */
+  hoodie: `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?${q}&w=800`,
   stickers: `https://images.unsplash.com/photo-1611532736597-de2d4265fba3?${q}&w=800`,
-  beanie: `https://images.unsplash.com/photo-1576871337622-98d48a1ced01?${q}&w=800`,
+  beanie: `https://images.unsplash.com/photo-1521369909029-2afed882baee?${q}&w=800`,
   tote: `https://images.unsplash.com/photo-1590874103328-eac38a683ce7?${q}&w=800`,
   mug: `https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?${q}&w=800`,
-  bottle: `https://images.unsplash.com/photo-1523362628745-0f58cd2cabe5?${q}&w=800`,
-  notebook: `https://images.unsplash.com/photo-1517842645767-c639b880afb6?${q}&w=800`
+  bottle: `https://images.unsplash.com/photo-1602143407151-7111542de6e8?${q}&w=800`,
+  notebook: `https://images.unsplash.com/photo-1503602642458-232111445657?${q}&w=800`
 } as const
 
 export const SAMPLE_NEWS = {

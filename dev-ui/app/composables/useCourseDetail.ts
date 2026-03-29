@@ -45,7 +45,8 @@ export function useCourseDetail () {
           level: found.level,
           badge: found.badge,
           image: found.image,
-          description: found.description
+          description: found.description,
+          learnItems: found.learnItems
         }
       }
     } catch { /* keep null */ }

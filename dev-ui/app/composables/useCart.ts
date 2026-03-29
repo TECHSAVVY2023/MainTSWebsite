@@ -1,7 +1,7 @@
 /**
  * Merchandise cart (client-only, persisted). Used for catalog → cart → checkout flow.
  */
-import { MERCH_CATALOG } from '~/composables/useMerchCatalog'
+import { MERCH_CATALOG_STATIC, MERCH_CATALOG_STATE_KEY, type MerchItem } from '~/composables/useMerchCatalog'
 
 const STORAGE_KEY = 'merch_cart_v1'
 
@@ -14,8 +14,16 @@ export type CartLine = {
   quantity: number
 }
 
-function catalogById (id: string) {
-  return MERCH_CATALOG.find((p) => p.id === id)
+function catalogById (id: string): MerchItem | undefined {
+  const state = useState<MerchItem[]>(MERCH_CATALOG_STATE_KEY, () => [...MERCH_CATALOG_STATIC])
+  return state.value.find((p) => p.id === id) ?? MERCH_CATALOG_STATIC.find((p) => p.id === id)
+}
+
+function storedImageUrl (raw: Partial<CartLine>): string | undefined {
+  const v = raw.image
+  if (typeof v !== 'string') return undefined
+  const t = v.trim()
+  return t.length ? t : undefined
 }
 
 /** Repair lines from storage (missing unitAmountPhp, string quantities, etc.) so totals never become NaN. */
@@ -35,7 +43,8 @@ export function normalizeCartLine (raw: Partial<CartLine>): CartLine | null {
     name: (raw.name && String(raw.name)) || cat?.name || 'Item',
     priceLabel: (raw.priceLabel && String(raw.priceLabel)) || cat?.priceLabel || '',
     unitAmountPhp,
-    image: raw.image ?? cat?.image,
+    /** Prefer live catalog URL so updated assets fix stale localStorage lines. */
+    image: cat?.image ?? storedImageUrl(raw),
     quantity
   }
 }
@@ -109,7 +118,8 @@ export function useCart () {
     const idx = lines.value.findIndex((l) => l.id === normalized.id)
     if (idx >= 0) {
       const next = [...lines.value]
-      const cur = normalizeCartLine(next[idx])!
+      const cur = normalizeCartLine(next[idx])
+      if (!cur) return
       const mergedQty = Math.min(99, cur.quantity + qty)
       next[idx] = { ...cur, quantity: mergedQty }
       lines.value = next
@@ -127,7 +137,8 @@ export function useCart () {
     const idx = lines.value.findIndex((l) => l.id === id)
     if (idx < 0) return
     const next = [...lines.value]
-    const cur = normalizeCartLine(next[idx])!
+    const cur = normalizeCartLine(next[idx])
+    if (!cur) return
     next[idx] = { ...cur, quantity: q }
     lines.value = next
   }

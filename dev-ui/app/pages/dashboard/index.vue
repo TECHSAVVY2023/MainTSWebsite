@@ -217,12 +217,20 @@
         <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-border gap-3">
           <div class="min-w-0">
             <h2 class="text-xs sm:text-sm font-bold text-dark">Recent Content</h2>
-            <p class="text-[11px] text-dark/60 mt-0.5 hidden sm:block">Latest posts from the CMS</p>
+            <p class="text-[11px] text-dark/60 mt-0.5 hidden sm:block">
+              Latest posts — up to <span class="font-semibold text-dark/75">5</span> shown ({{ allItems.length }} total)
+            </p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
             <span class="text-[11px] text-accent-purple bg-accent-purple/10 border border-accent-purple/20 px-2.5 py-1 rounded-full font-semibold hidden sm:block">
-              {{ allItems.length }} items
+              {{ allItems.length }} total
             </span>
+            <NuxtLink
+              to="/dashboard/contents"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-neutral-gray border border-neutral-border text-dark/80 hover:border-accent-purple/40 hover:text-accent-purple transition-colors whitespace-nowrap"
+            >
+              <i class="fas fa-list text-[10px]" /> More content
+            </NuxtLink>
             <button
               @click="handleNewContent"
               class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-primary text-white hover:bg-secondary transition-colors whitespace-nowrap"
@@ -265,13 +273,13 @@
               <tr v-if="loadingItems">
                 <td colspan="5" class="px-6 py-10 text-center text-dark/45 text-sm">Loading…</td>
               </tr>
-              <tr v-else-if="filteredContentItems.length === 0">
+              <tr v-else-if="recentContentItems.length === 0">
                 <td colspan="5" class="px-6 py-10 text-center text-dark/45 text-sm">
                   {{ contentSearch ? 'No results found' : 'No content yet' }}
                 </td>
               </tr>
               <tr
-                v-for="item in filteredContentItems" :key="item.id"
+                v-for="item in recentContentItems" :key="item.id"
                 class="border-b border-neutral-border hover:bg-neutral-gray transition-colors"
               >
                 <td class="px-4 sm:px-6 py-3.5 max-w-[140px] sm:max-w-[240px]">
@@ -392,6 +400,7 @@
 // @ts-ignore
 import moment from 'moment'
 import ContentFormAndList from '~/components/ContentFormAndList.vue'
+import type { CmsRaw } from '~/composables/useDashboardCmsList'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -402,8 +411,18 @@ const contentTableRef = ref<HTMLElement | null>(null)
 
 const { user, setAuth, logout } = useAuth()
 const { logoUrl } = useAppLogo()
-const config = useRuntimeConfig()
-const apiBase = (config.public?.apiBase as string || '').replace(/\/$/, '')
+
+const {
+  apiBase,
+  allItems,
+  loadingItems,
+  fetchItems,
+  getFiltersText,
+  getPrimaryCategory,
+  getStatusClass,
+  getStatusDot,
+  formatItemDate
+} = useDashboardCmsList()
 
 // ── Mobile drawer ────────────────────────────────────────────────
 const drawerOpen = ref(false)
@@ -431,49 +450,7 @@ function updateTime () {
   greeting.value = h < 12 ? 'Morning' : h < 18 ? 'Afternoon' : 'Evening'
 }
 
-// ── CMS data ────────────────────────────────────────────────────
-interface CmsRaw {
-  id: number
-  title: string
-  filters?: string | Record<string, unknown> | null
-  approval_status?: string
-  created_at?: string
-}
-
-const allItems = ref<CmsRaw[]>([])
-const loadingItems = ref(true)
-
-async function fetchItems () {
-  if (!apiBase) { loadingItems.value = false; return }
-  try {
-    const data = await $fetch<unknown>(`${apiBase}/techsavvy_app/cms/list/`)
-    const list = Array.isArray(data) ? data
-      : (data as Record<string, unknown>)?.data
-        ? (data as Record<string, unknown>).data as CmsRaw[]
-        : []
-    allItems.value = list as CmsRaw[]
-  } catch { /* silent */ } finally {
-    loadingItems.value = false
-  }
-}
-
-function getFiltersText (filters: CmsRaw['filters']): string {
-  if (!filters) return ''
-  if (typeof filters === 'string') return filters
-  if (typeof filters === 'object') return JSON.stringify(filters)
-  return String(filters)
-}
-
-function getPrimaryCategory (filters: CmsRaw['filters']): string {
-  if (!filters) return 'News'
-  if (typeof filters === 'object') {
-    const category = filters.category
-    return typeof category === 'string' && category.trim() ? category.trim() : 'News'
-  }
-  const text = String(filters)
-  if (!text.trim()) return 'News'
-  return text.split(',')[0]?.trim() || 'News'
-}
+// ── CMS data (recent table: 5 rows; search filters then slice) ──
 
 // ── Stat cards ──────────────────────────────────────────────────
 const newsCount = computed(() =>
@@ -508,23 +485,6 @@ const contentStatus = computed(() => {
   ]
 })
 
-// ── Helpers ─────────────────────────────────────────────────────
-function getStatusClass (status?: string) {
-  if (status === 'approved' || status === 'verified') return 'text-green-400'
-  if (status === 'pending') return 'text-amber-400'
-  if (status === 'rejected') return 'text-red-400'
-  return 'text-dark/50'
-}
-function getStatusDot (status?: string) {
-  if (status === 'approved' || status === 'verified') return 'bg-green-400'
-  if (status === 'pending') return 'bg-amber-400'
-  if (status === 'rejected') return 'bg-red-400'
-  return 'bg-white/25'
-}
-function formatItemDate (iso?: string) {
-  return iso ? moment(iso).format('MMM DD, YYYY') : '—'
-}
-
 // ── Content table actions ────────────────────────────────────────
 const showContentForm = ref(false)
 const contentSearch = ref('')
@@ -539,6 +499,8 @@ const filteredContentItems = computed(() => {
     getFiltersText(i.filters).toLowerCase().includes(q)
   )
 })
+
+const recentContentItems = computed(() => filteredContentItems.value.slice(0, 5))
 
 function scrollToForm () {
   nextTick(() => formSectionRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' }))

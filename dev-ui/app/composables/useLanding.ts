@@ -31,6 +31,57 @@ function toFilterText (filters?: string | Record<string, unknown> | null): strin
   return JSON.stringify(filters)
 }
 
+/** Parsed `filters.category` (lowercase) for JSON or legacy string CMS items. */
+function getFilterCategoryFromLandingItem (filters?: string | Record<string, unknown> | null): string {
+  if (!filters) return ''
+  if (typeof filters === 'object' && filters !== null && 'category' in filters) {
+    return String((filters as Record<string, unknown>).category || '').trim().toLowerCase()
+  }
+  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      const o = JSON.parse(filters) as Record<string, unknown>
+      return String(o.category || '').trim().toLowerCase()
+    } catch {
+      return ''
+    }
+  }
+  const parts = String(filters).split(',').map((s) => s.trim())
+  return (parts[0] || '').toLowerCase()
+}
+
+const NON_NEWS_LANDING_CATEGORIES = new Set([
+  'merchandise',
+  'events',
+  'courses',
+  'featured projects'
+])
+
+function landingNewsToCalendarRows (items: LandingNewsItem[]): LandingCalEvent[] {
+  const out: LandingCalEvent[] = []
+  for (const item of items) {
+    const f = item.filters
+    if (typeof f !== 'object' || f === null || Array.isArray(f)) continue
+    const fl = f as Record<string, unknown>
+    if (String(fl.category || '').trim().toLowerCase() !== 'events') continue
+    const dateStr = String(fl.event_date || '').trim()
+    if (!dateStr) continue
+    const iso = dateStr.includes('T') ? dateStr : `${dateStr}T12:00:00.000Z`
+    const kindRaw = String(fl.event_kind || 'event').toLowerCase()
+    const kind: LandingCalEvent['kind'] =
+      kindRaw === 'task' || kindRaw === 'reminder' || kindRaw === 'appointment' ? kindRaw : 'event'
+    out.push({
+      date: iso,
+      time: String(fl.event_time || ''),
+      endTime: String(fl.end_time || ''),
+      title: item.title || 'Event',
+      description: item.summary || '',
+      link: item.link && item.link !== '#' ? item.link : '',
+      kind
+    })
+  }
+  return out
+}
+
 function getFirstFileUrl (files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null): string {
   if (!files) return ''
   if (Array.isArray(files)) return files[0]?.url || ''
@@ -39,9 +90,13 @@ function getFirstFileUrl (files?: { name?: string; url?: string }[] | { name?: s
 }
 
 function isNewsItem (item: { filters?: string | Record<string, unknown> | null }): boolean {
+  const cat = getFilterCategoryFromLandingItem(item.filters)
+  if (cat && NON_NEWS_LANDING_CATEGORIES.has(cat)) return false
+  if (cat === 'news and update') return true
+
   const f = toFilterText(item.filters)
-  if (!f.trim()) return true // no category set → treat as news (legacy items)
-  return NEWS_CATEGORIES.some((cat) => f.split(',').map((s) => s.trim()).includes(cat)) || f.toLowerCase().includes('news and update')
+  if (!f.trim()) return true
+  return NEWS_CATEGORIES.some((c) => f.split(',').map((s) => s.trim()).includes(c)) || f.toLowerCase().includes('news and update')
 }
 export type LandingProjectItem = { title: string; domain?: string; url: string; image?: string; alt?: string }
 export type LandingCourseItem = { slug: string; title: string; instructor?: string; rating?: string; duration?: string; badge?: string; image?: string }
@@ -55,7 +110,7 @@ export type LandingCalEvent = {
   kind?: 'task' | 'event' | 'reminder' | 'appointment'
 }
 export type LandingRoleStat = { role: string; count: number; percent: number }
-export type LandingSpeaker = { name: string; role?: string; topic?: string; link?: string }
+export type LandingSpeaker = { name: string; role?: string; topic?: string; link?: string; image?: string }
 export type LandingSponsor = { name: string; tier?: string; description?: string; link?: string; logo?: string }
 
 const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
@@ -192,6 +247,8 @@ type MemberRoleApiItem = {
   firstname?: string
   lastname?: string
   website?: string
+  profilePicture?: string | null
+  speaker_topic?: string
 }
 
 type CmsApiItem = {
@@ -326,6 +383,14 @@ export function useLanding () {
     }))
   }
 
+  function resolveMemberMediaUrl (path: string | null | undefined): string {
+    if (!path) return ''
+    const p = String(path).trim()
+    if (!p || p.startsWith('http')) return p
+    const origin = apiBase.replace(/\/$/, '')
+    return `${origin}${p.startsWith('/') ? '' : '/'}${p}`
+  }
+
   function buildSpeakers (members: MemberRoleApiItem[]) {
     const topSpeakers = members
       .filter((member) => {
@@ -333,12 +398,17 @@ export function useLanding () {
         return role.includes('speaker') || role.includes('mentor') || role.includes('instructor')
       })
       .slice(0, 6)
-      .map((member) => ({
-        name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Guest Speaker',
-        role: normalizeRole(member.role),
-        topic: 'Practical full-stack development and career growth',
-        link: member.website || ''
-      }))
+      .map((member) => {
+        const topicLine = (member.speaker_topic && String(member.speaker_topic).trim()) || ''
+        const img = resolveMemberMediaUrl(member.profilePicture ?? null)
+        return {
+          name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Guest Speaker',
+          role: normalizeRole(member.role),
+          topic: topicLine || 'Practical full-stack development and career growth',
+          link: member.website || '',
+          image: img || undefined
+        }
+      })
 
     if (topSpeakers.length > 0) {
       speakers.value = topSpeakers
@@ -467,15 +537,6 @@ export function useLanding () {
       }
     } catch { /* keep empty */ }
 
-    const now = new Date()
-    eventReminders.value = [...calendarEvents.value]
-      .filter((event) => {
-        const dt = new Date(event.date)
-        return !Number.isNaN(dt.getTime()) && dt >= now
-      })
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-      .slice(0, 5)
-
     try {
       const raw = getStorage(APPROVED_NEWS_KEY)
       const approved = JSON.parse(raw || '[]')
@@ -491,14 +552,24 @@ export function useLanding () {
         calendarEvents.value = [...events].sort((a: { date: string }, b: { date: string }) =>
           (a.date || '').localeCompare(b.date || '')
         )
-        eventReminders.value = [...calendarEvents.value]
-          .filter((event) => {
-            const dt = new Date(event.date)
-            return !Number.isNaN(dt.getTime()) && dt >= now
-          })
-          .slice(0, 5)
       }
     } catch { /* keep as is */ }
+
+    const cmsCal = landingNewsToCalendarRows(newsItems.value)
+    if (cmsCal.length > 0) {
+      calendarEvents.value = [...cmsCal, ...calendarEvents.value].sort((a, b) =>
+        (a.date || '').localeCompare(b.date || '')
+      )
+    }
+
+    const now = new Date()
+    eventReminders.value = [...calendarEvents.value]
+      .filter((event) => {
+        const dt = new Date(event.date)
+        return !Number.isNaN(dt.getTime()) && dt >= now
+      })
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+      .slice(0, 5)
 
     try {
       if (apiBase) {
