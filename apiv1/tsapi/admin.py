@@ -17,15 +17,19 @@ class MerchCheckoutOrderAdmin(admin.ModelAdmin):
     list_display = (
         "reference_number",
         "status",
+        "buyer_email",
+        "receipt_email_sent_at",
         "checkout_session_id",
         "total_centavos",
         "created_at",
     )
     list_filter = ("status", "created_at")
-    search_fields = ("reference_number", "checkout_session_id")
+    search_fields = ("reference_number", "checkout_session_id", "buyer_email")
     readonly_fields = (
         "reference_number",
         "checkout_session_id",
+        "buyer_email",
+        "receipt_email_sent_at",
         "lines_json",
         "shipping_snapshot",
         "total_centavos",

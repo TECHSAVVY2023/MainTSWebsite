@@ -189,12 +189,19 @@ CORS_ALLOWED_ORIGINS = _dedupe_preserve(
 CORS_ALLOW_CREDENTIALS = True
 
 # ------------------------------------------------------------
-# Email (optional; for member confirmation)
+# Email — console in dev; set SMTP + EMAIL_BACKEND for production receipts
 # ------------------------------------------------------------
 EMAIL_BACKEND = _os_env.get(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )
 DEFAULT_FROM_EMAIL = _os_env.get("DEFAULT_FROM_EMAIL", "noreply@localhost")
+_email_host = _os_env.get("EMAIL_HOST", "").strip()
+if _email_host:
+    EMAIL_HOST = _email_host
+    EMAIL_PORT = int(_os_env.get("EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = _os_env.get("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = _os_env.get("EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_TLS = _os_env.get("EMAIL_USE_TLS", "true").lower() in ("true", "1", "yes")
 
 
 PAYMONGO_WEBHOOK_SECRET = _os_env.get("PAYMONGO_WEBHOOK_SECRET", "").strip()

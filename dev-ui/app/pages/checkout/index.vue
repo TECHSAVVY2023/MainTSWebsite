@@ -43,6 +43,24 @@
                   <input v-model="shipping.email" type="email" autocomplete="email" class="mt-1 w-full rounded-lg border px-3 py-2 text-dark" required>
                 </label>
                 <label class="block text-sm font-medium text-dark">
+                  Confirm email
+                  <input
+                    v-model="shipping.confirmEmail"
+                    type="email"
+                    autocomplete="email"
+                    class="mt-1 w-full rounded-lg border px-3 py-2 text-dark"
+                    placeholder="Re-enter your email"
+                    required
+                  >
+                </label>
+                <p
+                  v-if="emailMismatchHint"
+                  class="sm:col-span-2 text-sm text-red-600"
+                  role="status"
+                >
+                  Email addresses must match.
+                </p>
+                <label class="block text-sm font-medium text-dark">
                   Phone
                   <input v-model="shipping.phone" type="tel" autocomplete="tel" class="mt-1 w-full rounded-lg border px-3 py-2 text-dark">
                 </label>
@@ -203,9 +221,17 @@ const paymentError = ref('')
 
 const cancelledNotice = computed(() => route.query.cancelled === '1')
 
+const emailMismatchHint = computed(() => {
+  const em = shipping.email.trim().toLowerCase()
+  const ce = shipping.confirmEmail.trim().toLowerCase()
+  if (!shipping.email.trim() || !shipping.confirmEmail.trim()) return false
+  return em !== ce
+})
+
 const shipping = reactive({
   fullName: '',
   email: '',
+  confirmEmail: '',
   phone: '',
   region: '',
   province: '',
@@ -225,9 +251,13 @@ const billing = reactive({
 
 const canContinueDetails = computed(() => {
   const s = shipping
+  const em = s.email.trim().toLowerCase()
+  const ce = s.confirmEmail.trim().toLowerCase()
+  const emailsMatch = Boolean(em && ce && em === ce)
   return Boolean(
     s.fullName.trim()
     && s.email.trim()
+    && emailsMatch
     && s.region.trim()
     && s.province.trim()
     && s.city.trim()
@@ -293,6 +323,10 @@ async function startPayMongoCheckout () {
     ...(l.image && l.image.startsWith('https://') ? { image: l.image } : {})
   }))
 
+  const shipPayload = { ...shipping } as Record<string, string>
+  const confirmEmail = String(shipPayload.confirmEmail ?? '').trim()
+  delete shipPayload.confirmEmail
+
   submitting.value = true
   try {
     const res = await $fetch<{ checkout_url: string; reference_number: string }>(
@@ -304,7 +338,8 @@ async function startPayMongoCheckout () {
           success_url: successUrl,
           cancel_url: cancelUrl,
           lines: payloadLines,
-          shipping: { ...shipping },
+          shipping: shipPayload,
+          confirm_email: confirmEmail,
           send_email_receipt: false
         }
       }

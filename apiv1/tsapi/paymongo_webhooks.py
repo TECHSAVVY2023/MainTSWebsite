@@ -20,6 +20,7 @@ from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .merch_receipt_email import send_merch_receipt_for_order
 from .models import MerchCheckoutOrder, PaymongoWebhookEvent
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,11 @@ def _handle_event_type(event_type: str, payload: dict[str, Any]) -> None:
             ).update(status=MerchCheckoutOrder.STATUS_PAID)
             if updated:
                 logger.info("Merch order marked paid (checkout session %s)", cs_id)
+                try:
+                    order = MerchCheckoutOrder.objects.get(checkout_session_id=cs_id)
+                    send_merch_receipt_for_order(order)
+                except MerchCheckoutOrder.DoesNotExist:
+                    pass
             else:
                 logger.info(
                     "checkout_session.payment.paid: no pending order for session %s",
@@ -103,10 +109,16 @@ def _handle_event_type(event_type: str, payload: dict[str, Any]) -> None:
                 if isinstance(meta, dict):
                     ref = str(meta.get("order_ref") or "").strip()
                     if ref:
-                        MerchCheckoutOrder.objects.filter(
+                        n = MerchCheckoutOrder.objects.filter(
                             reference_number=ref,
                             status=MerchCheckoutOrder.STATUS_PENDING,
                         ).update(status=MerchCheckoutOrder.STATUS_PAID)
+                        if n:
+                            try:
+                                order = MerchCheckoutOrder.objects.get(reference_number=ref)
+                                send_merch_receipt_for_order(order)
+                            except MerchCheckoutOrder.DoesNotExist:
+                                pass
         logger.info("PayMongo payment.paid processed")
     elif event_type == "payment.failed":
         logger.warning("PayMongo payment.failed")

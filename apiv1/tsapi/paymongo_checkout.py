@@ -12,11 +12,15 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import EmailValidator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from .models import MerchCheckoutOrder
+
+_email_validator = EmailValidator()
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +92,33 @@ def paymongo_create_checkout(request):
     lines = body.get("lines")
     success_url = (body.get("success_url") or "").strip()
     cancel_url = (body.get("cancel_url") or "").strip()
-    shipping = body.get("shipping") if isinstance(body.get("shipping"), dict) else {}
+    shipping_raw = body.get("shipping") if isinstance(body.get("shipping"), dict) else {}
+    shipping = dict(shipping_raw)
+    shipping.pop("confirmEmail", None)
+    confirm_raw = (
+        (body.get("confirm_email") or shipping_raw.get("confirmEmail") or "").strip()
+    )
+    email_raw = (shipping_raw.get("email") or "").strip()
     reference = (body.get("reference_number") or "").strip()
+
+    if not email_raw or not confirm_raw:
+        return JsonResponse(
+            {
+                "error": "email and confirm_email are required for checkout (guest purchases).",
+            },
+            status=400,
+        )
+    if email_raw.casefold() != confirm_raw.casefold():
+        return JsonResponse(
+            {"error": "Email and confirmation do not match."},
+            status=400,
+        )
+    try:
+        _email_validator(email_raw)
+    except ValidationError:
+        return JsonResponse({"error": "Invalid email address."}, status=400)
+
+    shipping["email"] = email_raw
 
     if not isinstance(lines, list) or len(lines) == 0:
         return JsonResponse({"error": "lines must be a non-empty array"}, status=400)
@@ -142,6 +171,7 @@ def paymongo_create_checkout(request):
     order = MerchCheckoutOrder.objects.create(
         reference_number=reference,
         status=MerchCheckoutOrder.STATUS_PENDING,
+        buyer_email=email_raw,
         lines_json=lines,
         shipping_snapshot=shipping,
         total_centavos=total_centavos,
@@ -159,7 +189,7 @@ def paymongo_create_checkout(request):
         "metadata": {"order_ref": reference[:255]},
     }
 
-    email = (shipping.get("email") or "").strip()
+    email = (shipping.get("email") or email_raw or "").strip()
     if email:
         addr = _paymongo_address_from_shipping(shipping)
         attrs["billing"] = {

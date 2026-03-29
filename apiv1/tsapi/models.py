@@ -127,6 +127,8 @@ class MerchCheckoutOrder(models.Model):
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING, db_index=True
     )
+    buyer_email = models.EmailField(blank=True, default="")
+    receipt_email_sent_at = models.DateTimeField(null=True, blank=True)
     lines_json = models.JSONField(default=list)
     shipping_snapshot = models.JSONField(default=dict, blank=True)
     total_centavos = models.PositiveIntegerField(default=0)
