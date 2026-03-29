@@ -6,6 +6,7 @@ from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from . import views
+from .paymongo_checkout import paymongo_create_checkout, paymongo_order_status
 
 urlpatterns = [
     # CMS (public + CRUD)
@@ -20,4 +21,15 @@ urlpatterns = [
     path("admin-api/token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
     path("admin-api/me/", views.admin_me, name="admin-me"),
     path("admin-api/logout/", views.admin_logout, name="admin-logout"),
+    # PayMongo Checkout (Nuxt merch checkout — uses PAYMONGO_SECRET_KEY)
+    path(
+        "payments/paymongo/create-checkout/",
+        paymongo_create_checkout,
+        name="paymongo-create-checkout",
+    ),
+    path(
+        "payments/paymongo/order/<str:reference>/",
+        paymongo_order_status,
+        name="paymongo-order-status",
+    ),
 ]

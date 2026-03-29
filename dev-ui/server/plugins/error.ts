@@ -47,9 +47,8 @@ export default defineNitroPlugin((nitroApp) => {
         : ''
 
     const is404 = status === 404
-    /** Directory URL with no chunk name — missing-asset noise when status was not normalized */
-    const bareNuxtDir =
-      !is404 && (path === '/_nuxt' || path === '/_nuxt/') && status == null
+    /** Directory URL with no chunk name — always treat as benign */
+    const bareNuxtDir = path === '/_nuxt' || path === '/_nuxt/'
 
     if (is404 || bareNuxtDir) {
       clearUnhandledChain(error)

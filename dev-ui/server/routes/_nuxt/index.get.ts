@@ -1,8 +1,7 @@
 /**
- * Handle GET /_nuxt/ (no filename). Return 404 so the request is handled
- * and the dev server does not log "[request error] [unhandled]".
+ * Fallback if middleware did not run: GET /_nuxt/ — not a real asset; avoid 404 noise.
  */
 export default defineEventHandler((event) => {
-  setResponseStatus(event, 404)
-  return 'Not Found'
+  setResponseStatus(event, 204)
+  return ''
 })
