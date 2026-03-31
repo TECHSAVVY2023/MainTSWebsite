@@ -57,6 +57,7 @@
             <div class="p-2.5 sm:p-4 bg-[#f8f7f5]">
               <h3 class="text-sm sm:text-base font-bold mb-0.5 text-gray-900">{{ project?.title ?? '' }}</h3>
               <p class="text-gray-600 text-[11px] sm:text-xs">{{ project?.domain ?? '' }}</p>
+              <p class="text-gray-600 text-[11px] sm:text-xs">Develop By: {{ project?.developer ?? 'Tech Savvy Community' }}</p>
             </div>
           </div>
         </div>
@@ -72,6 +73,7 @@ import { DEFAULT_PROJECT_IMAGE } from '~/constants/sampleMedia'
 type ProjectItem = {
   title: string
   domain?: string
+  developer?: string
   url: string
   image?: string
   alt?: string

@@ -893,6 +893,7 @@ const categoryFieldConfig = {
   ],
   "Featured Projects": [
     { key: "tagline", label: "Tagline", placeholder: "Enter project tagline" },
+    { key: "project_developer", label: "Developer(s)", placeholder: "e.g. Jane Doe, Team Alpha" },
     { key: "project_client", label: "Project Client", placeholder: "Who is the client?" },
     { key: "project_status", label: "Project Status", placeholder: "Ongoing / Completed" },
     { key: "project_year", label: "Project Year", placeholder: "e.g. 2026" },
@@ -932,6 +933,7 @@ const createEmptyFilters = () => ({
   course_duration: "",
   course_type: "",
   project_client: "",
+  project_developer: "",
   project_status: "",
   project_year: "",
   unit_amount_php: "",

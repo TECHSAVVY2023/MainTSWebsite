@@ -28,6 +28,7 @@
       <div class="bg-[#f8f7f5] p-2 sm:p-3">
         <h2 class="text-sm sm:text-base font-bold mb-1 text-gray-900 line-clamp-2">{{ project?.title ?? '' }}</h2>
         <p class="text-gray-600 text-xs sm:text-sm truncate">{{ project?.domain ?? '' }}</p>
+        <p class="text-gray-600 text-xs sm:text-sm truncate">Develop By: {{ project?.developer ?? 'Tech Savvy Community' }}</p>
       </div>
     </div>
   </div>
@@ -35,7 +36,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  projects?: { title?: string; domain?: string; url?: string; image?: string; alt?: string }[] | unknown
+  projects?: { title?: string; domain?: string; developer?: string; url?: string; image?: string; alt?: string }[] | unknown
   defaultImage: string
 }>()
 

@@ -98,7 +98,7 @@ function isNewsItem (item: { filters?: string | Record<string, unknown> | null }
   if (!f.trim()) return true
   return NEWS_CATEGORIES.some((c) => f.split(',').map((s) => s.trim()).includes(c)) || f.toLowerCase().includes('news and update')
 }
-export type LandingProjectItem = { title: string; domain?: string; url: string; image?: string; alt?: string }
+export type LandingProjectItem = { title: string; domain?: string; developer?: string; url: string; image?: string; alt?: string }
 export type LandingCourseItem = { slug: string; title: string; instructor?: string; rating?: string; duration?: string; badge?: string; image?: string }
 export type LandingCalEvent = {
   date: string
@@ -156,6 +156,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
   {
     title: 'CampusMart E-commerce',
     domain: 'Retail Platform',
+    developer: 'Tech Savvy Community',
     url: '/projects',
     image: SAMPLE_PROJECTS.ecommerce,
     alt: 'Sample e-commerce project preview'
@@ -163,6 +164,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
   {
     title: 'BookNook Marketplace',
     domain: 'Online Book Store',
+    developer: 'Tech Savvy Community',
     url: '/projects',
     image: SAMPLE_PROJECTS.books,
     alt: 'Sample marketplace project preview'
@@ -170,6 +172,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
   {
     title: 'Farm2Door Shop',
     domain: 'Local Produce Store',
+    developer: 'Tech Savvy Community',
     url: '/projects',
     image: SAMPLE_PROJECTS.farm,
     alt: 'Sample produce store project preview'
@@ -177,6 +180,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
   {
     title: 'LearnHub LMS',
     domain: 'Education Platform',
+    developer: 'Tech Savvy Community',
     url: '/projects',
     image: SAMPLE_PROJECTS.lms,
     alt: 'Sample learning platform preview'
@@ -509,7 +513,7 @@ export function useLanding () {
       if (Array.isArray(proj) && proj.length > 0) {
         projects.value = proj
           .slice(0, LANDING_SECTION_MAX_CARDS)
-          .map((p) => ({ title: p.title, domain: p.domain, url: p.url, image: p.image, alt: p.alt }))
+          .map((p) => ({ title: p.title, domain: p.domain, developer: p.developer, url: p.url, image: p.image, alt: p.alt }))
       }
       const courses = await fetchCmsCourses()
       if (Array.isArray(courses) && courses.length > 0) {

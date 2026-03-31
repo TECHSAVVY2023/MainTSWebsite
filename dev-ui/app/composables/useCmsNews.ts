@@ -27,6 +27,25 @@ type CmsRawItem = {
   created_at?: string
 }
 
+function getProjectDeveloper (
+  filters?: string | Record<string, unknown> | null,
+  authors?: string
+): string {
+  let parsed: Record<string, unknown> | null = null
+  if (filters && typeof filters === 'object' && !Array.isArray(filters)) {
+    parsed = filters as Record<string, unknown>
+  } else if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      parsed = JSON.parse(filters) as Record<string, unknown>
+    } catch {
+      parsed = null
+    }
+  }
+  const fromFilter = String(parsed?.project_developer ?? '').trim()
+  if (fromFilter) return fromFilter
+  return String(authors ?? '').trim()
+}
+
 const NEWS_CATEGORIES = ['News', 'News Highlights', 'Events', 'Announcements']
 
 function toFilterText (filters?: string | Record<string, unknown> | null): string {
@@ -217,7 +236,7 @@ export function useCmsNews () {
     }
   }
 
-  async function fetchCmsProjects (): Promise<{ title: string; domain: string; url: string; image: string; alt: string }[]> {
+  async function fetchCmsProjects (): Promise<{ title: string; domain: string; developer?: string; url: string; image: string; alt: string }[]> {
     if (!apiBase) return []
     try {
       const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
@@ -240,6 +259,7 @@ export function useCmsNews () {
         return {
           title: item.title || 'Untitled',
           domain: domain || item.title || '',
+          developer: getProjectDeveloper(item.filters, item.authors) || undefined,
           url: link,
           image: img,
           alt: item.title || 'Project'
