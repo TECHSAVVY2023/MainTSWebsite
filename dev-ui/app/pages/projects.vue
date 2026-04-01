@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_PROJECT_IMAGE } from '~/constants/sampleMedia'
+import { DEFAULT_PROJECT_IMAGE } from '~/constants/defaultMediaAssets'
 
 const { projectSearchInputValue, filteredProjectsArray, searchQueryValue } = useProjectsPage()
 </script>

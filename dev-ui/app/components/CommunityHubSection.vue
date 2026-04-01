@@ -72,7 +72,6 @@
 import EventsReminderSection from '~/components/community/EventsReminderSection.vue'
 import SponsorsSection from '~/components/community/SponsorsSection.vue'
 import SpeakersSection from '~/components/community/SpeakersSection.vue'
-import { SAMPLE_BRAND_LOGOS } from '~/constants/sampleMedia'
 
 type EventReminderItem = {
   title?: string
@@ -149,53 +148,10 @@ const FALLBACK_SPEAKERS: SpeakerItem[] = [
   { name: 'Nina Patel', role: 'Speaker', topic: 'AI tooling for developers without the hype' }
 ]
 
-const FALLBACK_SPONSORS_ONLY: SponsorItem[] = [
-  { name: 'Tech Savvy Community Partners', tier: 'Community Sponsor', description: 'Supporting education, events, and developer growth.', logo: SAMPLE_BRAND_LOGOS.codebev },
-  { name: 'CloudStack Asia', tier: 'Infrastructure', description: 'Credits for learning environments.', logo: SAMPLE_BRAND_LOGOS.cloud },
-  { name: 'Women in Tech PH — Mindanao', tier: 'Diversity Sponsor', description: 'Mentorship circles and scholarship fund.', logo: SAMPLE_BRAND_LOGOS.diversity },
-  { name: 'Youth Code Initiative', tier: 'Outreach Sponsor', description: 'High school coding bootcamps and kits.', logo: SAMPLE_BRAND_LOGOS.youth },
-  { name: 'Open Source Pilipinas', tier: 'Community Sponsor', description: 'Documentation sprints and speaker outreach.', logo: SAMPLE_BRAND_LOGOS.openSource },
-  { name: 'Green Tech Collective', tier: 'Sustainability', description: 'Low-energy hosting tips for student projects.', logo: SAMPLE_BRAND_LOGOS.green },
-  { name: 'DevRel Meetup Network', tier: 'Events Sponsor', description: 'Cross-chapter promotion and speakers.', logo: SAMPLE_BRAND_LOGOS.devrel },
-  { name: 'Print & Brand Studio Ozamiz', tier: 'Creative Sponsor', description: 'Banners, stickers, and event branding.', logo: SAMPLE_BRAND_LOGOS.print }
-]
-
-const FALLBACK_PARTNERS_ONLY: SponsorItem[] = [
-  { name: 'Workflow Co-Working Space', tier: 'Venue Partner', description: 'Hosting workshops, talks, and local developer sessions.', link: 'https://www.techsavvies.space', logo: SAMPLE_BRAND_LOGOS.venue },
-  { name: 'Misamis Digital Guild', tier: 'Education Partner', description: 'Scholarships and learning resources for cohort members.', logo: SAMPLE_BRAND_LOGOS.education },
-  { name: 'Northern Mindanao IT Council', tier: 'Advocacy Partner', description: 'Regional tech policy and industry connections.', logo: SAMPLE_BRAND_LOGOS.advocacy },
-  { name: 'CodeBev Solutions', tier: 'Technology Partner', description: 'Tools and hosting support for community projects.', logo: SAMPLE_BRAND_LOGOS.codebev },
-  { name: 'Local Coffee Roasters Co.', tier: 'In-kind Partner', description: 'Beverages and venue snacks for meetups.', logo: SAMPLE_BRAND_LOGOS.coffee },
-  { name: 'Campus IT Student Union', tier: 'Academic Partner', description: 'Student volunteers and campus event space.', logo: SAMPLE_BRAND_LOGOS.campus },
-  { name: 'Regional Startup Hub', tier: 'Innovation Partner', description: 'Pitch nights and founder office hours.', logo: SAMPLE_BRAND_LOGOS.startup },
-  { name: 'Freelancers Guild MO', tier: 'Professional Partner', description: 'Contract templates and client ethics workshops.', logo: SAMPLE_BRAND_LOGOS.freelance }
-]
-
 /** 2 rows × md:grid-cols-4 in SpeakersSection / each sponsors & partners grid */
 const COMMUNITY_SPEAKERS_MAX = 8
 const COMMUNITY_SPONSORS_MAX = 8
 const COMMUNITY_PARTNERS_MAX = 8
-
-function mergeNamedUnique<T extends { name?: string }>(primary: T[], filler: T[], minCount: number): T[] {
-  const seen = new Set<string>()
-  const out: T[] = []
-  const add = (item: T) => {
-    const key = (item.name || '').trim().toLowerCase()
-    if (!key || seen.has(key)) return
-    seen.add(key)
-    out.push(item)
-  }
-  for (const item of primary) {
-    add(item)
-  }
-  if (out.length < minCount) {
-    for (const item of filler) {
-      if (out.length >= minCount) break
-      add(item)
-    }
-  }
-  return out.length > 0 ? out : filler.slice(0, minCount)
-}
 
 const safeReminders = computed(() =>
   Array.isArray(props.reminders) && props.reminders.length > 0
@@ -208,7 +164,8 @@ const safeSpeakers = computed(() => {
   const primary = Array.isArray(raw)
     ? raw.filter((s): s is SpeakerItem => s != null && typeof s === 'object' && typeof (s as SpeakerItem).name === 'string')
     : []
-  return mergeNamedUnique(primary, FALLBACK_SPEAKERS, COMMUNITY_SPEAKERS_MAX).slice(0, COMMUNITY_SPEAKERS_MAX)
+  if (primary.length > 0) return primary.slice(0, COMMUNITY_SPEAKERS_MAX)
+  return FALLBACK_SPEAKERS.slice(0, COMMUNITY_SPEAKERS_MAX)
 })
 
 const safeSponsors = computed(() => {
@@ -216,7 +173,7 @@ const safeSponsors = computed(() => {
   const primary = Array.isArray(raw)
     ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string')
     : []
-  return mergeNamedUnique(primary, FALLBACK_SPONSORS_ONLY, COMMUNITY_SPONSORS_MAX).slice(0, COMMUNITY_SPONSORS_MAX)
+  return primary.slice(0, COMMUNITY_SPONSORS_MAX)
 })
 
 const safePartners = computed(() => {
@@ -224,7 +181,7 @@ const safePartners = computed(() => {
   const primary = Array.isArray(raw)
     ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string')
     : []
-  return mergeNamedUnique(primary, FALLBACK_PARTNERS_ONLY, COMMUNITY_PARTNERS_MAX).slice(0, COMMUNITY_PARTNERS_MAX)
+  return primary.slice(0, COMMUNITY_PARTNERS_MAX)
 })
 
 </script>

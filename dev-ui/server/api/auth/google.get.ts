@@ -1,9 +1,9 @@
 function getOrigin (event: any): string {
   const headers = getRequestHeaders(event)
-  const proto = headers['x-forwarded-proto'] || 'http'
-  const host = headers['x-forwarded-host'] || headers['host'] || 'localhost:3000'
-  const cleanProto = (proto as string).split(',')[0].trim()
-  const cleanHost = (host as string).split(',')[0].trim()
+  const proto = headers['x-forwarded-proto'] ?? 'http'
+  const host = headers['x-forwarded-host'] ?? headers['host'] ?? 'localhost:3000'
+  const cleanProto = String(proto).split(',')[0]?.trim() || 'http'
+  const cleanHost = String(host).split(',')[0]?.trim() || 'localhost:3000'
   return `${cleanProto}://${cleanHost}`
 }
 

@@ -2,14 +2,13 @@
  * Landing page composable: news, projects, courses, calendar, scroll, search.
  */
 import {
-  SAMPLE_NEWS,
-  SAMPLE_PROJECTS,
-  SAMPLE_COURSES,
-  SAMPLE_BRAND_LOGOS,
+  LANDING_FALLBACK_NEWS_IMAGES,
+  LANDING_FALLBACK_PROJECT_IMAGES,
+  LANDING_FALLBACK_COURSE_IMAGES,
   DEFAULT_NEWS_IMAGE,
   DEFAULT_COURSE_IMAGE,
   DEFAULT_PROJECT_IMAGE
-} from '~/constants/sampleMedia'
+} from '~/constants/defaultMediaAssets'
 
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
@@ -31,6 +30,21 @@ function toFilterText (filters?: string | Record<string, unknown> | null): strin
   return JSON.stringify(filters)
 }
 
+function parseLandingFiltersObject (filters?: string | Record<string, unknown> | null): Record<string, unknown> | null {
+  if (!filters) return null
+  if (typeof filters === 'object' && filters !== null && !Array.isArray(filters)) {
+    return filters as Record<string, unknown>
+  }
+  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      return JSON.parse(filters) as Record<string, unknown>
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
 /** Parsed `filters.category` (lowercase) for JSON or legacy string CMS items. */
 function getFilterCategoryFromLandingItem (filters?: string | Record<string, unknown> | null): string {
   if (!filters) return ''
@@ -49,6 +63,19 @@ function getFilterCategoryFromLandingItem (filters?: string | Record<string, unk
   return (parts[0] || '').toLowerCase()
 }
 
+function mapLandingItemToSpeaker (item: LandingNewsItem): LandingSpeaker {
+  const fObj = parseLandingFiltersObject(item.filters)
+  const role = String(fObj?.speaker_role || fObj?.role || 'Speaker').trim() || 'Speaker'
+  const topic = String(fObj?.speaker_topic || fObj?.topic || item.summary || item.description || '').trim()
+  return {
+    name: item.title || 'Guest Speaker',
+    role,
+    topic: topic || 'Practical full-stack development and career growth',
+    link: item.link && item.link !== '#' ? item.link : '',
+    image: item.imageUrl || undefined
+  }
+}
+
 const NON_NEWS_LANDING_CATEGORIES = new Set([
   'merchandise',
   'events',
@@ -59,11 +86,24 @@ const NON_NEWS_LANDING_CATEGORIES = new Set([
 function landingNewsToCalendarRows (items: LandingNewsItem[]): LandingCalEvent[] {
   const out: LandingCalEvent[] = []
   for (const item of items) {
+    let fl: Record<string, unknown> | null = null
     const f = item.filters
-    if (typeof f !== 'object' || f === null || Array.isArray(f)) continue
-    const fl = f as Record<string, unknown>
-    if (String(fl.category || '').trim().toLowerCase() !== 'events') continue
-    const dateStr = String(fl.event_date || '').trim()
+    if (typeof f === 'object' && f !== null && !Array.isArray(f)) {
+      fl = f as Record<string, unknown>
+    } else if (typeof f === 'string' && f.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(f) as Record<string, unknown>
+        fl = parsed
+      } catch {
+        fl = null
+      }
+    }
+    if (!fl) continue
+
+    const category = String(fl.category || '').trim().toLowerCase()
+    if (category !== 'events') continue
+
+    const dateStr = String(fl.event_date || item.date || '').trim()
     if (!dateStr) continue
     const iso = dateStr.includes('T') ? dateStr : `${dateStr}T12:00:00.000Z`
     const kindRaw = String(fl.event_kind || 'event').toLowerCase()
@@ -74,7 +114,7 @@ function landingNewsToCalendarRows (items: LandingNewsItem[]): LandingCalEvent[]
       time: String(fl.event_time || ''),
       endTime: String(fl.end_time || ''),
       title: item.title || 'Event',
-      description: item.summary || '',
+      description: item.summary || item.description || '',
       link: item.link && item.link !== '#' ? item.link : '',
       kind
     })
@@ -120,7 +160,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Code Camp Batch Opens',
     summary: 'Applications are now open for the next full-stack learning batch.',
     description: 'Applications are now open for the next full-stack learning batch with guided mentorship and practical project work.',
-    imageUrl: SAMPLE_NEWS.codecamp,
+    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.codecamp,
     link: '/news'
   },
   {
@@ -129,7 +169,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Community Demo Night',
     summary: 'Learners showcased portfolio projects to mentors and peers.',
     description: 'Learners showcased portfolio projects to mentors and peers during our monthly community demo night.',
-    imageUrl: SAMPLE_NEWS.demoNight,
+    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.demoNight,
     link: '/news'
   },
   {
@@ -138,7 +178,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Mentor Spotlight Series',
     summary: 'A new talk series on modern frontend and backend workflows.',
     description: 'A new talk series featuring practical sessions on modern frontend and backend development workflows.',
-    imageUrl: SAMPLE_NEWS.mentor,
+    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.mentor,
     link: '/news'
   },
   {
@@ -147,7 +187,7 @@ const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
     title: 'Student Success Stories',
     summary: 'Graduates shared real project journeys and career progress.',
     description: 'Recent graduates shared real project journeys, lessons learned, and their career progress in tech.',
-    imageUrl: SAMPLE_NEWS.success,
+    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.success,
     link: '/news'
   }
 ]
@@ -158,7 +198,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Retail Platform',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: SAMPLE_PROJECTS.ecommerce,
+    image: LANDING_FALLBACK_PROJECT_IMAGES.ecommerce,
     alt: 'Sample e-commerce project preview'
   },
   {
@@ -166,7 +206,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Online Book Store',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: SAMPLE_PROJECTS.books,
+    image: LANDING_FALLBACK_PROJECT_IMAGES.books,
     alt: 'Sample marketplace project preview'
   },
   {
@@ -174,7 +214,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Local Produce Store',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: SAMPLE_PROJECTS.farm,
+    image: LANDING_FALLBACK_PROJECT_IMAGES.farm,
     alt: 'Sample produce store project preview'
   },
   {
@@ -182,7 +222,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Education Platform',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: SAMPLE_PROJECTS.lms,
+    image: LANDING_FALLBACK_PROJECT_IMAGES.lms,
     alt: 'Sample learning platform preview'
   }
 ]
@@ -195,7 +235,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '6 weeks',
     badge: 'Beginner',
-    image: SAMPLE_COURSES.frontend
+    image: LANDING_FALLBACK_COURSE_IMAGES.frontend
   },
   {
     slug: 'backend-api-practical',
@@ -204,7 +244,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.9',
     duration: '8 weeks',
     badge: 'Intermediate',
-    image: SAMPLE_COURSES.backend
+    image: LANDING_FALLBACK_COURSE_IMAGES.backend
   },
   {
     slug: 'nuxt-fullstack-lab',
@@ -213,7 +253,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.7',
     duration: '7 weeks',
     badge: 'Project-based',
-    image: SAMPLE_COURSES.nuxt
+    image: LANDING_FALLBACK_COURSE_IMAGES.nuxt
   },
   {
     slug: 'deployment-and-devops',
@@ -222,7 +262,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '5 weeks',
     badge: 'Advanced',
-    image: SAMPLE_COURSES.devops
+    image: LANDING_FALLBACK_COURSE_IMAGES.devops
   }
 ]
 
@@ -425,6 +465,24 @@ export function useLanding () {
     ]
   }
 
+  function buildSpeakersFromCms (cmsApproved: LandingNewsItem[]) {
+    const rows = cmsApproved
+      .filter((item) => {
+        const category = getFilterCategoryFromLandingItem(item.filters)
+        if (category.includes('speaker')) return true
+        if (category.includes('community members')) return true
+        if (category.includes('community people')) return true
+        const f = toFilterText(item.filters).toLowerCase()
+        return f.includes('speaker') || f.includes('community members')
+      })
+      .map(mapLandingItemToSpeaker)
+      .filter((s) => (s.name || '').trim().length > 0)
+
+    if (rows.length > 0) {
+      speakers.value = rows.slice(0, 6)
+    }
+  }
+
   function mapCmsToSponsorRow (item: LandingNewsItem): LandingSponsor {
     return {
       name: item.title || 'Community Partner',
@@ -437,11 +495,21 @@ export function useLanding () {
   function buildSponsorsAndPartners (cmsApproved: LandingNewsItem[]) {
     const sponsorRows: LandingSponsor[] = []
     const partnerRows: LandingSponsor[] = []
+    const sponsorCategoryKeys = new Set([
+      'sponsors & partners',
+      'sponsors and partners',
+      'sponsor & partner',
+      'sponsor and partner'
+    ])
 
     for (const item of cmsApproved) {
-      const f = toFilterText(item.filters).toLowerCase()
-      const hasSponsor = f.includes('sponsor')
-      const hasPartner = /\bpartner\b/.test(f) || f.includes('venue partner')
+      const category = getFilterCategoryFromLandingItem(item.filters)
+      if (!sponsorCategoryKeys.has(category)) continue
+
+      const fObj = parseLandingFiltersObject(item.filters)
+      const kind = String(fObj?.partner_kind || '').trim().toLowerCase()
+      const hasPartner = kind === 'partner'
+      const hasSponsor = kind === 'sponsor' || !hasPartner
 
       const row = mapCmsToSponsorRow(item)
       if (hasPartner && !hasSponsor) {
@@ -457,35 +525,8 @@ export function useLanding () {
       return
     }
 
-    sponsors.value = [
-      {
-        name: 'Tech Savvy Community Partners',
-        tier: 'Community Sponsor',
-        description: 'Helping fund educational programs and developer activities.',
-        logo: SAMPLE_BRAND_LOGOS.codebev
-      },
-      {
-        name: 'CloudStack Asia',
-        tier: 'Infrastructure Sponsor',
-        description: 'Credits and tooling for learning environments.',
-        logo: SAMPLE_BRAND_LOGOS.cloud
-      }
-    ]
-    partners.value = [
-      {
-        name: 'Workflow Co-Working Space',
-        tier: 'Venue Partner',
-        description: 'Host venue supporting workshops, talks, and build sessions.',
-        link: 'https://www.techsavvies.space',
-        logo: SAMPLE_BRAND_LOGOS.venue
-      },
-      {
-        name: 'Misamis Digital Guild',
-        tier: 'Education Partner',
-        description: 'Scholarships and learning resources for cohort members.',
-        logo: SAMPLE_BRAND_LOGOS.education
-      }
-    ]
+    sponsors.value = []
+    partners.value = []
   }
 
   async function loadData () {
@@ -605,6 +646,9 @@ export function useLanding () {
     }
     if (communityRoleStats.value.length === 0) {
       communityRoleStats.value = [{ role: 'Member', count: 1, percent: 100 }]
+    }
+    if (speakers.value.length === 0) {
+      buildSpeakersFromCms(newsItems.value)
     }
     if (speakers.value.length === 0) {
       buildSpeakers([])

@@ -1,8 +1,17 @@
+/// <reference types="node" />
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-21',
   devtools: { enabled: true },
   srcDir: 'app',
   modules: ['@nuxtjs/tailwindcss'],
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        types: ['node'],
+      },
+    },
+  },
   app: {
     head: {
       link: [

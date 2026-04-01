@@ -29,7 +29,8 @@ class CmsItem(models.Model):
     content_id = models.CharField(max_length=255, blank=True, default="")
     title = models.CharField(max_length=255)
     authors = models.CharField(max_length=255, blank=True, default="")
-    filters = models.CharField(max_length=255, blank=True, default="")
+    # Store structured CMS filters as JSON string when needed (can exceed 255 chars).
+    filters = models.TextField(blank=True, default="")
     descriptions = models.TextField(blank=True)
     approval_status = models.CharField(
         max_length=20, choices=APPROVAL_CHOICES, default=APPROVAL_PENDING

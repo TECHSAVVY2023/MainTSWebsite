@@ -1,7 +1,7 @@
 /**
  * Merch catalog: approved CMS items with category "Merchandise", merged with static fallback.
  */
-import { SAMPLE_MERCH } from '~/constants/sampleMedia'
+import { MERCH_CATALOG_IMAGE_URLS } from '~/constants/defaultMediaAssets'
 
 export type MerchItem = {
   id: string
@@ -22,7 +22,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱549',
     unitAmountPhp: 549,
     subtitle: 'Think smart. Code smart. Official Code Camp Season 4 print.',
-    image: SAMPLE_MERCH.tee,
+    image: MERCH_CATALOG_IMAGE_URLS.tee,
     alt: 'Code Camp Season 4 community t-shirt'
   },
   {
@@ -31,7 +31,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱1,090',
     unitAmountPhp: 1090,
     subtitle: 'Mid-weight fleece, embroidered mark — for meetups and late builds.',
-    image: SAMPLE_MERCH.hoodie,
+    image: MERCH_CATALOG_IMAGE_URLS.hoodie,
     alt: 'Tech Savvy hoodie'
   },
   {
@@ -40,7 +40,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱180',
     unitAmountPhp: 180,
     subtitle: 'Vinyl stickers and enamel pin — bundle for laptops and lanyards.',
-    image: SAMPLE_MERCH.stickers,
+    image: MERCH_CATALOG_IMAGE_URLS.stickers,
     alt: 'Tech Savvy stickers and pin set'
   },
   {
@@ -49,7 +49,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱420',
     unitAmountPhp: 420,
     subtitle: 'Soft acrylic knit with woven label — for cool venues and night builds.',
-    image: SAMPLE_MERCH.beanie,
+    image: MERCH_CATALOG_IMAGE_URLS.beanie,
     alt: 'Tech Savvy community beanie'
   },
   {
@@ -58,7 +58,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱380',
     unitAmountPhp: 380,
     subtitle: 'Heavy cotton canvas, long handles — laptops, hoodies, and event swag.',
-    image: SAMPLE_MERCH.tote,
+    image: MERCH_CATALOG_IMAGE_URLS.tote,
     alt: 'Code Camp canvas tote bag'
   },
   {
@@ -67,7 +67,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱290',
     unitAmountPhp: 290,
     subtitle: 'Matte glaze with debossed mark — desk companion for stand-ups.',
-    image: SAMPLE_MERCH.mug,
+    image: MERCH_CATALOG_IMAGE_URLS.mug,
     alt: 'Code Camp ceramic mug'
   },
   {
@@ -76,7 +76,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱650',
     unitAmountPhp: 650,
     subtitle: 'Double-wall steel, powder coat — keeps drinks cold through long sessions.',
-    image: SAMPLE_MERCH.bottle,
+    image: MERCH_CATALOG_IMAGE_URLS.bottle,
     alt: 'Tech Savvy insulated water bottle'
   },
   {
@@ -85,13 +85,10 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱220',
     unitAmountPhp: 220,
     subtitle: 'Dot grid, lay-flat binding — sketches, stand-up notes, and API doodles.',
-    image: SAMPLE_MERCH.notebook,
+    image: MERCH_CATALOG_IMAGE_URLS.notebook,
     alt: 'Tech Savvy notebook journal'
   }
 ]
-
-/** @deprecated Use MERCH_CATALOG_STATIC */
-export const MERCH_CATALOG = MERCH_CATALOG_STATIC
 
 export const MERCH_CATALOG_STATE_KEY = 'merch-catalog-cms'
 

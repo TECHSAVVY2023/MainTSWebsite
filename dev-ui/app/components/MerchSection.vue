@@ -119,7 +119,7 @@
 
 <script setup lang="ts">
 import type { MerchItem } from '~/composables/useMerchCatalog'
-import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
+import { DEFAULT_MEDIA_FALLBACK } from '~/constants/defaultMediaAssets'
 
 const props = withDefaults(
   defineProps<{

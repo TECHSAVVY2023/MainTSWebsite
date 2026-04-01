@@ -1,10 +1,12 @@
 <template>
-  <div class="font-inter min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-6 sm:py-8 bg-gradient-to-br from-[#f5f7fa] via-[#f1f3f7] to-[#eceff4] relative">
-    <NuxtLink :to="backToHomeHref" class="absolute top-5 left-5 inline-flex items-center gap-2 text-dark/90 text-sm no-underline transition-colors hover:text-accent-purple">
+  <div class="font-inter relative flex min-h-screen items-center justify-center overflow-hidden bg-[#050816] px-4 py-6 sm:px-6 sm:py-8">
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(145,88,255,0.22),transparent_45%),radial-gradient(circle_at_80%_70%,rgba(255,125,86,0.18),transparent_42%),linear-gradient(120deg,#060817_0%,#0d1125_52%,#070a1b_100%)]" aria-hidden="true" />
+    <SectionWires gradient-id-prefix="swg-login-page" />
+    <NuxtLink :to="backToHomeHref" class="absolute left-5 top-5 z-20 inline-flex items-center gap-2 text-sm text-white/90 no-underline transition-colors hover:text-accent-gold">
       <i class="fas fa-arrow-left" :aria-hidden="true" /> Back to Home
     </NuxtLink>
-    <div class="w-full max-w-[1080px] rounded-2xl overflow-hidden shadow-[0_20px_40px_rgba(46,19,104,0.08),0_0_0_1px_rgba(224,224,224,0.8)]">
-      <div class="flex flex-col lg:flex-row">
+    <div class="relative z-10 w-full max-w-[1020px] overflow-hidden rounded-[34px] border border-white/20 bg-white shadow-[0_24px_72px_rgba(2,6,23,0.58)]">
+      <div class="flex flex-col lg:flex-row lg:min-h-[620px]">
         <LoginWelcomeBanner />
         <LoginFormSection :login="login" @submit="login.onSubmit" />
       </div>

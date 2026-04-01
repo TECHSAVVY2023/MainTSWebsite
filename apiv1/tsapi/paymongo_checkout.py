@@ -1,5 +1,7 @@
 """
-Create PayMongo Checkout Sessions (secret key) and expose order status for the Nuxt checkout flow.
+PayMongo checkout session creation and order status (server-side only).
+
+Secrets and tunables come from `payment_config` / API `.env`, not the frontend.
 """
 from __future__ import annotations
 
@@ -11,24 +13,22 @@ from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
+from . import payment_config
 from .models import MerchCheckoutOrder
 
 _email_validator = EmailValidator()
 
 logger = logging.getLogger(__name__)
 
-PAYMONGO_API = "https://api.paymongo.com/v1/checkout_sessions"
-
 
 def _paymongo_auth_header() -> str:
-    key = getattr(settings, "PAYMONGO_SECRET_KEY", "") or ""
+    key = payment_config.PAYMONGO_SECRET_KEY or ""
     token = base64.b64encode(f"{key}:".encode("utf-8")).decode("ascii")
     return f"Basic {token}"
 
@@ -36,7 +36,7 @@ def _paymongo_auth_header() -> str:
 def _paymongo_post(payload: dict[str, Any]) -> dict[str, Any]:
     body = json.dumps(payload).encode("utf-8")
     req = Request(
-        PAYMONGO_API,
+        payment_config.PAYMONGO_CHECKOUT_SESSIONS_URL,
         data=body,
         headers={
             "Content-Type": "application/json",
@@ -69,16 +69,14 @@ class PayMongoApiError(Exception):
 
 
 def _payment_method_types() -> list[str]:
-    raw = getattr(settings, "PAYMONGO_PAYMENT_METHOD_TYPES", "card,gcash,paymaya,qrph")
-    if isinstance(raw, str):
-        return [x.strip() for x in raw.split(",") if x.strip()]
-    return list(raw)
+    raw = payment_config.PAYMONGO_PAYMENT_METHOD_TYPES
+    return [part.strip() for part in raw.split(",") if part.strip()]
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def paymongo_create_checkout(request):
-    if not getattr(settings, "PAYMONGO_SECRET_KEY", "").strip():
+    if not payment_config.PAYMONGO_SECRET_KEY:
         return JsonResponse(
             {"error": "PAYMONGO_SECRET_KEY is not configured on the server."},
             status=503,

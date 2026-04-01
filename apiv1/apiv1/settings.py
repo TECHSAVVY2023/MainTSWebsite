@@ -15,6 +15,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['188.166.211.139', '127.0.0.1', 'api.techsavvies.space', 'localhost']
 PUBLIC_SITE = os.getenv("PAYMONGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
 
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -28,6 +29,50 @@ CORS_ALLOWED_ORIGINS = [
     "https://fabricspluscurtains.com",
     "https://www.fabricspluscurtains.com",
 ]
+
+# PayMongo (and related) payment settings — single source: tsapi.payment_config + .env
+from tsapi import payment_config as _payment_config
+
+
+SECRET_KEY = _os_env.get("SECRET_KEY", "django-insecure-change-me")
+DEBUG = _os_env.get("DEBUG", "True").lower() in ("true", "1")
+ALLOWED_HOSTS = ["*"]
+
+
+def _comma_separated_urls(key: str) -> list[str]:
+    raw = _os_env.get(key, "")
+    return [x.strip() for x in raw.split(",") if x.strip()]
+
+
+def _dedupe_preserve(seq: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for x in seq:
+        if x not in seen:
+            seen.add(x)
+            out.append(x)
+    return out
+
+
+# Browser POSTs (admin, DRF, etc.) send Origin; Django 4+ must trust it or CSRF fails (e.g. ngrok front-end).
+_public_site = _payment_config.PAYMONGO_PUBLIC_BASE_URL
+CSRF_TRUSTED_ORIGINS = _dedupe_preserve(
+    [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        "https://localhost:3000",
+        "https://127.0.0.1:3000",
+    ]
+    + _comma_separated_urls("CSRF_TRUSTED_ORIGINS")
+    + (
+        [_public_site]
+        if _public_site.startswith(("http://", "https://"))
+        else []
+    )
+)
+>>>>>>> f1eed00 (4/2/2026 Updates)
 
 
 # Application definition
@@ -149,7 +194,6 @@ SIMPLE_JWT = {
 }
 
 
-
 # ------------------------------------------------------------
 # Email
 # ------------------------------------------------------------
@@ -169,3 +213,10 @@ PAYMONGO_WEBHOOK_SECRET = os.getenv("PAYMONGO_WEBHOOK_SECRET", "").strip()
 PAYMONGO_PUBLIC_BASE_URL = os.getenv("PAYMONGO_PUBLIC_BASE_URL")
 PAYMONGO_SECRET_KEY = os.getenv("PAYMONGO_SECRET_KEY", "").strip()
 PAYMONGO_PAYMENT_METHOD_TYPES = os.getenv("PAYMONGO_PAYMENT_METHOD_TYPES", "card,gcash,paymaya,qrph")
+
+# Re-export for code that reads django.conf.settings (checkout + webhooks).
+PAYMONGO_WEBHOOK_SECRET = _payment_config.PAYMONGO_WEBHOOK_SECRET
+PAYMONGO_PUBLIC_BASE_URL = _payment_config.PAYMONGO_PUBLIC_BASE_URL
+PAYMONGO_SECRET_KEY = _payment_config.PAYMONGO_SECRET_KEY
+PAYMONGO_PAYMENT_METHOD_TYPES = _payment_config.PAYMONGO_PAYMENT_METHOD_TYPES
+
