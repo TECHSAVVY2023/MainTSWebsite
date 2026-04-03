@@ -73,7 +73,48 @@
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-dark/60">
                   {{ field.label }}
                 </label>
+                <div
+                  v-if="Array.isArray(field.options) && field.options.length >= 2 && field.options.length <= 3"
+                  class="flex flex-wrap gap-2"
+                >
+                  <button
+                    v-for="option in field.options"
+                    :key="`${field.key}-${option}`"
+                    type="button"
+                    class="rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors"
+                    :class="
+                      formData.filters[field.key] === option
+                        ? 'border-accent-purple bg-accent-purple text-white'
+                        : 'border-neutral-border bg-white text-dark/80 hover:border-accent-purple/40 hover:bg-violet-border'
+                    "
+                    @click="formData.filters[field.key] = option"
+                  >
+                    {{ option }}
+                  </button>
+                </div>
+                <select
+                  v-else-if="Array.isArray(field.options) && field.options.length > 3"
+                  v-model="formData.filters[field.key]"
+                  class="w-full rounded-lg border border-neutral-border bg-white px-4 py-2 text-dark transition-colors duration-200 focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
+                >
+                  <option value="">Select {{ field.label.toLowerCase() }}</option>
+                  <option
+                    v-for="option in field.options"
+                    :key="`${field.key}-${option}`"
+                    :value="option"
+                  >
+                    {{ option }}
+                  </option>
+                </select>
                 <input
+                  v-else-if="field.inputType === 'time'"
+                  v-model="formData.filters[field.key]"
+                  type="time"
+                  :step="field.timeStep != null ? field.timeStep : 300"
+                  class="w-full min-h-[2.75rem] rounded-lg border border-neutral-border bg-white px-4 py-2 font-medium tabular-nums text-dark focus:border-accent-purple/40 focus:ring-2 focus:ring-accent-purple/30 outline-none"
+                />
+                <input
+                  v-else
                   v-model="formData.filters[field.key]"
                   :type="field.inputType || 'text'"
                   :placeholder="field.placeholder"
@@ -129,6 +170,9 @@
               <p class="mb-3 text-xs text-dark/60">
                 Upload files or add file URLs manually. Supported: Images (JPG,
                 PNG), Videos (MP4), PDFs & Other files.
+              </p>
+              <p class="mb-3 text-xs font-semibold text-accent-purple/90">
+                The first image is used as the landing card cover.
               </p>
 
               <div
@@ -836,6 +880,7 @@ const formData = ref({
   approval_status: "pending",
   links: [],
   files: [],
+  images: [],
   logs: [],
 });
 
@@ -880,6 +925,8 @@ const categoryOptions = [
   "Featured Projects",
   "Merchandise",
   "Events",
+  "Sponsors & partners",
+  "Community Members & Speakers",
 ];
 const categoryFieldConfig = {
   "News and update": [
@@ -887,15 +934,30 @@ const categoryFieldConfig = {
   ],
   Courses: [
     { key: "tagline", label: "Tagline", placeholder: "Enter course tagline" },
-    { key: "course_level", label: "Course Level", placeholder: "Beginner / Intermediate / Advanced" },
+    {
+      key: "course_level",
+      label: "Course Level",
+      placeholder: "Beginner / Intermediate / Advanced",
+      options: ["Beginner", "Intermediate", "Advanced"],
+    },
     { key: "course_duration", label: "Course Duration", placeholder: "e.g. 8 weeks" },
-    { key: "course_type", label: "Course Type", placeholder: "Online / Hybrid / Onsite" },
+    {
+      key: "course_type",
+      label: "Course Type",
+      placeholder: "Online / Hybrid / Onsite",
+      options: ["Online", "Hybrid", "Onsite"],
+    },
   ],
   "Featured Projects": [
     { key: "tagline", label: "Tagline", placeholder: "Enter project tagline" },
     { key: "project_developer", label: "Developer(s)", placeholder: "e.g. Jane Doe, Team Alpha" },
     { key: "project_client", label: "Project Client", placeholder: "Who is the client?" },
-    { key: "project_status", label: "Project Status", placeholder: "Ongoing / Completed" },
+    {
+      key: "project_status",
+      label: "Project Status",
+      placeholder: "Ongoing / Completed",
+      options: ["Ongoing", "Completed"],
+    },
     { key: "project_year", label: "Project Year", placeholder: "e.g. 2026" },
   ],
   Merchandise: [
@@ -914,15 +976,44 @@ const categoryFieldConfig = {
       placeholder: "",
       inputType: "date",
     },
-    { key: "event_time", label: "Start time", placeholder: "10:30 AM" },
-    { key: "end_time", label: "End time", placeholder: "11:45 AM" },
+    { key: "event_time", label: "Start time", inputType: "time", timeStep: 300 },
+    { key: "end_time", label: "End time", inputType: "time", timeStep: 300 },
     { key: "venue", label: "Venue", placeholder: "Online / address" },
     { key: "tagline", label: "Tagline", placeholder: "Headline" },
     {
       key: "event_kind",
       label: "Kind",
       placeholder: "event | reminder | task | appointment",
+      options: ["event", "reminder", "task", "appointment"],
     },
+  ],
+  "Sponsors & partners": [
+    {
+      key: "partner_kind",
+      label: "Type",
+      placeholder: "sponsor | partner",
+      options: ["sponsor", "partner"],
+    },
+    {
+      key: "sponsor_tier",
+      label: "Tier",
+      placeholder: "Community Sponsor / Venue Partner / etc.",
+    },
+    { key: "tagline", label: "Tagline", placeholder: "Short supporting line" },
+  ],
+  "Community Members & Speakers": [
+    {
+      key: "speaker_role",
+      label: "Role",
+      placeholder: "Speaker / Mentor / Instructor / Community Lead",
+      options: ["Speaker", "Mentor", "Instructor", "Community Lead"],
+    },
+    {
+      key: "speaker_topic",
+      label: "Topic",
+      placeholder: "Talk topic or specialization",
+    },
+    { key: "tagline", label: "Tagline", placeholder: "Short profile line" },
   ],
 };
 
@@ -942,6 +1033,10 @@ const createEmptyFilters = () => ({
   end_time: "",
   venue: "",
   event_kind: "",
+  partner_kind: "",
+  sponsor_tier: "",
+  speaker_role: "",
+  speaker_topic: "",
 });
 
 const parseLegacyFilters = (rawFilters) => {
@@ -966,6 +1061,30 @@ const parseLegacyFilters = (rawFilters) => {
   }
   return parsed;
 };
+
+/** Stored times may be "10:30 AM" or "22:30"; HTML time input needs "HH:MM" (24h). */
+function legacyTimeToTimeInput (raw) {
+  if (raw == null) return "";
+  const s = String(raw).trim();
+  if (!s) return "";
+  if (/^\d{1,2}:\d{2}\s*(AM|PM)$/i.test(s)) {
+    const m = s.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return "";
+    let h = parseInt(m[1], 10);
+    const min = m[2];
+    const ap = m[3].toUpperCase();
+    if (ap === "PM" && h < 12) h += 12;
+    if (ap === "AM" && h === 12) h = 0;
+    return `${String(h).padStart(2, "0")}:${min}`;
+  }
+  const m24 = s.match(/^(\d{1,2}):(\d{2})$/);
+  if (m24) {
+    const h = Math.min(23, Math.max(0, parseInt(m24[1], 10)));
+    const min = Math.min(59, Math.max(0, parseInt(m24[2], 10)));
+    return `${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+  }
+  return "";
+}
 
 const normalizeFiltersForSubmit = (filters) => {
   const parsed = parseLegacyFilters(filters);
@@ -1206,6 +1325,53 @@ const getFileExtension = (filename) => {
   return ext;
 };
 
+const getFileUrl = (file) => {
+  if (!file || typeof file !== "object") return "";
+  return String(file.url || "").trim();
+};
+
+const getFileNameOrUrlName = (file) => {
+  if (!file || typeof file !== "object") return "";
+  const explicit = String(file.name || "").trim();
+  if (explicit) return explicit;
+  const rawUrl = String(file.url || "").split("?")[0];
+  return rawUrl.split("/").pop() || "";
+};
+
+const splitCoverImageAndFiles = (files, existingImages = []) => {
+  const normalizedFiles = (Array.isArray(files) ? files : []).filter((file) => {
+    return file && typeof file === "object" && getFileUrl(file);
+  });
+
+  let coverImageUrl = "";
+  let coverImageIndex = -1;
+
+  for (let i = 0; i < normalizedFiles.length; i++) {
+    const file = normalizedFiles[i];
+    const fileName = getFileNameOrUrlName(file);
+    const fileUrl = getFileUrl(file);
+    if (isImageFile(fileName) || isImageFile(fileUrl)) {
+      coverImageUrl = fileUrl;
+      coverImageIndex = i;
+      break;
+    }
+  }
+
+  if (!coverImageUrl && Array.isArray(existingImages) && existingImages[0]) {
+    coverImageUrl = String(existingImages[0]);
+  }
+
+  const filesWithoutCover =
+    coverImageIndex >= 0
+      ? normalizedFiles.filter((_, index) => index !== coverImageIndex)
+      : normalizedFiles;
+
+  return {
+    images: coverImageUrl ? [coverImageUrl] : [],
+    files: filesWithoutCover,
+  };
+};
+
 // Clean filename - extract only filename up to extension, remove query params and hashes
 const getCleanFilename = (filename) => {
   if (!filename) return "";
@@ -1437,12 +1603,18 @@ const handleSubmit = async () => {
     // No need to manually build filters here anymore
 
     // Prepare final data
+    const mediaBuckets = splitCoverImageAndFiles(
+      formData.value.files,
+      formData.value.images,
+    );
+
     const submitData = {
       ...formData.value,
       filters: normalizeFiltersForSubmit(formData.value.filters),
       // Ensure JSON fields are properly formatted
       links: formData.value.links || [],
-      files: formData.value.files || [],
+      images: mediaBuckets.images,
+      files: mediaBuckets.files,
       logs: formData.value.logs || [],
     };
 
@@ -1496,8 +1668,21 @@ const editPost = (post) => {
     date: post.date || "",
     links: post.links || [],
     files: post.files || [],
+    images: Array.isArray(post.images) ? post.images : [],
     logs: post.logs || [],
   };
+
+  const fl = formData.value.filters;
+  if (fl) {
+    if (fl.event_time) {
+      const t = legacyTimeToTimeInput(fl.event_time);
+      if (t) fl.event_time = t;
+    }
+    if (fl.end_time) {
+      const t = legacyTimeToTimeInput(fl.end_time);
+      if (t) fl.end_time = t;
+    }
+  }
 
   // Scroll to form
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1555,6 +1740,7 @@ const clearForm = () => {
     approval_status: "pending",
     links: [],
     files: [],
+    images: [],
     logs: [],
   };
 

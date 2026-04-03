@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order {{ order_reference }}</title>
+</head>
+<body style="font-family: system-ui, Segoe UI, sans-serif; line-height: 1.5; color: #1a1a1a; max-width: 36rem; margin: 0 auto; padding: 1.25rem;">
+  <p>Hi {{ buyer_name }},</p>
+  <p>Thank you for your purchase. This email confirms payment for your merchandise order.</p>
+  <p>
+    <strong>Order reference:</strong> {{ order_reference }}<br>
+    <strong>Date (UTC):</strong> {{ date_utc }}<br>
+    <strong>Total:</strong> {{ total_display }}
+  </p>
+  <p><strong>Items</strong></p>
+  <ul style="padding-left: 1.25rem;">
+    {% for row in line_rows %}
+    <li>{{ row.label }} — {{ row.amount_display }}</li>
+    {% empty %}
+    <li>(No line details)</li>
+    {% endfor %}
+  </ul>
+  <p>If you have questions, reply to this email or contact us through our website.</p>
+  <p>— Tech Savvy</p>
+</body>
+</html>

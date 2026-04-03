@@ -10,9 +10,6 @@
                 Sponsors
               </h3>
             </div>
-            <p class="max-w-md text-xs text-dark/55 sm:text-sm">
-              Organizations backing programs and community growth.
-            </p>
           </SectionWireShield>
         </div>
         <span class="shrink-0 rounded-full border border-accent-purple/15 bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-purple/80 shadow-sm sm:text-xs">
@@ -40,9 +37,6 @@
                 Partners
               </h3>
             </div>
-            <p class="max-w-md text-xs text-dark/55 sm:text-sm">
-              Venues, education, and collaborators we work with.
-            </p>
           </SectionWireShield>
         </div>
         <span class="shrink-0 rounded-full border border-teal-500/20 bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-teal-700/90 shadow-sm sm:text-xs">
@@ -72,7 +66,7 @@
 
 <script setup lang="ts">
 import SponsorFlipCard, { type SponsorFlipItem } from '~/components/community/SponsorFlipCard.vue'
-import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
+import { DEFAULT_MEDIA_FALLBACK } from '~/constants/defaultMediaAssets'
 
 withDefaults(
   defineProps<{

@@ -104,6 +104,11 @@
 </template>
 
 <script setup lang="ts">
+import { DEFAULT_NEWS_IMAGE } from '~/constants/defaultMediaAssets'
+
+/** Shown when the gallery has no images yet or the first URL failed. */
+const fallbackImage = DEFAULT_NEWS_IMAGE
+
 const props = withDefaults(
   defineProps<{
     images?: string[] | { value?: string[] }

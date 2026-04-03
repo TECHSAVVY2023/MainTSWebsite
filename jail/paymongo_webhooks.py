@@ -14,12 +14,12 @@ import json
 import logging
 from typing import Any
 
-from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from . import payment_config
 from .merch_receipt_email import send_merch_receipt_for_order
 from .models import MerchCheckoutOrder, PaymongoWebhookEvent
 
@@ -72,34 +72,62 @@ def _checkout_session_id_from_event(attrs: dict[str, Any]) -> str:
     return ""
 
 
+def _mark_pending_paid_by_checkout_session(checkout_session_id: str) -> None:
+    """Transition pending order to paid by PayMongo checkout session id; then email receipt."""
+    if not checkout_session_id:
+        return
+    updated_rows = MerchCheckoutOrder.objects.filter(
+        checkout_session_id=checkout_session_id,
+        status=MerchCheckoutOrder.STATUS_PENDING,
+    ).update(status=MerchCheckoutOrder.STATUS_PAID)
+    if not updated_rows:
+        logger.info(
+            "checkout_session.payment.paid: no pending order for session %s",
+            checkout_session_id,
+        )
+        return
+    logger.info("Merch order marked paid (checkout session %s)", checkout_session_id)
+    try:
+        paid_order = MerchCheckoutOrder.objects.get(
+            checkout_session_id=checkout_session_id
+        )
+        send_merch_receipt_for_order(paid_order)
+    except MerchCheckoutOrder.DoesNotExist:
+        pass
+
+
+def _mark_pending_paid_by_reference(reference_number: str) -> None:
+    """Transition pending order to paid by our `reference_number` (metadata.order_ref); then email."""
+    if not reference_number:
+        return
+    updated_rows = MerchCheckoutOrder.objects.filter(
+        reference_number=reference_number,
+        status=MerchCheckoutOrder.STATUS_PENDING,
+    ).update(status=MerchCheckoutOrder.STATUS_PAID)
+    if not updated_rows:
+        return
+    try:
+        paid_order = MerchCheckoutOrder.objects.get(reference_number=reference_number)
+        send_merch_receipt_for_order(paid_order)
+    except MerchCheckoutOrder.DoesNotExist:
+        pass
+
+
 def _handle_event_type(event_type: str, payload: dict[str, Any]) -> None:
-    """Mark `MerchCheckoutOrder` paid/failed from PayMongo events."""
+    """Mark `MerchCheckoutOrder` paid from PayMongo events; log other types."""
     root = payload.get("data") or {}
     attrs = root.get("attributes") or {}
     if not isinstance(attrs, dict):
         attrs = {}
 
     if event_type == "checkout_session.payment.paid":
-        cs_id = _checkout_session_id_from_event(attrs)
-        if cs_id:
-            updated = MerchCheckoutOrder.objects.filter(
-                checkout_session_id=cs_id,
-                status=MerchCheckoutOrder.STATUS_PENDING,
-            ).update(status=MerchCheckoutOrder.STATUS_PAID)
-            if updated:
-                logger.info("Merch order marked paid (checkout session %s)", cs_id)
-                try:
-                    order = MerchCheckoutOrder.objects.get(checkout_session_id=cs_id)
-                    send_merch_receipt_for_order(order)
-                except MerchCheckoutOrder.DoesNotExist:
-                    pass
-            else:
-                logger.info(
-                    "checkout_session.payment.paid: no pending order for session %s",
-                    cs_id,
-                )
+        session_id = _checkout_session_id_from_event(attrs)
+        if session_id:
+            _mark_pending_paid_by_checkout_session(session_id)
         else:
-            logger.warning("checkout_session.payment.paid: missing checkout session id in payload")
+            logger.warning(
+                "checkout_session.payment.paid: missing checkout session id in payload"
+            )
     elif event_type == "payment.paid":
         inner = attrs.get("data")
         if isinstance(inner, dict):
@@ -107,18 +135,9 @@ def _handle_event_type(event_type: str, payload: dict[str, Any]) -> None:
             if isinstance(pay_attrs, dict):
                 meta = pay_attrs.get("metadata") or {}
                 if isinstance(meta, dict):
-                    ref = str(meta.get("order_ref") or "").strip()
-                    if ref:
-                        n = MerchCheckoutOrder.objects.filter(
-                            reference_number=ref,
-                            status=MerchCheckoutOrder.STATUS_PENDING,
-                        ).update(status=MerchCheckoutOrder.STATUS_PAID)
-                        if n:
-                            try:
-                                order = MerchCheckoutOrder.objects.get(reference_number=ref)
-                                send_merch_receipt_for_order(order)
-                            except MerchCheckoutOrder.DoesNotExist:
-                                pass
+                    order_ref = str(meta.get("order_ref") or "").strip()
+                    if order_ref:
+                        _mark_pending_paid_by_reference(order_ref)
         logger.info("PayMongo payment.paid processed")
     elif event_type == "payment.failed":
         logger.warning("PayMongo payment.failed")
@@ -132,7 +151,7 @@ def _handle_event_type(event_type: str, payload: dict[str, Any]) -> None:
 @require_POST
 def paymongo_webhook(request):
     raw = request.body
-    secret = getattr(settings, "PAYMONGO_WEBHOOK_SECRET", "") or ""
+    secret = payment_config.PAYMONGO_WEBHOOK_SECRET
 
     # Paymongo-Signature -> HTTP_PAYMONGO_SIGNATURE in Django META
     sig = request.META.get("HTTP_PAYMONGO_SIGNATURE", "")
@@ -183,12 +202,11 @@ def paymongo_webhook(request):
 
 def paymongo_webhook_health(_request):
     """GET for tunnel checks; does not expose webhook signing secret."""
-    base = getattr(settings, "PAYMONGO_PUBLIC_BASE_URL", "") or ""
-    base = base.strip().rstrip("/")
+    base = payment_config.PAYMONGO_PUBLIC_BASE_URL.strip().rstrip("/")
     data: dict = {
         "service": "paymongo-webhook",
         "post_path": "/webhooks/paymongo/",
-        "configured": bool(getattr(settings, "PAYMONGO_WEBHOOK_SECRET", "")),
+        "configured": bool(payment_config.PAYMONGO_WEBHOOK_SECRET),
     }
     if base:
         data["endpoint_url_for_paymongo_dashboard"] = f"{base}/webhooks/paymongo/"

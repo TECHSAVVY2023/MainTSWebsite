@@ -80,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
+import { DEFAULT_NEWS_IMAGE } from '~/constants/defaultMediaAssets'
 
 type NewsItem = {
   date?: string

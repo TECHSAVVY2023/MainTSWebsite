@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_COURSE_IMAGE } from '~/constants/sampleMedia'
+import { DEFAULT_COURSE_IMAGE } from '~/constants/defaultMediaAssets'
 
 const { course } = useCourseDetailPage()
 </script>

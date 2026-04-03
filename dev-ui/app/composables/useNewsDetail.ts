@@ -2,7 +2,7 @@
  * News detail page composable: article, images, lightbox.
  */
 import { ref, computed, watch } from 'vue'
-import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
+import { DEFAULT_NEWS_IMAGE } from '~/constants/defaultMediaAssets'
 
 export type NewsDetailItem = {
   id?: string
@@ -56,14 +56,19 @@ export function useNewsDetail () {
     const arr = a.images
     let urls: string[] = []
     if (Array.isArray(arr) && arr.length > 0) {
-      urls = arr.slice(0, 6).filter(Boolean).map((u) => u || DEFAULT_IMAGE)
+      urls = arr
+        .slice(0, 6)
+        .map((u) => (typeof u === 'string' && u.trim() ? u : DEFAULT_IMAGE))
     } else {
       const single = a.imageUrl
       urls = [single && single.trim() ? single : DEFAULT_IMAGE]
     }
     // Deduplicate: if all images are the same (e.g. fallback), show only one
     const unique = [...new Set(urls)]
-    if (unique.length === 1 && urls.length > 1) return [unique[0]]
+    if (unique.length === 1 && urls.length > 1) {
+      const only = unique[0]
+      return only !== undefined ? [only] : urls
+    }
     return urls
   })
 

@@ -28,13 +28,13 @@
           </SectionWireShield>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-start w-full max-w-[72rem] mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-start w-full max-w-[72rem] mx-auto justify-items-center">
           <div
             v-for="(project, idx) in safeProjects"
             :key="project.title || project.url || idx"
-            class="group relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#f8f7f5] border transition-all duration-300 hover:-translate-y-1 card-outline-violet-glow"
+            class="group relative flex h-[252px] w-[236px] flex-col overflow-hidden rounded-xl border bg-[#f8f7f5] transition-all duration-300 hover:-translate-y-1 card-outline-violet-glow sm:rounded-2xl"
           >
-            <div class="aspect-video relative bg-gray-200 overflow-hidden">
+            <div class="relative h-[132px] shrink-0 overflow-hidden bg-gray-200">
               <img
                 :src="project?.image || defaultImage"
                 :alt="project?.alt || project?.title || 'Project'"
@@ -47,17 +47,17 @@
                   :href="project?.url || '#'"
                   target="_blank"
                   rel="noopener"
-                  class="inline-flex items-center text-accent-purple font-semibold text-[11px] sm:text-xs"
+                  class="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1.5 text-[11px] font-bold text-[#1f2340] shadow-[0_6px_18px_rgba(0,0,0,0.35)] no-underline transition-all duration-200 hover:bg-white sm:px-3 sm:py-1.5 sm:text-xs"
                 >
                   Visit Site
                   <i class="fas fa-external-link-alt ml-1.5 text-[10px] sm:text-xs" />
                 </a>
               </div>
             </div>
-            <div class="p-2.5 sm:p-4 bg-[#f8f7f5]">
-              <h3 class="text-sm sm:text-base font-bold mb-0.5 text-gray-900">{{ project?.title ?? '' }}</h3>
-              <p class="text-gray-600 text-[11px] sm:text-xs">{{ project?.domain ?? '' }}</p>
-              <p class="text-gray-600 text-[11px] sm:text-xs">Develop By: {{ project?.developer ?? 'Tech Savvy Community' }}</p>
+            <div class="flex flex-1 flex-col bg-[#f8f7f5] p-2.5 sm:p-3">
+              <h3 class="line-clamp-2 text-sm font-bold text-gray-900">{{ project?.title ?? '' }}</h3>
+              <p class="mt-1 truncate text-[11px] text-gray-600">{{ project?.domain ?? '' }}</p>
+              <p class="mt-auto line-clamp-2 text-[11px] leading-tight text-gray-600">Developed by: {{ project?.developer ?? 'Tech Savvy Community' }}</p>
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@
 
 <script setup lang="ts">
 import { LANDING_SECTION_MAX_CARDS } from '~/composables/useLanding'
-import { DEFAULT_PROJECT_IMAGE } from '~/constants/sampleMedia'
+import { DEFAULT_PROJECT_IMAGE } from '~/constants/defaultMediaAssets'
 
 type ProjectItem = {
   title: string
