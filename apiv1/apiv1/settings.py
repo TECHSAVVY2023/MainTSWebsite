@@ -10,9 +10,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------------------------------------------
 # Security
 # ------------------------------------------------------------
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-DEBUG = True
-ALLOWED_HOSTS = ['188.166.211.139', '127.0.0.1', 'api.techsavvies.space', 'localhost']
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", os.getenv("SECRET_KEY", "django-insecure-change-me"))
+DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1")
+ALLOWED_HOSTS = ['188.166.211.139', '127.0.0.1', 'api.techsavvies.space', 'localhost', '*']
 PUBLIC_SITE = os.getenv("PAYMONGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
 
 
@@ -33,14 +33,8 @@ CORS_ALLOWED_ORIGINS = [
 # PayMongo (and related) payment settings — single source: tsapi.payment_config + .env
 from tsapi import payment_config as _payment_config
 
-
-SECRET_KEY = _os_env.get("SECRET_KEY", "django-insecure-change-me")
-DEBUG = _os_env.get("DEBUG", "True").lower() in ("true", "1")
-ALLOWED_HOSTS = ["*"]
-
-
 def _comma_separated_urls(key: str) -> list[str]:
-    raw = _os_env.get(key, "")
+    raw = os.environ.get(key, "")
     return [x.strip() for x in raw.split(",") if x.strip()]
 
 
@@ -72,7 +66,6 @@ CSRF_TRUSTED_ORIGINS = _dedupe_preserve(
         else []
     )
 )
->>>>>>> f1eed00 (4/2/2026 Updates)
 
 
 # Application definition
