@@ -330,7 +330,7 @@ async function startPayMongoCheckout () {
   submitting.value = true
   try {
     const res = await $fetch<{ checkout_url: string; reference_number: string }>(
-      `${apiBase}/techsavvy_app/payments/paymongo/create-checkout/`,
+      `${apiBase}/techsavvy_app/merch/checkout/`,
       {
         method: 'POST',
         body: {

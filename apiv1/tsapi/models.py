@@ -89,11 +89,6 @@ class TechsavvyMembers(models.Model):
 
 
 class PaymongoWebhookEvent(models.Model):
-    """
-    Idempotent log of PayMongo webhook deliveries (data.id is unique per event).
-    Inspect in admin or extend _handle_event_type to update orders.
-    """
-
     paymongo_event_id = models.CharField(max_length=255, unique=True, db_index=True)
     event_type = models.CharField(max_length=120, db_index=True)
     livemode = models.BooleanField(default=False)
@@ -108,7 +103,6 @@ class PaymongoWebhookEvent(models.Model):
 
 
 class MerchCheckoutOrder(models.Model):
-    """Merch cart checkout — linked to PayMongo Checkout Session + webhooks."""
 
     STATUS_PENDING = "pending"
     STATUS_PAID = "paid"

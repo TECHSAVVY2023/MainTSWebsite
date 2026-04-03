@@ -1,25 +1,9 @@
-"""
-URL configuration for apiv1 project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from tsapi import views as tsapi_views
-from tsapi.paymongo_webhooks import paymongo_webhook, paymongo_webhook_health
+from tsapi.merch import views as merch_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,8 +12,9 @@ urlpatterns = [
     path('techsavvy_members/', include('tsapi.urls_members')),
     path('calendar-events', tsapi_views.calendar_events),
     # PayMongo dashboard → https://YOUR_NGROK_HOST/webhooks/paymongo/
-    path('webhooks/paymongo/', paymongo_webhook, name='paymongo_webhook'),
-    path('webhooks/paymongo/health/', paymongo_webhook_health, name='paymongo_webhook_health'),
+    path("webhooks/paymongo/", merch_views.paymongo_webhook),
+    path("", include("tsapi.urls")),
+
 ]
 
 if settings.DEBUG:

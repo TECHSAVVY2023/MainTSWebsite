@@ -116,7 +116,7 @@ async function checkOnce () {
       reference_number: string
       status: string
       total_centavos?: number
-    }>(`${apiBase}/techsavvy_app/payments/paymongo/order/${encodeURIComponent(ref)}/`)
+    }>(`${apiBase}/merch/order/${encodeURIComponent(ref)}/`)
     totalCentavos.value = typeof res.total_centavos === 'number' ? res.total_centavos : null
     if (res.status === 'paid') {
       status.value = 'paid'

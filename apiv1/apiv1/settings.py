@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ------------------------------------------------------------
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = True
-ALLOWED_HOSTS = ['188.166.211.139', '127.0.0.1', 'api.techsavvies.space', 'localhost']
+ALLOWED_HOSTS = ['*']
 PUBLIC_SITE = os.getenv("PAYMONGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
 
 CORS_ALLOW_CREDENTIALS = True
@@ -27,6 +27,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.aptitudeentertainment.com",
     "https://fabricspluscurtains.com",
     "https://www.fabricspluscurtains.com",
+    "https://proreform-reservedly-marcelene.ngrok-free.dev",
 ]
 
 
