@@ -224,9 +224,8 @@ const DEFAULT_CITY_OPTIONS: ProfileOption[] = [
 ]
 
 export function useProfileOptions () {
-  const config = useRuntimeConfig()
-  const apiBase =
-    String((config.public as { apiBase?: string }).apiBase ?? '').trim() || ''
+  const config = import.meta.client ? useRuntimeConfig() : { public: {} }
+  const apiBase = (config.public?.apiBase as string) || ''
 
   async function fetchCitiesFromApi (province: string): Promise<ProfileOption[]> {
     if (!apiBase || !province) return []

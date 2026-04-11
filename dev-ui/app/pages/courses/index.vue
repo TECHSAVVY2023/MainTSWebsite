@@ -1,7 +1,7 @@
 <template>
   <div class="font-inter text-dark min-h-screen bg-neutral-gray">
     <LayoutPageHeader back-text="Back to Home" />
-    <main class="bg-neutral-gray pt-6 pb-16 sm:pt-8 sm:pb-20 md:pt-12 md:pb-24 relative overflow-hidden flex flex-col">
+    <main class="bg-neutral-gray pt-24 pb-16 sm:pt-28 sm:pb-20 md:pt-32 md:pb-24 relative overflow-hidden flex flex-col">
       <SectionWires gradient-id-prefix="swg-courses" />
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_COURSE_IMAGE } from '~/constants/defaultMediaAssets'
+import { DEFAULT_COURSE_IMAGE } from '~/constants/sampleMedia'
 
 const { courses, searchQueryValue, selectedCategoryValue, filteredCoursesArray } = useCoursesPage()
 </script>

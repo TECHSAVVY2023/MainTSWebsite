@@ -1,3 +1,5 @@
+import logging
+
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.db import transaction, IntegrityError
@@ -7,6 +9,8 @@ from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 
 from tsapi.models import MerchCheckoutOrder, PaymongoWebhookEvent
+
+logger = logging.getLogger(__name__)
 from .utils import format_php_centavos, lines_to_text, build_paymongo_address
 from .paymongo_client import create_checkout_session, PayMongoApiError
 
@@ -16,45 +20,63 @@ import hashlib, hmac, json
 validator = EmailValidator()
 
 
+def _payment_method_types_list() -> list[str]:
+    raw = getattr(settings, "PAYMONGO_PAYMENT_METHOD_TYPES", "") or "card,gcash,paymaya,qrph"
+    return [x.strip() for x in raw.split(",") if x.strip()]
+
+
 class ReceiptService:
+    """
+    Email a plain-text receipt to `buyer_email` after PayMongo marks the order paid.
+
+    Idempotent via `receipt_email_sent_at` — only set **after** `send_mail` succeeds
+    so SMTP failures can be retried on a duplicate webhook.
+    """
 
     @staticmethod
     def send(order: MerchCheckoutOrder) -> bool:
-        updated = MerchCheckoutOrder.objects.filter(
-            pk=order.pk,
-            receipt_email_sent_at__isnull=True
-        ).update(receipt_email_sent_at=timezone.now())
-
-        if not updated:
-            return True
-
-        row = MerchCheckoutOrder.objects.filter(pk=order.pk).first()
-        if not row:
-            return False
-
-        to = (row.buyer_email or "").strip()
-        if not to:
-            return True
-
-        ship = row.shipping_snapshot or {}
-        name = ship.get("fullName", "Customer")
-
-        body = (
-            f"Hi {name},\n\n"
-            f"Order: {row.reference_number}\n"
-            f"Total: {format_php_centavos(row.total_centavos)}\n\n"
-            f"{lines_to_text(row.lines_json or [])}"
-        )
-
         try:
-            send_mail(
-                f"Receipt — {row.reference_number}",
-                body,
-                settings.DEFAULT_FROM_EMAIL,
-                [to],
-            )
+            with transaction.atomic():
+                row = MerchCheckoutOrder.objects.select_for_update().get(pk=order.pk)
+                if row.receipt_email_sent_at:
+                    return True
+
+                to = (row.buyer_email or "").strip()
+                if not to:
+                    logger.warning(
+                        "Merch order %s: paid but buyer_email is empty — no receipt",
+                        row.reference_number,
+                    )
+                    return True
+
+                ship = row.shipping_snapshot or {}
+                name = ship.get("fullName", "Customer")
+
+                body = (
+                    f"Hi {name},\n\n"
+                    "Thank you for your Tech Savvy merchandise order.\n\n"
+                    f"Order: {row.reference_number}\n"
+                    f"Total: {format_php_centavos(row.total_centavos)}\n\n"
+                    f"{lines_to_text(row.lines_json or [])}\n"
+                )
+
+                send_mail(
+                    f"Receipt — {row.reference_number}",
+                    body,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [to],
+                    fail_silently=False,
+                )
+                row.receipt_email_sent_at = timezone.now()
+                row.save(update_fields=["receipt_email_sent_at"])
+        except MerchCheckoutOrder.DoesNotExist:
+            return False
         except Exception:
-            pass
+            logger.exception(
+                "Merch receipt email failed for order %s",
+                getattr(order, "reference_number", order.pk),
+            )
+            return False
 
         return True
 
@@ -81,19 +103,26 @@ class CheckoutService:
 
         line_items = []
         total = 0
+        checkout_desc = str(getattr(settings, "MERCH_CHECKOUT_DESCRIPTION", "") or "").strip() or "Tech Savvy merchandise"
+        checkout_desc = checkout_desc[:255]
+        ship = body.get("shipping") or {}
 
         for item in lines:
-            # Convert unitAmountPhp → centavos
             unit_php = float(item.get("unitAmountPhp") or 0)
             amount = int(round(unit_php * 100))
             qty = int(item.get("quantity") or 1)
 
-            line_items.append({
+            li = {
                 "currency": "PHP",
                 "amount": amount,
                 "name": item.get("name") or "Item",
                 "quantity": qty,
-            })
+                "description": checkout_desc[:255],
+            }
+            img = item.get("image")
+            if isinstance(img, str) and img.startswith("https://"):
+                li["images"] = [img]
+            line_items.append(li)
 
             total += amount * qty
 
@@ -103,24 +132,38 @@ class CheckoutService:
             status=MerchCheckoutOrder.STATUS_PENDING,
             total_centavos=total,
             lines_json=lines,
-            shipping_snapshot=body.get("shipping", {})
+            shipping_snapshot=ship,
         )
+
+        send_email_receipt = body.get("send_email_receipt")
+        if send_email_receipt is None:
+            send_email_receipt = True
+        else:
+            send_email_receipt = bool(send_email_receipt)
+
+        addr = build_paymongo_address(ship)
+        billing = {
+            "name": str(ship.get("fullName") or "Customer")[:255],
+            "email": email,
+            "phone": str(ship.get("phone") or "")[:50],
+            "address": {
+                **addr,
+                "state": str(ship.get("province") or "")[:100],
+            },
+        }
 
         payload = {
             "data": {
                 "attributes": {
                     "reference_number": ref,
+                    "description": checkout_desc,
                     "line_items": line_items,
-                    "payment_method_types": [
-                        "gcash",
-                        "card",
-                        "grab_pay"
-                    ],
+                    "payment_method_types": _payment_method_types_list(),
+                    "billing": billing,
+                    "send_email_receipt": send_email_receipt,
                     "success_url": body.get("success_url") or "http://localhost:3000/success",
                     "cancel_url": body.get("cancel_url") or "http://localhost:3000/cancel",
-                    "metadata": {
-                                "order_ref": ref
-                            }
+                    "metadata": {"order_ref": ref},
                 }
             }
         }
@@ -163,8 +206,7 @@ class WebhookService:
         attrs = event.get("attributes", {})
         event_type = attrs.get("type")
 
-        print("\n🔥 WEBHOOK RECEIVED")
-        print(json.dumps(data, indent=2)[:1000])
+        logger.info("PayMongo webhook: %s", event_type)
 
         try:
             with transaction.atomic():
@@ -185,8 +227,6 @@ class WebhookService:
                 or data_obj.get("attributes", {}).get("id")
             )
 
-            print("🆔 CS_ID FROM WEBHOOK:", cs_id)
-
             order = None
 
             if cs_id:
@@ -194,15 +234,17 @@ class WebhookService:
                     checkout_session_id=cs_id
                 ).first()
 
-            print("📦 ORDER FOUND (CS):", order)
-
             if order and order.status == MerchCheckoutOrder.STATUS_PENDING:
                 order.status = MerchCheckoutOrder.STATUS_PAID
                 order.save(update_fields=["status"])
-                try:
-                    ReceiptService.send(order)
-                except Exception:
-                    pass
+                if getattr(settings, "MERCH_SEND_CUSTOM_RECEIPT_EMAIL", False):
+                    try:
+                        ReceiptService.send(order)
+                    except Exception:
+                        logger.exception(
+                            "Custom receipt email failed for order %s",
+                            order.reference_number,
+                        )
 
         elif event_type == "payment.paid":
 
@@ -212,8 +254,6 @@ class WebhookService:
             metadata = pay_attrs.get("metadata", {}) or {}
             ref = metadata.get("order_ref")
 
-            print("🔎 REF FROM METADATA:", ref)
-
             order = None
 
             if ref:
@@ -221,15 +261,17 @@ class WebhookService:
                     reference_number=ref
                 ).first()
 
-            print("📦 ORDER FOUND (REF):", order)
-
             if order and order.status == MerchCheckoutOrder.STATUS_PENDING:
                 order.status = MerchCheckoutOrder.STATUS_PAID
                 order.save(update_fields=["status"])
-                try:
-                    ReceiptService.send(order)
-                except Exception:
-                    pass
+                if getattr(settings, "MERCH_SEND_CUSTOM_RECEIPT_EMAIL", False):
+                    try:
+                        ReceiptService.send(order)
+                    except Exception:
+                        logger.exception(
+                            "Custom receipt email failed for order %s",
+                            order.reference_number,
+                        )
 
         return JsonResponse({"received": True})
 

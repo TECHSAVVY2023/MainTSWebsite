@@ -19,10 +19,13 @@ const props = withDefaults(
 )
 
 const wrapperClass = computed(() => {
-  const bg = props.variant === 'white' ? 'bg-white' : 'bg-neutral-gray'
+  // Use a flat white surface so the wire mask visually disappears
+  // against current section backgrounds while still blocking wires.
+  const bg = 'bg-white'
   const layout = props.wide ? 'w-full max-w-full' : 'inline-block max-w-full align-top'
   return [
-    'relative z-[2] rounded-sm',
+    // Keep this layer above decorative wire SVG in every section.
+    'relative isolate z-[60] rounded-none',
     bg,
     layout,
     'px-2.5 py-2 sm:px-3 sm:py-2.5'

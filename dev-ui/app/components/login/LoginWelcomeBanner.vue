@@ -1,18 +1,52 @@
 <template>
-  <aside class="relative flex flex-shrink-0 flex-col items-center justify-center overflow-hidden px-7 py-8 sm:px-10 sm:py-10 lg:w-[56%] lg:px-12 lg:py-12">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_25%_18%,rgba(203,143,255,0.25),transparent_38%),linear-gradient(155deg,#05091a_0%,#121938_48%,#1b0f33_100%)]" aria-hidden="true" />
-    <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:44px_44px] opacity-45 pointer-events-none" aria-hidden="true" />
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(255,255,255,0.16),transparent_25%),radial-gradient(circle_at_80%_82%,rgba(255,174,122,0.18),transparent_28%)] pointer-events-none" aria-hidden="true" />
-    <SectionWires gradient-id-prefix="swg-login-banner" />
-    <div class="relative z-10 w-full max-w-[430px] rounded-[30px] border border-white/20 bg-[rgba(9,14,35,0.72)] p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_24px_58px_rgba(0,0,0,0.45)] backdrop-blur-[3px] sm:p-8">
-      <p class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-accent-purple">Welcome</p>
-      <h1 class="mb-4 text-[1.75rem] font-bold leading-tight tracking-[-0.02em] text-[#F7F5FC]">
-        <span class="block text-lg font-medium text-white sm:text-xl">Welcome to</span>
-        <span class="block text-3xl sm:text-[2.5rem] font-extrabold bg-gradient-to-r from-accent-purple to-accent-gold bg-clip-text text-transparent">TECHSAVVY</span>
+  <div class="w-full relative flex items-center justify-center px-6 sm:px-10 py-10 lg:px-10 xl:px-16 lg:py-16 bg-violet-600">
+    <!-- Decorative background elements -->
+    <div>
+      <div class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:32px_32px] pointer-events-none" aria-hidden="true" />
+    
+    <div class="relative z-10 w-full max-w-sm mx-auto">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm mb-6 lg:mb-8 border border-white/20">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+        <span class="text-[10px] font-black tracking-[0.2em] uppercase text-white">Community Access</span>
+      </div>
+      
+      <h1 class="text-white text-[2.5rem] sm:text-[2rem] xl:text-[3.5rem] font-black tracking-tighter leading-none mb-4 lg:mb-6">
+        WELCOME<br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-white">
+          BACK.
+        </span>
       </h1>
-      <p class="text-[0.9375rem] leading-relaxed text-white/90 sm:text-base">
-        Code · Create · Connect. Join our growing IT community in Misamis Occidental and grow with aspiring developers.
+      
+      <p class="text-violet-200 text-xs sm:text-sm xl:text-base font-semibold tracking-wide mb-3">
+        Code · Create · Connect
       </p>
+      
+      <p class="text-white/80 text-sm xl:text-base leading-relaxed lg:mb-12 mb-5">
+        Join our growing IT community in Misamis Occidental and grow with aspiring developers.
+      </p>
+      
+      <!-- Feature list -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-3 rounded-2xl backdrop-blur-sm shadow-sm transition-transform hover:-translate-y-1 duration-300">
+          <div class="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-amber-300">
+            <i class="fas fa-project-diagram text-sm" />
+          </div>
+          <div>
+            <p class="text-white font-bold text-xs uppercase tracking-widest leading-none mb-1">Real-world Projects</p>
+            <p class="text-white/60 text-[10px] uppercase font-bold tracking-widest">Build meaningful software</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 bg-white/5 border border-white/10 px-4 py-3 rounded-2xl backdrop-blur-sm shadow-sm transition-transform hover:-translate-y-1 duration-300">
+          <div class="shrink-0 w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-sky-400">
+            <i class="fas fa-users text-sm" />
+          </div>
+          <div>
+            <p class="text-white font-bold text-xs uppercase tracking-widest leading-none mb-1">Community Center</p>
+            <p class="text-white/60 text-[10px] uppercase font-bold tracking-widest">Connect with fellow IT enthusiasts</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </aside>
+    </div>
+  </div>
 </template>

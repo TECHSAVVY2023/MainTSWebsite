@@ -1,6 +1,8 @@
 /**
  * News listing page composable: data, search, pagination.
  */
+import { FALLBACK_NEWS_ITEMS } from '~/constants/fallbackNews'
+
 export type NewsListItem = {
   id?: string
   date?: string
@@ -27,6 +29,28 @@ export function useNewsList () {
 
   const newsItems = ref<NewsListItem[]>([])
   const newsSearchInput = ref('')
+
+  function mergeListItems (api: NewsListItem[]): NewsListItem[] {
+    let merged: NewsListItem[] =
+      api.length > 0 ? [...api] : [...FALLBACK_NEWS_ITEMS]
+    try {
+      const raw = getStorage(APPROVED_NEWS_KEY)
+      const approved = JSON.parse(raw || '[]')
+      if (Array.isArray(approved) && approved.length > 0) {
+        merged = [...approved, ...merged]
+      }
+    } catch { /* ignore */ }
+    return merged
+  }
+
+  watch(
+    cmsListFromApi,
+    (v) => {
+      const api = Array.isArray(v) ? (v as NewsListItem[]) : []
+      newsItems.value = mergeListItems(api)
+    },
+    { immediate: true }
+  )
 
   const searchQuery = computed(() => (newsSearchInput.value || '').trim().toLowerCase())
 
@@ -79,23 +103,18 @@ export function useNewsList () {
     const q = route.query.q
     if (typeof q === 'string' && q.trim()) newsSearchInput.value = q.trim()
 
+    let api: NewsListItem[] = []
     const fromApi = cmsListFromApi.value
     if (Array.isArray(fromApi) && fromApi.length > 0) {
-      newsItems.value = fromApi as NewsListItem[]
+      api = fromApi as NewsListItem[]
     } else {
       try {
         const list = await fetchCmsList()
-        if (list.length > 0) newsItems.value = list as NewsListItem[]
+        if (list.length > 0) api = list as NewsListItem[]
       } catch { /* fall through */ }
     }
 
-    try {
-      const raw = getStorage(APPROVED_NEWS_KEY)
-      const approved = JSON.parse(raw || '[]')
-      if (Array.isArray(approved) && approved.length > 0) {
-        newsItems.value = [...approved, ...newsItems.value]
-      }
-    } catch { /* ignore */ }
+    newsItems.value = mergeListItems(api)
   }
 
   return {

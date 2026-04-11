@@ -2,6 +2,9 @@
 ViewSets and auth (boss-style): public read-only, optional admin JWT.
 Same URL paths kept for dev-ui compatibility.
 """
+import json
+import re
+
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -13,22 +16,73 @@ from .models import CmsItem, FileUploadModel, TechsavvyMembers
 from .serializers import CmsItemSerializer, FileUploadSerializer, TechsavvySerializer
 
 
-# =========================================================
-# STUB (dashboard)
-# =========================================================
+def _category_includes_events(cat_val) -> bool:
+    s = str(cat_val or "").strip().lower()
+    if not s:
+        return False
+    if s == "events":
+        return True
+    parts = re.split(r"[|,]", s)
+    return any(p.strip() == "events" for p in parts)
+
+
+def _cms_rows_for_calendar():
+    """Approved CMS items whose filters JSON has category 'events' and event_date."""
+    rows = []
+    for item in CmsItem.objects.filter(approval_status=CmsItem.APPROVAL_APPROVED).order_by(
+        "-created_at"
+    ):
+        raw = (item.filters or "").strip()
+        if not raw:
+            continue
+        try:
+            fl = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(fl, dict):
+            continue
+        if not _category_includes_events(fl.get("category", "")):
+            continue
+        date_str = str(fl.get("event_date", "")).strip()
+        if not date_str:
+            continue
+        iso = date_str if "T" in date_str else f"{date_str}T12:00:00.000Z"
+        link = ""
+        if isinstance(item.links, list) and item.links:
+            link = str(item.links[0] or "")
+        kind_raw = str(fl.get("event_kind", "event")).strip().lower()
+        if kind_raw not in ("task", "reminder", "appointment", "event"):
+            kind_raw = "event"
+        rows.append(
+            {
+                "id": str(item.pk),
+                "title": item.title or "Event",
+                "date": iso,
+                "time": str(fl.get("event_time", "")).strip(),
+                "end_time": str(fl.get("end_time", "")).strip(),
+                "description": (item.descriptions or "")[:2000],
+                "link": link,
+                "kind": kind_raw,
+            }
+        )
+    rows.sort(key=lambda r: r["date"])
+    return rows
+
 
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def calendar_events(request):
-    """Stub for dashboard calendar-events."""
+    """
+    Calendar feed for Nuxt landing / dashboard.
+    GET: approved CMS rows with filters.category=events and event_date set.
+    POST: legacy stub shape (dashboard create); not persisted here.
+    """
     if request.method == "POST":
-        return Response({"id": "1", "title": "", "date": "", "time": "", "description": "", "link": ""})
-    return Response([])
+        return Response(
+            {"id": "1", "title": "", "date": "", "time": "", "description": "", "link": ""}
+        )
+    return Response(_cms_rows_for_calendar())
 
-
-# =========================================================
-# CMS – PUBLIC (read-only) + ADMIN (full CRUD via same URLs for now)
-# =========================================================
 
 class CmsViewSet(ModelViewSet):
     """
@@ -94,11 +148,6 @@ class FileUploadViewSet(ModelViewSet):
         )
 
 
-
-# =========================================================
-# MEMBERS – ViewSet (email moved to signals)
-# =========================================================
-
 class MemberViewSet(ModelViewSet):
     queryset = TechsavvyMembers.objects.all().order_by("-created_at")
     serializer_class = TechsavvySerializer
@@ -142,10 +191,6 @@ class MemberViewSet(ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
-
-# =========================================================
-# ADMIN AUTH (JWT – boss-style)
-# =========================================================
 
 @api_view(["POST"])
 @permission_classes([AllowAny])

@@ -1,18 +1,22 @@
 /**
  * Landing page composable: news, projects, courses, calendar, scroll, search.
  */
+import { FALLBACK_NEWS_ITEMS } from '~/constants/fallbackNews'
 import {
-  LANDING_FALLBACK_NEWS_IMAGES,
-  LANDING_FALLBACK_PROJECT_IMAGES,
-  LANDING_FALLBACK_COURSE_IMAGES,
+  SAMPLE_PROJECTS,
+  SAMPLE_COURSES,
+  SAMPLE_BRAND_LOGOS,
   DEFAULT_NEWS_IMAGE,
   DEFAULT_COURSE_IMAGE,
   DEFAULT_PROJECT_IMAGE
-} from '~/constants/defaultMediaAssets'
+} from '~/constants/sampleMedia'
+import { firstCmsImageUrl } from '~/utils/cmsMedia'
 
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
-const CMS_LIST_PATH = '/techsavvy_app/cms/list/'
+const CMS_LIST_PATH = '/api/techsavvies/cms/list/'
+/** Server proxy — browser calls Nuxt origin; Nitro forwards to Django (see server/api/internal/cms-list.get.ts). */
+const CMS_LIST_PROXY_PATH = '/api/internal/cms-list'
 
 /** Homepage sections: same max cards per row (News, Courses, Featured Projects). */
 export const LANDING_SECTION_MAX_CARDS = 4
@@ -28,21 +32,6 @@ function toFilterText (filters?: string | Record<string, unknown> | null): strin
   if (!filters) return ''
   if (typeof filters === 'string') return filters
   return JSON.stringify(filters)
-}
-
-function parseLandingFiltersObject (filters?: string | Record<string, unknown> | null): Record<string, unknown> | null {
-  if (!filters) return null
-  if (typeof filters === 'object' && filters !== null && !Array.isArray(filters)) {
-    return filters as Record<string, unknown>
-  }
-  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
-    try {
-      return JSON.parse(filters) as Record<string, unknown>
-    } catch {
-      return null
-    }
-  }
-  return null
 }
 
 /** Parsed `filters.category` (lowercase) for JSON or legacy string CMS items. */
@@ -63,19 +52,6 @@ function getFilterCategoryFromLandingItem (filters?: string | Record<string, unk
   return (parts[0] || '').toLowerCase()
 }
 
-function mapLandingItemToSpeaker (item: LandingNewsItem): LandingSpeaker {
-  const fObj = parseLandingFiltersObject(item.filters)
-  const role = String(fObj?.speaker_role || fObj?.role || 'Speaker').trim() || 'Speaker'
-  const topic = String(fObj?.speaker_topic || fObj?.topic || item.summary || item.description || '').trim()
-  return {
-    name: item.title || 'Guest Speaker',
-    role,
-    topic: topic || 'Practical full-stack development and career growth',
-    link: item.link && item.link !== '#' ? item.link : '',
-    image: item.imageUrl || undefined
-  }
-}
-
 const NON_NEWS_LANDING_CATEGORIES = new Set([
   'merchandise',
   'events',
@@ -83,27 +59,62 @@ const NON_NEWS_LANDING_CATEGORIES = new Set([
   'featured projects'
 ])
 
+/** Primary `filters.category` values that belong in the homepage “News & Updates” strip (lowercase tokens). */
+const NEWS_SECTION_CATEGORY_TOKENS = new Set([
+  'news and update',
+  'news and updates',
+  'news highlights',
+  'news highlight',
+  'announcements',
+  'announcement',
+  'news'
+])
+
+function splitCategoryTokens (categoryField: string): string[] {
+  const s = String(categoryField || '').trim().toLowerCase()
+  if (!s) return []
+  return s.split(/[|,]/).map((t) => t.trim()).filter(Boolean)
+}
+
+/** Normalize CMS `filters` when API returns a JSON string (legacy) or object. */
+function parseLandingFiltersObject (filters: unknown): Record<string, unknown> | null {
+  if (!filters) return null
+  if (typeof filters === 'object' && !Array.isArray(filters)) {
+    return filters as Record<string, unknown>
+  }
+  if (typeof filters === 'string' && filters.trim().startsWith('{')) {
+    try {
+      const o = JSON.parse(filters) as unknown
+      if (typeof o === 'object' && o !== null && !Array.isArray(o)) {
+        return o as Record<string, unknown>
+      }
+    } catch {
+      return null
+    }
+  }
+  return null
+}
+
+function isApprovedCmsLanding (status?: string): boolean {
+  const s = String(status || '').trim().toLowerCase()
+  return s === 'approved' || s === 'published' || s === 'live'
+}
+
+/** True if `filters.category` is `events` or a comma/pipe list that includes `events` (e.g. from dashboard checkboxes). */
+function filterCategoryIncludesEvents (categoryVal: unknown): boolean {
+  const s = String(categoryVal || '').trim().toLowerCase()
+  if (!s) return false
+  if (s === 'events') return true
+  return s.split(/[|,]/).map(p => p.trim().toLowerCase()).some(t => t === 'events')
+}
+
 function landingNewsToCalendarRows (items: LandingNewsItem[]): LandingCalEvent[] {
   const out: LandingCalEvent[] = []
   for (const item of items) {
-    let fl: Record<string, unknown> | null = null
-    const f = item.filters
-    if (typeof f === 'object' && f !== null && !Array.isArray(f)) {
-      fl = f as Record<string, unknown>
-    } else if (typeof f === 'string' && f.trim().startsWith('{')) {
-      try {
-        const parsed = JSON.parse(f) as Record<string, unknown>
-        fl = parsed
-      } catch {
-        fl = null
-      }
-    }
+    const fl = parseLandingFiltersObject(item.filters)
     if (!fl) continue
-
-    const category = String(fl.category || '').trim().toLowerCase()
-    if (category !== 'events') continue
-
-    const dateStr = String(fl.event_date || item.date || '').trim()
+    if (!filterCategoryIncludesEvents(fl.category)) continue
+    const dateStr = String(fl.event_date || '').trim()
     if (!dateStr) continue
     const iso = dateStr.includes('T') ? dateStr : `${dateStr}T12:00:00.000Z`
     const kindRaw = String(fl.event_kind || 'event').toLowerCase()
@@ -114,7 +125,7 @@ function landingNewsToCalendarRows (items: LandingNewsItem[]): LandingCalEvent[]
       time: String(fl.event_time || ''),
       endTime: String(fl.end_time || ''),
       title: item.title || 'Event',
-      description: item.summary || item.description || '',
+      description: item.summary || '',
       link: item.link && item.link !== '#' ? item.link : '',
       kind
     })
@@ -131,12 +142,22 @@ function getFirstFileUrl (files?: { name?: string; url?: string }[] | { name?: s
 
 function isNewsItem (item: { filters?: string | Record<string, unknown> | null }): boolean {
   const cat = getFilterCategoryFromLandingItem(item.filters)
-  if (cat && NON_NEWS_LANDING_CATEGORIES.has(cat)) return false
-  if (cat === 'news and update') return true
+  const tokens = splitCategoryTokens(cat)
+
+  if (tokens.length > 0) {
+    if (tokens.some((t) => NEWS_SECTION_CATEGORY_TOKENS.has(t))) return true
+    if (tokens.every((t) => NON_NEWS_LANDING_CATEGORIES.has(t))) return false
+  } else if (cat && NON_NEWS_LANDING_CATEGORIES.has(cat)) {
+    return false
+  }
+
+  if (cat === 'news and update' || cat === 'news highlights') return true
 
   const f = toFilterText(item.filters)
+  const lower = f.toLowerCase()
   if (!f.trim()) return true
-  return NEWS_CATEGORIES.some((c) => f.split(',').map((s) => s.trim()).includes(c)) || f.toLowerCase().includes('news and update')
+  if (lower.includes('news and update') || lower.includes('news highlights')) return true
+  return NEWS_CATEGORIES.some((c) => lower.includes(c.toLowerCase()))
 }
 export type LandingProjectItem = { title: string; domain?: string; developer?: string; url: string; image?: string; alt?: string }
 export type LandingCourseItem = { slug: string; title: string; instructor?: string; rating?: string; duration?: string; badge?: string; image?: string }
@@ -150,47 +171,16 @@ export type LandingCalEvent = {
   kind?: 'task' | 'event' | 'reminder' | 'appointment'
 }
 export type LandingRoleStat = { role: string; count: number; percent: number }
-export type LandingSpeaker = { name: string; role?: string; topic?: string; link?: string; image?: string }
+export type LandingSpeaker = {
+  name: string
+  role?: string
+  topic?: string
+  link?: string
+  image?: string
+  /** Set when mapped from API — used for “Speakers only” filter on the hub. */
+  isSpeaker?: boolean
+}
 export type LandingSponsor = { name: string; tier?: string; description?: string; link?: string; logo?: string }
-
-const FALLBACK_NEWS_ITEMS: LandingNewsItem[] = [
-  {
-    id: 'sample-news-1',
-    date: '2026-03-10',
-    title: 'Code Camp Batch Opens',
-    summary: 'Applications are now open for the next full-stack learning batch.',
-    description: 'Applications are now open for the next full-stack learning batch with guided mentorship and practical project work.',
-    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.codecamp,
-    link: '/news'
-  },
-  {
-    id: 'sample-news-2',
-    date: '2026-03-05',
-    title: 'Community Demo Night',
-    summary: 'Learners showcased portfolio projects to mentors and peers.',
-    description: 'Learners showcased portfolio projects to mentors and peers during our monthly community demo night.',
-    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.demoNight,
-    link: '/news'
-  },
-  {
-    id: 'sample-news-3',
-    date: '2026-02-28',
-    title: 'Mentor Spotlight Series',
-    summary: 'A new talk series on modern frontend and backend workflows.',
-    description: 'A new talk series featuring practical sessions on modern frontend and backend development workflows.',
-    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.mentor,
-    link: '/news'
-  },
-  {
-    id: 'sample-news-4',
-    date: '2026-02-20',
-    title: 'Student Success Stories',
-    summary: 'Graduates shared real project journeys and career progress.',
-    description: 'Recent graduates shared real project journeys, lessons learned, and their career progress in tech.',
-    imageUrl: LANDING_FALLBACK_NEWS_IMAGES.success,
-    link: '/news'
-  }
-]
 
 const FALLBACK_PROJECTS: LandingProjectItem[] = [
   {
@@ -198,7 +188,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Retail Platform',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: LANDING_FALLBACK_PROJECT_IMAGES.ecommerce,
+    image: SAMPLE_PROJECTS.ecommerce,
     alt: 'Sample e-commerce project preview'
   },
   {
@@ -206,7 +196,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Online Book Store',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: LANDING_FALLBACK_PROJECT_IMAGES.books,
+    image: SAMPLE_PROJECTS.books,
     alt: 'Sample marketplace project preview'
   },
   {
@@ -214,7 +204,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Local Produce Store',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: LANDING_FALLBACK_PROJECT_IMAGES.farm,
+    image: SAMPLE_PROJECTS.farm,
     alt: 'Sample produce store project preview'
   },
   {
@@ -222,7 +212,7 @@ const FALLBACK_PROJECTS: LandingProjectItem[] = [
     domain: 'Education Platform',
     developer: 'Tech Savvy Community',
     url: '/projects',
-    image: LANDING_FALLBACK_PROJECT_IMAGES.lms,
+    image: SAMPLE_PROJECTS.lms,
     alt: 'Sample learning platform preview'
   }
 ]
@@ -235,7 +225,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '6 weeks',
     badge: 'Beginner',
-    image: LANDING_FALLBACK_COURSE_IMAGES.frontend
+    image: SAMPLE_COURSES.frontend
   },
   {
     slug: 'backend-api-practical',
@@ -244,7 +234,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.9',
     duration: '8 weeks',
     badge: 'Intermediate',
-    image: LANDING_FALLBACK_COURSE_IMAGES.backend
+    image: SAMPLE_COURSES.backend
   },
   {
     slug: 'nuxt-fullstack-lab',
@@ -253,7 +243,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.7',
     duration: '7 weeks',
     badge: 'Project-based',
-    image: LANDING_FALLBACK_COURSE_IMAGES.nuxt
+    image: SAMPLE_COURSES.nuxt
   },
   {
     slug: 'deployment-and-devops',
@@ -262,7 +252,7 @@ const FALLBACK_COURSES: LandingCourseItem[] = [
     rating: '4.8',
     duration: '5 weeks',
     badge: 'Advanced',
-    image: LANDING_FALLBACK_COURSE_IMAGES.devops
+    image: SAMPLE_COURSES.devops
   }
 ]
 
@@ -303,7 +293,8 @@ type CmsApiItem = {
   filters?: string | Record<string, unknown> | null
   links?: string[]
   files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null
-  images?: string[]
+  /** String URLs and/or `{ name?, url? }` objects (API may mix both). */
+  images?: unknown[]
   created_at?: string
 }
 
@@ -311,7 +302,7 @@ function mapCmsToNewsItem (
   cms: { id?: number; title?: string; descriptions?: string; approval_status?: string; filters?: string | Record<string, unknown> | null; links?: string[]; files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null; images?: string[]; created_at?: string },
   baseUrl: string
 ) {
-  const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
+  const imgFromImages = firstCmsImageUrl(cms.images)
   let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
   if (fileUrl && baseUrl && !fileUrl.startsWith('http')) {
     const origin = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '')
@@ -341,6 +332,25 @@ function normalizeCmsList (body: unknown): unknown[] {
   return []
 }
 
+function mapDashboardCalKind (raw?: string): LandingCalEvent['kind'] {
+  const k = String(raw || 'event').trim().toLowerCase()
+  if (k === 'task' || k === 'reminder' || k === 'appointment') return k
+  return 'event'
+}
+
+/** Drop duplicates when the same CMS event is merged from the calendar-events feed and CMS list. */
+function dedupeLandingCalEvents (events: LandingCalEvent[]): LandingCalEvent[] {
+  const seen = new Set<string>()
+  const out: LandingCalEvent[] = []
+  for (const e of events) {
+    const key = `${String(e.date || '')}::${String(e.title || '').trim().toLowerCase()}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(e)
+  }
+  return out
+}
+
 export function useLanding () {
   const config = useRuntimeConfig()
   const apiBase = (config.public?.apiBase as string) || ''
@@ -357,22 +367,48 @@ export function useLanding () {
   const sponsors = ref<LandingSponsor[]>([])
   const partners = ref<LandingSponsor[]>([])
 
-  const { data: cmsListFromApi } = useAsyncData(
+  const mediaBase = () => apiBase.replace(/\/$/, '')
+
+  async function fetchCmsListMapped (): Promise<LandingNewsItem[]> {
+    const origin = mediaBase()
+    const toMapped = (data: unknown) =>
+      (normalizeCmsList(data) as { approval_status?: string }[])
+        .filter((item) => isApprovedCmsLanding(item.approval_status))
+        .map((item: unknown) => mapCmsToNewsItem(item as CmsApiItem, origin))
+
+    const jsonHeaders = { Accept: 'application/json' as const }
+    try {
+      const data = await $fetch<unknown>(CMS_LIST_PROXY_PATH, { headers: jsonHeaders })
+      return toMapped(data)
+    } catch {
+      /* proxy unavailable or API base missing — try Django URL directly (SSR / same-machine dev) */
+    }
+    if (!origin) return []
+    try {
+      const data = await $fetch<unknown>(`${origin}${CMS_LIST_PATH}`, { headers: jsonHeaders })
+      return toMapped(data)
+    } catch {
+      return []
+    }
+  }
+
+  const { data: cmsListFromApi, refresh: refreshLandingCmsList } = useAsyncData(
     'landing-cms-list',
-    async () => {
-      if (!apiBase) return []
-      try {
-        const url = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
-        const data = await $fetch<unknown>(url)
-        const list = normalizeCmsList(data)
-        return (list as { approval_status?: string }[])
-          .filter((item) => item.approval_status === 'approved')
-          .map((item: unknown) => mapCmsToNewsItem(item as CmsApiItem, apiBase))
-      } catch {
-        return []
-      }
-    },
+    () => fetchCmsListMapped(),
     { server: true, default: () => [] }
+  )
+
+  /**
+   * `loadData()` only runs on the client (onMounted). Without this, SSR can render an empty
+   * news strip until hydration, and a slow `useAsyncData` resolve can miss the first `loadData()` pass.
+   */
+  watch(
+    cmsListFromApi,
+    (v) => {
+      if (!Array.isArray(v) || v.length === 0) return
+      newsItems.value = v as LandingNewsItem[]
+    },
+    { immediate: true }
   )
 
   const newsItemsDisplay = computed(() =>
@@ -435,52 +471,44 @@ export function useLanding () {
     return `${origin}${p.startsWith('/') ? '' : '/'}${p}`
   }
 
-  function buildSpeakers (members: MemberRoleApiItem[]) {
-    const topSpeakers = members
-      .filter((member) => {
-        const role = normalizeRole(member.role).toLowerCase()
-        return role.includes('speaker') || role.includes('mentor') || role.includes('instructor')
-      })
-      .slice(0, 6)
-      .map((member) => {
-        const topicLine = (member.speaker_topic && String(member.speaker_topic).trim()) || ''
-        const img = resolveMemberMediaUrl(member.profilePicture ?? null)
-        return {
-          name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Guest Speaker',
-          role: normalizeRole(member.role),
-          topic: topicLine || 'Practical full-stack development and career growth',
-          link: member.website || '',
-          image: img || undefined
-        }
-      })
-
-    if (topSpeakers.length > 0) {
-      speakers.value = topSpeakers
-      return
-    }
-
-    speakers.value = [
-      { name: 'Ms. Jo', role: 'Tech Lead & CTO', topic: 'Modern web development and real-world delivery' },
-      { name: 'Community Mentor Panel', role: 'Mentor', topic: 'Career readiness, code review, and collaboration' }
-    ]
+  function memberIsSpeaker (member: MemberRoleApiItem): boolean {
+    const roleLabel = normalizeRole(member.role).toLowerCase()
+    const raw = String(member.role || '').toLowerCase()
+    const topic = String(member.speaker_topic || '').trim()
+    if (topic.length > 0) return true
+    return (
+      roleLabel.includes('speaker') ||
+      roleLabel.includes('mentor') ||
+      roleLabel.includes('instructor') ||
+      raw.includes('speaker') ||
+      raw.includes('mentor') ||
+      raw.includes('trainer')
+    )
   }
 
-  function buildSpeakersFromCms (cmsApproved: LandingNewsItem[]) {
-    const rows = cmsApproved
-      .filter((item) => {
-        const category = getFilterCategoryFromLandingItem(item.filters)
-        if (category.includes('speaker')) return true
-        if (category.includes('community members')) return true
-        if (category.includes('community people')) return true
-        const f = toFilterText(item.filters).toLowerCase()
-        return f.includes('speaker') || f.includes('community members')
-      })
-      .map(mapLandingItemToSpeaker)
-      .filter((s) => (s.name || '').trim().length > 0)
-
-    if (rows.length > 0) {
-      speakers.value = rows.slice(0, 6)
+  function mapMemberToCommunityCard (member: MemberRoleApiItem): LandingSpeaker {
+    const topicLine = String(member.speaker_topic || '').trim()
+    const roleDisplay = normalizeRole(member.role)
+    const speaker = memberIsSpeaker(member)
+    const img = resolveMemberMediaUrl(member.profilePicture ?? null)
+    return {
+      name: `${member.firstname || ''} ${member.lastname || ''}`.trim() || 'Member',
+      role: roleDisplay,
+      topic:
+        topicLine ||
+        (speaker ? 'Practical full-stack development and career growth' : 'Community member'),
+      link: member.website || '',
+      image: img || undefined,
+      isSpeaker: speaker
     }
+  }
+
+  function applyCommunityMembersFromApi (members: MemberRoleApiItem[]) {
+    if (!members.length) {
+      speakers.value = []
+      return
+    }
+    speakers.value = members.map(mapMemberToCommunityCard)
   }
 
   function mapCmsToSponsorRow (item: LandingNewsItem): LandingSponsor {
@@ -495,21 +523,11 @@ export function useLanding () {
   function buildSponsorsAndPartners (cmsApproved: LandingNewsItem[]) {
     const sponsorRows: LandingSponsor[] = []
     const partnerRows: LandingSponsor[] = []
-    const sponsorCategoryKeys = new Set([
-      'sponsors & partners',
-      'sponsors and partners',
-      'sponsor & partner',
-      'sponsor and partner'
-    ])
 
     for (const item of cmsApproved) {
-      const category = getFilterCategoryFromLandingItem(item.filters)
-      if (!sponsorCategoryKeys.has(category)) continue
-
-      const fObj = parseLandingFiltersObject(item.filters)
-      const kind = String(fObj?.partner_kind || '').trim().toLowerCase()
-      const hasPartner = kind === 'partner'
-      const hasSponsor = kind === 'sponsor' || !hasPartner
+      const f = toFilterText(item.filters).toLowerCase()
+      const hasSponsor = f.includes('sponsor')
+      const hasPartner = /\bpartner\b/.test(f) || f.includes('venue partner')
 
       const row = mapCmsToSponsorRow(item)
       if (hasPartner && !hasSponsor) {
@@ -525,36 +543,68 @@ export function useLanding () {
       return
     }
 
-    sponsors.value = []
-    partners.value = []
+    sponsors.value = [
+      {
+        name: 'Tech Savvy Community Partners',
+        tier: 'Community Sponsor',
+        description: 'Helping fund educational programs and developer activities.',
+        logo: SAMPLE_BRAND_LOGOS.codebev
+      },
+      {
+        name: 'CloudStack Asia',
+        tier: 'Infrastructure Sponsor',
+        description: 'Credits and tooling for learning environments.',
+        logo: SAMPLE_BRAND_LOGOS.cloud
+      }
+    ]
+    partners.value = [
+      {
+        name: 'Workflow Co-Working Space',
+        tier: 'Venue Partner',
+        description: 'Host venue supporting workshops, talks, and build sessions.',
+        link: 'https://www.techsavvies.space',
+        logo: SAMPLE_BRAND_LOGOS.venue
+      },
+      {
+        name: 'Misamis Digital Guild',
+        tier: 'Education Partner',
+        description: 'Scholarships and learning resources for cohort members.',
+        logo: SAMPLE_BRAND_LOGOS.education
+      }
+    ]
   }
 
   async function loadData () {
+    if (import.meta.client) {
+      await refreshLandingCmsList()
+    }
     const fromApi = cmsListFromApi.value
     if (Array.isArray(fromApi) && fromApi.length > 0) {
       newsItems.value = fromApi as LandingNewsItem[]
-    } else if (apiBase) {
-      try {
-        const cmsUrl = `${apiBase.replace(/\/$/, '')}${CMS_LIST_PATH}`
-        const res = await fetch(cmsUrl)
-        const data = await res.json().catch(() => null)
-        const list = normalizeCmsList(data)
-        if (res.ok && list.length > 0) {
-          const mapped = (list as { approval_status?: string }[])
-            .filter((item) => item.approval_status === 'approved')
-            .map((item: unknown) => mapCmsToNewsItem(item as Parameters<typeof mapCmsToNewsItem>[0], apiBase))
-          if (mapped.length > 0) newsItems.value = mapped
-        }
-      } catch { /* fall through */ }
+    } else {
+      const mapped = await fetchCmsListMapped()
+      if (mapped.length > 0) {
+        newsItems.value = mapped
+      }
+    }
+
+    const { token, init: initAuth } = useAuth()
+    if (import.meta.client) initAuth()
+    const includeFeaturedProjects = !!token.value
+
+    if (!includeFeaturedProjects) {
+      projects.value = []
     }
 
     try {
       const { fetchCmsProjects, fetchCmsCourses } = useCmsNews()
-      const proj = await fetchCmsProjects()
-      if (Array.isArray(proj) && proj.length > 0) {
-        projects.value = proj
-          .slice(0, LANDING_SECTION_MAX_CARDS)
-          .map((p) => ({ title: p.title, domain: p.domain, developer: p.developer, url: p.url, image: p.image, alt: p.alt }))
+      if (includeFeaturedProjects) {
+        const proj = await fetchCmsProjects()
+        if (Array.isArray(proj) && proj.length > 0) {
+          projects.value = proj
+            .slice(0, LANDING_SECTION_MAX_CARDS)
+            .map((p) => ({ title: p.title, domain: p.domain, developer: p.developer, url: p.url, image: p.image, alt: p.alt }))
+        }
       }
       const courses = await fetchCmsCourses()
       if (Array.isArray(courses) && courses.length > 0) {
@@ -576,7 +626,15 @@ export function useLanding () {
         const events = await api.getCalendarEvents()
         if (Array.isArray(events) && events.length > 0) {
           calendarEvents.value = events
-            .map((e) => ({ date: e.date, time: e.time, title: e.title, description: e.description, link: e.link }))
+            .map((e) => ({
+              date: e.date,
+              time: e.time,
+              endTime: e.end_time || e.endTime || '',
+              title: e.title,
+              description: e.description,
+              link: e.link,
+              kind: mapDashboardCalKind(e.kind)
+            }))
             .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
         }
       }
@@ -607,6 +665,8 @@ export function useLanding () {
       )
     }
 
+    calendarEvents.value = dedupeLandingCalEvents(calendarEvents.value)
+
     const now = new Date()
     eventReminders.value = [...calendarEvents.value]
       .filter((event) => {
@@ -618,12 +678,17 @@ export function useLanding () {
 
     try {
       if (apiBase) {
-        const membersUrl = `${apiBase.replace(/\/$/, '')}/techsavvy_members/member/list/`
-        const members = await $fetch<MemberRoleApiItem[] | unknown>(membersUrl)
-        const normalized = Array.isArray(members) ? members : []
+        const membersUrl = `${apiBase.replace(/\/$/, '')}/api/techsavvies/member/list/`
+        const members = await $fetch<MemberRoleApiItem[] | Record<string, unknown> | unknown>(membersUrl)
+        let normalized: MemberRoleApiItem[] = []
+        if (Array.isArray(members)) {
+          normalized = members as MemberRoleApiItem[]
+        } else if (members && typeof members === 'object' && Array.isArray((members as Record<string, unknown>).results)) {
+          normalized = (members as { results: MemberRoleApiItem[] }).results
+        }
         if (normalized.length > 0) {
           buildRoleStats(normalized)
-          buildSpeakers(normalized)
+          applyCommunityMembersFromApi(normalized)
         }
       }
     } catch { /* keep fallback values */ }
@@ -632,7 +697,7 @@ export function useLanding () {
     if (newsItems.value.length === 0) {
       newsItems.value = [...FALLBACK_NEWS_ITEMS].slice(0, LANDING_SECTION_MAX_CARDS)
     }
-    if (projects.value.length === 0) {
+    if (includeFeaturedProjects && projects.value.length === 0) {
       projects.value = [...FALLBACK_PROJECTS].slice(0, LANDING_SECTION_MAX_CARDS)
     }
     if (coursesPreview.value.length === 0) {
@@ -647,13 +712,6 @@ export function useLanding () {
     if (communityRoleStats.value.length === 0) {
       communityRoleStats.value = [{ role: 'Member', count: 1, percent: 100 }]
     }
-    if (speakers.value.length === 0) {
-      buildSpeakersFromCms(newsItems.value)
-    }
-    if (speakers.value.length === 0) {
-      buildSpeakers([])
-    }
-
     if (typeof document !== 'undefined') {
       const sectionObserver = new IntersectionObserver(
         (entries) => {

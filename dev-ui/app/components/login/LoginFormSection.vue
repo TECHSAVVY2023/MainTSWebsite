@@ -1,37 +1,49 @@
 <template>
   <main
     ref="formPanelRef"
-    class="relative flex flex-1 flex-col justify-center bg-white px-6 py-12 sm:px-10 lg:w-[44%] lg:px-14 lg:py-16"
+    class="w-full flex flex-col justify-center items-center relative"
     @mousemove="handleMouseMove"
     @mouseleave="handleMouseLeave"
   >
-    <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(102,51,153,0.09),transparent_38%),radial-gradient(circle_at_90%_85%,rgba(239,68,68,0.08),transparent_30%)]" aria-hidden="true" />
     <canvas
       ref="trailCanvasRef"
-      class="pointer-events-none absolute inset-0 z-[1]"
+      class="absolute inset-0 pointer-events-none z-[1]"
       aria-hidden="true"
     />
-    <div class="relative z-10 mx-auto w-full max-w-sm text-violet">
-      <h2 class="mb-4 text-center text-[1.03rem] font-bold uppercase tracking-[0.14em] text-[#1f2333]">
-        USER LOGIN
-      </h2>
-      <p class="mb-8 text-center text-[0.95rem] leading-relaxed text-[#4a4f63]">
-        Sign in with your Google account to access the dashboard.
-      </p>
-      <form class="space-y-5" @submit.prevent="$emit('submit')">
+    <div class="w-full max-w-sm relative z-10">
+      <div class="text-center mb-5">
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto lg:mb-6 text-violet-600 lg:shadow-sm lg:border border-violet-100">
+          <i class="fas fa-fingerprint text-2xl" />
+        </div>
+        <p class="text-xs font-bold text-violet-900 uppercase tracking-widest">
+          Access your community dashboard
+        </p>
+      </div>
+
+      <form class="space-y-6" @submit.prevent="$emit('submit')">
         <button
           type="submit"
-          class="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-[#dde0ea] bg-white px-6 py-3.5 text-base font-semibold uppercase tracking-[0.06em] text-[#1f2333] shadow-[0_10px_28px_rgba(17,24,39,0.1)] transition-all hover:-translate-y-px hover:border-[#b9bbca] hover:bg-[#fafaff]"
+          class="w-full relative group overflow-hidden rounded-2xl bg-white border-2 border-violet-100 p-4 transition-all duration-300 hover:border-violet-400 hover:shadow-[0_8px_24px_rgba(124,58,237,0.15)] flex flex-row items-center justify-center gap-3 cursor-pointer"
         >
-          <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#f4f4fb] text-[1.05rem] font-extrabold text-[#2d1f4e]">G</span>
-          LOGIN WITH GOOGLE
+          <div class="absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
+          <i class="fab fa-google text-violet-600 text-xl relative z-10"></i>
+          <span class="relative z-10 text-sm font-black text-violet-800 uppercase tracking-widest group-hover:text-violet-800 transition-colors">Continue with Google</span>
         </button>
       </form>
-      <p class="mt-7 text-center text-sm text-[#3D2A6E]">
-        New to TECH SAVVY?
-        <NuxtLink to="/" class="text-[#6B5B95] font-semibold no-underline transition-colors hover:text-accent-purple">Join Community</NuxtLink>
-      </p>
+
+      <div class="relative lg:mt-12 mt-5 text-center border-t border-violet-50 pt-8">
+        <p class="text-[10px] font-bold text-violet-900 uppercase tracking-widest">
+          New to TechSavvy?
+        </p>
+        <NuxtLink to="/#news" class="inline-block mt-3 px-6 py-2.5 rounded-xl bg-violet-50 border border-violet-100 text-violet-700 font-black text-[10px] uppercase tracking-widest hover:bg-violet-600 hover:text-white transition-colors no-underline">
+          Join the community
+        </NuxtLink>
+      </div>
     </div>
+
+    <NuxtLink to="https://www.techsavvies.space" class="absolute bottom-2 lg:bottom-10 inline-flex items-center justify-center gap-2 text-violet-400 font-bold text-[10px] tracking-widest uppercase transition-colors hover:text-violet-700 z-50 w-full text-center">
+      <i class="fas fa-arrow-left" :aria-hidden="true" /> Back to Home
+    </NuxtLink>
   </main>
 </template>
 
@@ -42,6 +54,19 @@ const trailCanvasRef = ref<HTMLCanvasElement | null>(null)
 const props = defineProps<{
   login: ReturnType<typeof useLogin>
 }>()
+
+const email = computed({
+  get: () => props.login.email.value,
+  set: (v) => { props.login.email.value = v }
+})
+const password = computed({
+  get: () => props.login.password.value,
+  set: (v) => { props.login.password.value = v }
+})
+const remember = computed({
+  get: () => props.login.remember.value,
+  set: (v) => { props.login.remember.value = v }
+})
 
 function handleMouseMove (e: MouseEvent) {
   props.login.onFormMouseMove(e, formPanelRef.value)

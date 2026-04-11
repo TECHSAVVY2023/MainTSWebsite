@@ -1,7 +1,7 @@
 <template>
   <div class="font-inter min-h-screen bg-neutral-gray text-dark">
     <LayoutPageHeader back-text="Back to all news" back-href="/news" />
-    <main class="bg-neutral-gray pt-8 pb-16 sm:pt-10 sm:pb-20 md:pt-14 md:pb-24 relative overflow-hidden flex flex-col">
+    <main class="bg-neutral-gray pt-24 pb-16 sm:pt-28 sm:pb-20 md:pt-32 md:pb-24 relative overflow-hidden flex flex-col">
       <SectionWires gradient-id-prefix="swg-news-slug" />
       <div class="relative z-10 isolate flex-1 flex flex-col">
         <div class="container mx-auto px-4 sm:px-6 lg:px-10 relative flex-1 flex flex-col">

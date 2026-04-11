@@ -8,8 +8,14 @@ export function useNewsSlug () {
     return cleaned || 'news-item'
   }
 
+  /**
+   * CMS posts use numeric string ids (`"42"`). Demo/fallback rows use ids like `sample-news-2`;
+   * those must not be used in URLs or `/news/sample-news-2` will never match API-only lists.
+   */
   function getNewsSlug (item: { id?: string; title?: string; date?: string }) {
-    return item.id || newsSlugFromTitleDate(item)
+    const id = String(item?.id ?? '').trim()
+    if (/^\d+$/.test(id)) return id
+    return newsSlugFromTitleDate(item)
   }
 
   return { getNewsSlug, newsSlugFromTitleDate }

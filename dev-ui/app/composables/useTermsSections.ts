@@ -44,7 +44,7 @@ export const TERMS_SECTIONS: LegalSection[] = [
     id: 'intellectual-property',
     title: '4. Intellectual Property',
     paragraphs: [
-      'All content on our Services—including but not limited to text, graphics, logos, course materials, and software—is the property of TECH SAVVY, CODEDEV Solutions, or our licensors and is protected by copyright and other intellectual property laws.',
+      'All content on our Services—including but not limited to text, graphics, logos, course materials, and software—is the property of TECH SAVVY or our licensors and is protected by copyright and other intellectual property laws.',
       'You may not reproduce, distribute, modify, or create derivative works from our content without express written permission. Course materials are provided for your personal, non-commercial use only.'
     ]
   },
@@ -67,7 +67,7 @@ export const TERMS_SECTIONS: LegalSection[] = [
     id: 'limitation',
     title: '7. Limitation of Liability',
     paragraphs: [
-      'To the fullest extent permitted by law, TECH SAVVY, CODEDEV Solutions, and our affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Services.',
+      'To the fullest extent permitted by law, TECH SAVVY and our affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Services.',
       'Our total liability for any claims arising from or related to these Terms or the Services shall not exceed the amount you paid to us, if any, in the twelve months preceding the claim.'
     ]
   },

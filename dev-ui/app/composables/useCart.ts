@@ -118,9 +118,7 @@ export function useCart () {
     const idx = lines.value.findIndex((l) => l.id === normalized.id)
     if (idx >= 0) {
       const next = [...lines.value]
-      const row = next[idx]
-      if (row === undefined) return
-      const cur = normalizeCartLine(row)
+      const cur = normalizeCartLine(next[idx])
       if (!cur) return
       const mergedQty = Math.min(99, cur.quantity + qty)
       next[idx] = { ...cur, quantity: mergedQty }
@@ -139,9 +137,7 @@ export function useCart () {
     const idx = lines.value.findIndex((l) => l.id === id)
     if (idx < 0) return
     const next = [...lines.value]
-    const row = next[idx]
-    if (row === undefined) return
-    const cur = normalizeCartLine(row)
+    const cur = normalizeCartLine(next[idx])
     if (!cur) return
     next[idx] = { ...cur, quantity: q }
     lines.value = next

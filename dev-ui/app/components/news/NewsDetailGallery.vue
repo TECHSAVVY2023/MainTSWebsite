@@ -1,7 +1,7 @@
 <template>
   <div class="rounded-2xl border border-white/20 overflow-hidden bg-[rgba(35,21,89,0.95)] shadow-xl">
     <!-- Single image: hero layout -->
-    <template v-if="imagesArray.length === 1">
+    <template v-if="safeImagesLength === 1">
       <div
         class="relative overflow-hidden min-h-[280px] lg:min-h-[320px] cursor-pointer aspect-video"
         role="button"
@@ -21,7 +21,7 @@
     </template>
 
     <!-- Multiple images: carousel with thumbnails and pagination -->
-    <template v-else-if="imagesArray.length > 1">
+    <template v-else-if="safeImagesLength > 1">
       <div class="relative">
         <!-- Main image -->
         <div
@@ -104,9 +104,8 @@
 </template>
 
 <script setup lang="ts">
-import { DEFAULT_NEWS_IMAGE } from '~/constants/defaultMediaAssets'
+import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
 
-/** Shown when the gallery has no images yet or the first URL failed. */
 const fallbackImage = DEFAULT_NEWS_IMAGE
 
 const props = withDefaults(
@@ -119,10 +118,12 @@ const props = withDefaults(
 
 const imagesArray = computed(() => {
   const v = props.images
-  if (Array.isArray(v)) return v
-  if (v && typeof v === 'object' && 'value' in v) return Array.isArray((v as { value?: unknown }).value) ? (v as { value: string[] }).value : []
+  if (Array.isArray(v)) return v.filter(Boolean)
+  if (v && typeof v === 'object' && 'value' in v) return Array.isArray((v as { value?: unknown }).value) ? (v as { value: string[] }).value.filter(Boolean) : []
   return []
 })
+
+const safeImagesLength = computed(() => imagesArray.value.length)
 
 defineEmits<{
   'open-lightbox': [idx: number]

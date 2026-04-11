@@ -7,12 +7,29 @@
     <div class="relative z-10 isolate flex-1 flex flex-col">
       <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative">
         <div class="mb-8 sm:mb-12">
-          <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-            Community Calendar
-          </h2>
-          <p class="text-sm sm:text-base text-dark/60 max-w-[42rem] leading-relaxed">
-            Stay updated with workshops, meetups, and events
-          </p>
+          <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
+            <SectionWireShield :wide="false">
+              <div class="max-w-[42rem]">
+                <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
+                  Community Calendar
+                </h2>
+                <p class="text-sm sm:text-base text-dark/60 leading-relaxed">
+                  Stay updated with workshops, meetups, and events
+                </p>
+              </div>
+            </SectionWireShield>
+            <SectionWireShield :wide="false">
+              <a
+                href="https://calendar.google.com/calendar/embed?src=en.philippines%23holiday%40group.v.calendar.google.com&ctz=Asia%2FManila&mode=AGENDA"
+                target="_blank"
+                rel="noopener"
+                class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium text-dark/80 hover:text-dark border border-neutral-border hover:border-accent-purple/30 transition-colors"
+              >
+                <i class="fas fa-external-link-alt mr-2" />
+                Open Calendar
+              </a>
+            </SectionWireShield>
+          </div>
         </div>
 
         <div class="rounded-2xl overflow-hidden bg-white backdrop-blur-[10px] border border-neutral-border">

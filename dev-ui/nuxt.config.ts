@@ -1,37 +1,69 @@
-/// <reference types="node" />
+import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+/** Local Django default when `.env` has no `NUXT_PUBLIC_API_BASE` (avoids empty CMS + demo fallbacks). */
+const defaultPublicApiBase =
+  process.env.NUXT_PUBLIC_API_BASE?.trim() ||
+  (process.env.NODE_ENV !== "production" ? "http://127.0.0.1:8000" : "");
 
 export default defineNuxtConfig({
-  compatibilityDate: '2026-02-21',
-  devtools: { enabled: true },
-  srcDir: 'app',
-  modules: ['@nuxtjs/tailwindcss'],
-  typescript: {
-    tsConfig: {
-      compilerOptions: {
-        types: ['node'],
-      },
-    },
+  modules: ["nuxt-gtag"],
+  gtag: {
+    id: "G-G6MZR024YE",
   },
+  compatibilityDate: "2025-07-15",
+  devtools: { enabled: false },
+  ssr: true, // Ensure SSR is enabled for proper meta tag rendering
+  srcDir: 'app',
   app: {
     head: {
+      charset: "utf-8",
+      viewport: "width=device-width, initial-scale=1",
+      title: "Tech Savvy Code Camp",
+      script: [
+        {
+          src: "https://www.googletagmanager.com/gtag/js?id=G-G6MZR024YE",
+          async: true,
+        },
+      ],
       link: [
-        { rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css' }
-      ]
-    }
-  },
-  runtimeConfig: {
-    /** Server-only (never exposed to client) */
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    public: {
-      /** API base URL. For apiv1 use http://127.0.0.1:8000 (no /api). Set in .env as NUXT_PUBLIC_API_BASE. */
-      apiBase: (process.env.NUXT_PUBLIC_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, ''),
-      /** Absolute site origin for PayMongo success/cancel redirects (no trailing slash). */
-      siteUrl: (process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000').replace(/\/$/, ''),
-      googleClientId: process.env.GOOGLE_CLIENT_ID,
+        {
+          rel: "stylesheet",
+          href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
+          crossorigin: "anonymous",
+          referrerpolicy: "no-referrer",
+        },
+      ],
     },
   },
-  tailwindcss: {
-    cssPath: '~/assets/css/tailwind.css',
-    viewer: true,
+  css: ["~/assets/css/main.css"],
+  vite: {
+    resolve: {
+      alias: {
+        // Vite 7 still resolves import("#app-manifest") in node_modules/nuxt/.../manifest.js
+        // for the client graph even when the server branch is dead. Stub = default (no appManifest).
+        // If you enable experimental.appManifest, remove this alias so Nuxt’s virtual module wins.
+        "#app-manifest": resolve(__dirname, "stubs/app-manifest-stub.mjs"),
+      },
+    },
+    plugins: [
+      tailwindcss(),
+    ],
   },
-})
+  runtimeConfig: {
+    // Server-only (never exposed to client)
+    apiBase: process.env.API_BASE,
+    public: {
+      // Client-safe — Google OAuth & PayMongo secrets live on the API only (apiv1/.env)
+      // Override with NUXT_PUBLIC_API_BASE in production; dev falls back to local Django.
+      apiBase: defaultPublicApiBase,
+      /** Public site origin for checkout success/cancel URLs (e.g. https://techsavvies.space) */
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "",
+      /** Comma-separated emails that get super-admin UI (dev: add your Google email). */
+      superAdminEmails: process.env.NUXT_PUBLIC_SUPERADMIN_EMAILS || "markanthonyogaoogao@gmail.com",
+    },
+  }
+});

@@ -7,57 +7,138 @@
     <div class="relative z-10 isolate flex-1 flex flex-col">
       <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
         <div class="mb-8 sm:mb-12">
-          <SectionWireShield>
-            <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
-            <div class="mb-0">
-              <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark mb-1">
-                Featured Projects
-              </h2>
-              <p class="max-w-[42rem] text-sm leading-relaxed text-dark/60 sm:text-base">
-                Ecommerce websites developed by our community
-              </p>
-            </div>
-            <NuxtLink
-              to="/projects"
-              class="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent-purple/25 bg-violet-border py-2 px-4 text-sm font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:py-2.5 sm:px-5 sm:text-base"
-            >
-              View all
-              <i class="fas fa-arrow-right text-xs" />
-            </NuxtLink>
-            </div>
-          </SectionWireShield>
+          <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
+            <SectionWireShield :wide="false">
+              <div class="max-w-[42rem]">
+                <div class="mb-1 flex flex-wrap items-center gap-2">
+                  <h2 class="text-[22px] sm:text-[26px] md:text-[30px] font-bold tracking-tight leading-tight text-dark">
+                    Featured Projects
+                  </h2>
+                  <span
+                    v-if="locked"
+                    class="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-800 sm:text-[11px]"
+                  >
+                    <i class="fas fa-lock text-[9px]" aria-hidden="true" />
+                    Members
+                  </span>
+                </div>
+                <p class="text-sm leading-relaxed text-dark/60 sm:text-base">
+                  Ecommerce websites developed by our community
+                </p>
+              </div>
+            </SectionWireShield>
+            <SectionWireShield :wide="false">
+              <NuxtLink
+                :to="locked ? '/login' : '/projects'"
+                class="inline-flex shrink-0 items-center gap-2 rounded-full border border-accent-purple/25 bg-violet-border py-2 px-4 text-sm font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:py-2.5 sm:px-5 sm:text-base"
+              >
+                <template v-if="locked">
+                  <i class="fas fa-lock text-xs" aria-hidden="true" />
+                  Sign in to view
+                </template>
+                <template v-else>
+                  View all
+                  <i class="fas fa-arrow-right text-xs" />
+                </template>
+              </NuxtLink>
+            </SectionWireShield>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-start w-full max-w-[72rem] mx-auto justify-items-center">
+        <div class="relative w-full max-w-[72rem] mx-auto">
           <div
-            v-for="(project, idx) in safeProjects"
-            :key="project.title || project.url || idx"
-            class="group relative flex h-[252px] w-[236px] flex-col overflow-hidden rounded-xl border bg-[#f8f7f5] transition-all duration-300 hover:-translate-y-1 card-outline-violet-glow sm:rounded-2xl"
+            class="grid w-full gap-3 sm:gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch"
+            :class="locked ? 'min-h-[280px] sm:min-h-[320px]' : ''"
           >
-            <div class="relative h-[132px] shrink-0 overflow-hidden bg-gray-200">
-              <img
-                :src="project?.image || defaultImage"
-                :alt="project?.alt || project?.title || 'Project'"
-                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-                @error="onImageError($event)"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5 sm:p-4">
-                <a
-                  :href="project?.url || '#'"
-                  target="_blank"
-                  rel="noopener"
-                  class="inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/95 px-2.5 py-1.5 text-[11px] font-bold text-[#1f2340] shadow-[0_6px_18px_rgba(0,0,0,0.35)] no-underline transition-all duration-200 hover:bg-white sm:px-3 sm:py-1.5 sm:text-xs"
-                >
-                  Visit Site
-                  <i class="fas fa-external-link-alt ml-1.5 text-[10px] sm:text-xs" />
-                </a>
+            <template v-if="locked">
+              <div
+                v-for="n in 4"
+                :key="'sk-' + n"
+                class="flex flex-col h-full min-h-0 overflow-hidden rounded-xl sm:rounded-2xl border border-gray-200/80 bg-[#f0eef5]/90 animate-pulse"
+                aria-hidden="true"
+              >
+                <div class="aspect-video w-full shrink-0 bg-gray-300/60" />
+                <div class="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+                  <div class="h-3.5 rounded bg-gray-300/50 sm:h-4 w-[88%]" />
+                  <div class="h-3 rounded bg-gray-200/80 w-[55%]" />
+                  <div class="mt-auto h-3 rounded bg-gray-200/70 w-[72%]" />
+                </div>
               </div>
-            </div>
-            <div class="flex flex-1 flex-col bg-[#f8f7f5] p-2.5 sm:p-3">
-              <h3 class="line-clamp-2 text-sm font-bold text-gray-900">{{ project?.title ?? '' }}</h3>
-              <p class="mt-1 truncate text-[11px] text-gray-600">{{ project?.domain ?? '' }}</p>
-              <p class="mt-auto line-clamp-2 text-[11px] leading-tight text-gray-600">Developed by: {{ project?.developer ?? 'Tech Savvy Community' }}</p>
+            </template>
+            <template v-else>
+              <article
+                v-for="(project, idx) in safeProjects"
+                :key="project.title || project.url || idx"
+                class="group relative flex flex-col h-full min-h-0 overflow-hidden rounded-xl sm:rounded-2xl bg-[#f8f7f5] border transition-all duration-300 hover:-translate-y-1 card-outline-violet-glow"
+              >
+              <div class="aspect-video w-full shrink-0 relative bg-gray-200 overflow-hidden">
+                <img
+                  :src="project?.image || defaultImage"
+                  :alt="project?.alt || project?.title || 'Project'"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  @error="onImageError($event)"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-2.5 sm:p-4">
+                  <a
+                    :href="project?.url || '#'"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center text-accent-purple font-semibold text-[11px] sm:text-xs"
+                  >
+                    Visit Site
+                    <i class="fas fa-external-link-alt ml-1.5 text-[10px] sm:text-xs" />
+                  </a>
+                </div>
+              </div>
+              <div
+                class="flex flex-col flex-1 min-h-0 gap-1 sm:gap-1.5 p-2.5 sm:p-4 bg-[#f8f7f5]"
+              >
+                <h3
+                  class="text-sm sm:text-base font-bold text-gray-900 leading-snug line-clamp-2 min-h-[2.5rem] sm:min-h-[3.25rem]"
+                >
+                  {{ project?.title ?? '' }}
+                </h3>
+                <p
+                  class="text-gray-600 text-[11px] sm:text-xs line-clamp-1 shrink-0 min-h-[1.125rem]"
+                >
+                  {{ project?.domain ?? '' }}
+                </p>
+                <p
+                  class="text-gray-600 text-[11px] sm:text-xs line-clamp-2 mt-auto leading-snug min-h-[2.25rem] sm:min-h-[2.5rem]"
+                >
+                  Develop By: {{ project?.developer ?? 'Tech Savvy Community' }}
+                </p>
+              </div>
+              </article>
+            </template>
+          </div>
+
+          <div
+            v-if="locked"
+            class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-neutral-gray/70 px-4 py-10 backdrop-blur-[5px] sm:px-6"
+          >
+            <div
+              class="max-w-sm rounded-2xl border border-violet-200/80 bg-white/95 px-6 py-8 text-center shadow-[0_20px_50px_rgba(46,19,104,0.12)]"
+            >
+              <div
+                class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700"
+              >
+                <i class="fas fa-lock text-2xl" aria-hidden="true" />
+              </div>
+              <p class="text-base font-bold text-dark sm:text-lg">
+                Member access
+              </p>
+              <p class="mt-2 text-sm leading-relaxed text-dark/65">
+                Sign in with your community account to browse featured projects and the full directory.
+              </p>
+              <NuxtLink
+                to="/login"
+                class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-violet-700 px-5 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-violet-800"
+              >
+                <i class="fas fa-sign-in-alt text-xs" aria-hidden="true" />
+                Sign in
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -68,7 +149,7 @@
 
 <script setup lang="ts">
 import { LANDING_SECTION_MAX_CARDS } from '~/composables/useLanding'
-import { DEFAULT_PROJECT_IMAGE } from '~/constants/defaultMediaAssets'
+import { DEFAULT_PROJECT_IMAGE } from '~/constants/sampleMedia'
 
 type ProjectItem = {
   title: string
@@ -81,10 +162,15 @@ type ProjectItem = {
 
 const props = withDefaults(
   defineProps<{
+    /** When true, show members-only overlay; project list is hidden until the user signs in. */
+    locked?: boolean
     projects?: ProjectItem[] | unknown
     defaultImage?: string
   }>(),
-  { defaultImage: DEFAULT_PROJECT_IMAGE }
+  {
+    locked: false,
+    defaultImage: DEFAULT_PROJECT_IMAGE
+  }
 )
 
 const safeProjects = computed(() => {

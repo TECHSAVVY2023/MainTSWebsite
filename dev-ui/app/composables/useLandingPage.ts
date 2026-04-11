@@ -53,11 +53,11 @@ export function useLandingPage () {
   onMounted(() => landing.loadData())
 
   useHead({
-    title: 'TECH SAVVY | Code Camp 2025 — Modern Community & Full-Stack Development',
+    title: 'www.techsavvies.space',
     meta: [
       {
         name: 'description',
-        content: 'Modern minimalist redesign of TECH SAVVY Code Camp - A growing IT community in Misamis Occidental running code camps in full-stack web development.'
+        content: 'Modern minimalist redesign of TECH SAVVY Code Camp - A growing IT community in Misamis Occidental running code camps in full-stack web development. TECH SAVVY | Code Camp 2026 — Tech Community & Full-Stack Development'
       }
     ],
     link: [

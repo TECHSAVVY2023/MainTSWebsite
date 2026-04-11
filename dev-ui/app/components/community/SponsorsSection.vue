@@ -10,13 +10,16 @@
                 Sponsors
               </h3>
             </div>
+            <p class="max-w-md text-xs text-dark/55 sm:text-sm">
+              Organizations backing programs and community growth.
+            </p>
           </SectionWireShield>
         </div>
         <span class="shrink-0 rounded-full border border-accent-purple/15 bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-purple/80 shadow-sm sm:text-xs">
           {{ sponsors.length }} total
         </span>
       </div>
-      <div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-4">
+      <div class="grid grid-cols-2 items-stretch gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
         <SponsorFlipCard
           v-for="(sponsor, idx) in sponsors"
           :key="'sp-' + (sponsor.name || idx)"
@@ -37,13 +40,16 @@
                 Partners
               </h3>
             </div>
+            <p class="max-w-md text-xs text-dark/55 sm:text-sm">
+              Venues, education, and collaborators we work with.
+            </p>
           </SectionWireShield>
         </div>
         <span class="shrink-0 rounded-full border border-teal-500/20 bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-teal-700/90 shadow-sm sm:text-xs">
           {{ partners.length }} total
         </span>
       </div>
-      <div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-4">
+      <div class="grid grid-cols-2 items-stretch gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
         <SponsorFlipCard
           v-for="(sponsor, idx) in partners"
           :key="'pt-' + (sponsor.name || idx)"
@@ -66,7 +72,7 @@
 
 <script setup lang="ts">
 import SponsorFlipCard, { type SponsorFlipItem } from '~/components/community/SponsorFlipCard.vue'
-import { DEFAULT_MEDIA_FALLBACK } from '~/constants/defaultMediaAssets'
+import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
 
 withDefaults(
   defineProps<{

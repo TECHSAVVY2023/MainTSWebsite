@@ -1,124 +1,189 @@
 <template>
-  <section
-    id="about"
-    class="min-h-screen flex flex-col pt-16 pb-12 md:pt-24 md:pb-24 bg-neutral-gray relative overflow-hidden"
-  >
-    <SectionWires gradient-id-prefix="swg-about" />
-    <div class="relative z-10 isolate flex-1 flex flex-col">
-      <div class="container mx-auto px-8 sm:px-12 lg:px-20 flex-shrink-0 relative">
-        <div class="mb-8 sm:mb-12">
+  <section id="about" class="py-24 md:py-32 bg-white relative overflow-hidden">
+    <!-- Subtle background wires for continuity-->
+    <SectionWires gradient-id-prefix="swg-about-new" /> 
+    
+    <div class="container mx-auto px-2 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-32 items-center">
+        
+        <!-- Left Column: Typographic Story -->
+        <div class=" bg-white pr-10 py-5">
           <SectionWireShield>
-            <h2 class="mb-1 text-left text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
-              What is Tech Savvy?
+            <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-100">
+              <!-- <span class="flex h-2 w-2 rounded-full bg-violet-600 animate-pulse" /> -->
+              <i class="fa fa-leaf text-green-400"></i>
+              <span class="text-[0.65rem] font-bold uppercase tracking-wider text-violet-700">About Our Community</span>
+            </div>
+            
+            <h2 class="text-4xl md:text-5xl font-extrabold text-[#1a0533] leading-[1.1] mb-8 tracking-tight flex whitespace-nowrap">
+              What is <span class="pr-5 bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent pl-3">TECH SAVVY?</span>
             </h2>
-            <p class="max-w-[42rem] text-left text-sm leading-relaxed text-dark/60 sm:text-base">
-              Our vision, mission, and how we support developers in Misamis Occidental.
-            </p>
+            
+            <div class="space-y-6 text-gray-600 leading-relaxed text-base md:text-lg">
+              <p>
+                A vibrant IT community in Misamis Occidental, <span class="font-bold text-gray-900 decoration-violet-200 decoration-4">started April 30, 2023</span> at 
+                
+                <a href="https://www.facebook.com/workflowcoffeematcha" class="font-bold text-green-700 hover:underline decoration-green-700 decoration-4 underline-offset-2">Workflow Co-Working Space Ozamiz</a>.
+                We're dedicated to running immersive code camps in full-stack web development.
+              </p>
+              
+              <p>
+                We guide aspiring developers by teaching the right techniques and helping them upskill through their journey from roadmap sessions to pursuing roles in the global IT industry.
+              </p>
+
+              <!-- Vision & Mission Cards -->
+              <div class="grid grid-cols-2 items-stretch gap-4 pt-6 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+                <div
+                  class="group flex h-full min-h-0 flex-col border rounded-2xl border-violet-100/50 p-5 transition-all hover:bg-white hover:shadow-xl hover:shadow-violet-200/20"
+                >
+                  <h3 class="mb-3 text-sm font-bold uppercase tracking-widest text-green-900">
+                    Our Vision
+                  </h3>
+                  <p class="min-h-[4.5rem] flex-1 text-sm leading-relaxed text-gray-700 sm:min-h-[5rem]">
+                    To empower and support developers in their career growth and connect them with rewarding opportunities.
+                  </p>
+                </div>
+
+                <div
+                  class="group flex h-full min-h-0 flex-col border rounded-2xl border-indigo-100/50 p-5 transition-all hover:bg-white hover:shadow-xl hover:shadow-indigo-200/20"
+                >
+                  <h3 class="mb-3 text-sm font-bold uppercase tracking-widest text-green-900">
+                    Our Mission
+                  </h3>
+                  <p class="min-h-[4.5rem] flex-1 text-sm leading-relaxed text-gray-700 sm:min-h-[5rem]">
+                    To enhance technical skills and facilitate knowledge-sharing among community members.
+                  </p>
+                </div>
+              </div>
+            </div>
           </SectionWireShield>
         </div>
-      </div>
-      <div
-        ref="whatisWrapRef"
-        class="flex-1 min-h-0 w-full overflow-x-auto overflow-y-hidden scroll-smooth snap-x snap-mandatory touch-pan-x box-border [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-black/20 [&::-webkit-scrollbar-thumb]:rounded [&::-webkit-scrollbar-thumb]:bg-violet-border"
-      >
-        <div class="whatis-pages flex h-full min-h-[380px]">
-          <section class="w-full min-w-full shrink-0 h-full min-h-[380px] bg-neutral-gray snap-start snap-always flex flex-wrap items-center justify-center py-8 px-6 md:py-12 md:px-8 overflow-y-auto box-border max-[767px]:px-4">
-            <div class="max-w-[1000px] w-full mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-12 max-[767px]:justify-start max-[767px]:items-start max-[900px]:flex-col max-[900px]:items-center max-[900px]:gap-6">
-              <div class="flex-1 min-w-0 max-w-[480px] flex flex-col gap-3.5 p-5 bg-white border rounded-xl break-words card-outline-violet-glow max-[767px]:w-full max-[767px]:max-w-[280px] max-[767px]:mx-auto max-[900px]:max-w-full">
-                <h2 class="text-dark font-semibold text-2xl leading-tight tracking-tight">Vision</h2>
-                <p class="text-sm md:text-base text-dark/80 leading-relaxed">A growing IT community empowering developers in their career growth and connecting them with opportunities in the IT industry.</p>
-                <div class="flex gap-3 flex-wrap">
-                  <button type="button" class="inline-flex items-center justify-center py-2.5 px-5 font-medium text-sm text-white bg-primary border border-primary rounded-lg cursor-pointer transition-colors hover:bg-secondary hover:border-secondary" @click="step('right')">Main →</button>
-                </div>
-              </div>
-              <div class="flex-[0_1_420px] max-w-[480px] min-w-0 relative h-[400px] max-[900px]:max-w-[440px] max-[900px]:h-[380px] max-[600px]:flex max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-4 max-[600px]:h-auto max-[600px]:min-h-[320px]">
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] top-0 left-0 border-2 border-green-400/55 z-[1] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about1" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
-                </div>
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] left-[58%] top-[34%] border-2 border-red-400/55 z-[2] max-[900px]:left-[55%] max-[900px]:top-[30%] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about2" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
-                </div>
-              </div>
-            </div>
-          </section>
 
-          <section class="w-full min-w-full shrink-0 h-full min-h-[380px] bg-neutral-gray snap-start snap-always flex flex-wrap items-center justify-center py-8 px-6 md:py-12 md:px-8 overflow-y-auto box-border max-[767px]:px-4">
-            <div class="max-w-[1000px] w-full mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-12 max-[767px]:justify-start max-[767px]:items-start max-[900px]:flex-col max-[900px]:items-center max-[900px]:gap-6">
-              <div class="flex-1 min-w-0 max-w-[480px] flex flex-col gap-3.5 p-5 bg-white border rounded-xl break-words card-outline-violet-glow max-[767px]:w-full max-[767px]:max-w-[280px] max-[767px]:mx-auto max-[900px]:max-w-full">
-                <h2 class="text-dark font-semibold text-2xl leading-tight tracking-tight">What is TECH SAVVY?</h2>
-                <p class="text-sm md:text-base text-dark/80 leading-relaxed">A growing IT community in Misamis Occidental, <strong class="font-medium">started April 30, 2023 at Workflow Co-Working Space Ozamiz</strong>, running code camps in full-stack web development.</p>
-                <p class="hidden md:block text-sm md:text-base text-dark/80 leading-relaxed"><strong class="font-medium">Tech Savvy</strong> mentors aspiring developers with full-stack techniques and supports them from learning through to roles in the IT industry.</p>
-                <div class="flex gap-3 flex-wrap">
-                  <button type="button" class="inline-flex items-center justify-center py-2.5 px-5 font-medium text-sm text-white bg-primary border border-primary rounded-lg cursor-pointer transition-colors hover:bg-secondary hover:border-secondary" @click="step('left')">← Vision</button>
-                  <button type="button" class="inline-flex items-center justify-center py-2.5 px-5 font-medium text-sm text-white bg-primary border border-primary rounded-lg cursor-pointer transition-colors hover:bg-secondary hover:border-secondary" @click="step('right')">Mission →</button>
-                </div>
-              </div>
-              <div class="flex-[0_1_420px] max-w-[480px] min-w-0 relative h-[400px] max-[900px]:max-w-[440px] max-[900px]:h-[380px] max-[600px]:flex max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-4 max-[600px]:h-auto max-[600px]:min-h-[320px]">
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] top-0 left-0 border-2 border-green-400/55 z-[1] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about3" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
-                </div>
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] left-[58%] top-[34%] border-2 border-red-400/55 z-[2] max-[900px]:left-[55%] max-[900px]:top-[30%] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about4" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
-                </div>
-              </div>
-            </div>
-          </section>
+        <!-- Right Column: 3D Community Carousel -->
+        <div class="relative min-h-[550px] md:min-h-[650px] lg:h-auto flex flex-col items-center justify-center">
+          
+          <!-- 3D Perspective Container -->
+          <div 
+            class="relative w-full max-w-[480px] aspect-square flex items-center justify-center"
+            @mouseenter="stopRotation"
+            @mouseleave="startRotation"
+          >
+            
+            <!-- Backdrop Glow for active focus -->
+            <div class="absolute inset-0 bg-violet-400/10 blur-[120px] rounded-full scale-75 pointer-events-none" />
 
-          <section class="w-full min-w-full shrink-0 h-full min-h-[380px] bg-neutral-gray snap-start snap-always flex flex-wrap items-center justify-center py-8 px-6 md:py-12 md:px-8 overflow-y-auto box-border max-[767px]:px-4">
-            <div class="max-w-[1000px] w-full mx-auto flex flex-wrap items-center justify-center gap-8 md:gap-12 max-[767px]:justify-start max-[767px]:items-start max-[900px]:flex-col max-[900px]:items-center max-[900px]:gap-6">
-              <div class="flex-1 min-w-0 max-w-[480px] flex flex-col gap-3.5 p-5 bg-white border rounded-xl break-words card-outline-violet-glow max-[767px]:w-full max-[767px]:max-w-[280px] max-[767px]:mx-auto max-[900px]:max-w-full">
-                <h2 class="text-dark font-semibold text-2xl leading-tight tracking-tight">Mission</h2>
-                <p class="text-sm md:text-base text-dark/80 leading-relaxed">The mission is to enhance the skills and knowledge of developers, facilitate networking and knowledge-sharing among community members, and assist job seekers in finding fulfilling roles in the IT industry.</p>
-                <div class="flex gap-3 flex-wrap">
-                  <button type="button" class="inline-flex items-center justify-center py-2.5 px-5 font-medium text-sm text-white bg-primary border border-primary rounded-lg cursor-pointer transition-colors hover:bg-secondary hover:border-secondary" @click="step('left')">← Main</button>
-                </div>
+            <div 
+              v-for="(img, index) in trioImages" 
+              :key="index"
+              class="rounded-[2.5rem] absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
+              :class="[
+                index === currentIndex ? 'z-30 opacity-100 scale-100 translate-x-0 cursor-default shadow-[0_45px_90px_rgba(26,5,51,0.15)]' : 'shadow-lg',
+                index === (currentIndex - 1 + 3) % 3 ? 'z-10 opacity-30 scale-[0.85] -translate-x-[45%] cursor-pointer' : '',
+                index === (currentIndex + 1) % 3 ? 'z-10 opacity-30 scale-[0.85] translate-x-[45%] cursor-pointer' : ''
+              ]"
+              @click="currentIndex = index"
+            >
+              <div 
+                class="w-full h-full rounded-[2.5rem] overflow-hidden border-[6px] border-white bg-white group transition-shadow duration-500"
+                :class="index === currentIndex ? '' : 'shadow-2xl'"
+              >
+                <img 
+                  :src="img" 
+                  alt="Community Life" 
+                  class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                />
+                
+                <!-- Inactive Overlay (Tint only, No Blur) -->
+                <div 
+                  v-if="index !== currentIndex" 
+                  class="absolute inset-0 bg-gray-900/5 transition-opacity duration-700" 
+                />
               </div>
-              <div class="flex-[0_1_420px] max-w-[480px] min-w-0 relative h-[400px] max-[900px]:max-w-[440px] max-[900px]:h-[380px] max-[600px]:flex max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-4 max-[600px]:h-auto max-[600px]:min-h-[320px]">
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] top-0 left-0 border-2 border-green-400/55 z-[1] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about5" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
+            </div>
+
+            <!-- Floating Growth Badge (Overlays the active slide) -->
+            <div class="absolute -bottom-10 -right-6 z-40 bg-white/95 backdrop-blur-xl p-5 rounded-3xl shadow-[0_20px_60px_rgba(26,5,51,0.12)] border border-violet-100 hidden sm:block animate-float">
+              <div class="flex items-center gap-4">
+                <div class="flex -space-x-3">
+                  <div v-for="i in 3" :key="i" class="w-10 h-10 rounded-full border-2 border-white bg-violet-100 overflow-hidden shadow-md">
+                    <img :src="`https://i.pravatar.cc/100?img=${i+42}`" alt="Member" class="w-full h-full object-cover" />
+                  </div>
                 </div>
-                <div class="absolute w-[78%] h-[280px] min-h-[220px] bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:z-[25] left-[58%] top-[34%] border-2 border-red-400/55 z-[2] max-[900px]:left-[55%] max-[900px]:top-[30%] max-[900px]:w-3/4 max-[900px]:h-[240px] max-[900px]:min-h-[200px] max-[600px]:!relative max-[600px]:!left-auto max-[600px]:!top-auto max-[600px]:w-[85%] max-[600px]:max-w-[320px] max-[600px]:h-[200px] max-[600px]:min-h-[180px]">
-                  <img src="https://picsum.photos/600/400?random=about6" alt="" class="w-full h-full object-cover object-center block" loading="lazy" />
+                <div class="text-left flex flex-col gap-0.5">
+                  <div class="flex items-center gap-1.5">
+                    <p class="text-[0.65rem] font-bold text-gray-400 uppercase tracking-widest">Community Growth</p>
+                    <span class="px-2 py-0.5 rounded-full bg-violet-600 text-[0.55rem] font-black text-white uppercase tracking-tighter shadow-sm">Season 4</span>
+                  </div>
+                  <p class="text-[0.85rem] font-black text-[#1a0533] leading-tight">
+                    <span class="text-violet-600">+50 Active Members</span> 
+                    <span class="text-gray-400 font-medium ml-1">in 2026</span>
+                  </p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+
+          <!-- Enhanced Carousel Dots Navigation -->
+          <div class="flex items-center gap-3 mt-20 lg:mr-32">
+            <button 
+              v-for="(_, i) in trioImages" 
+              :key="i"
+              class="h-2 rounded-full transition-all duration-500 ease-out"
+              :class="i === currentIndex ? 'w-10 bg-violet-600 shadow-[0_0_15px_rgba(124,58,237,0.4)]' : 'w-2 bg-gray-200 hover:bg-violet-200'"
+              @click="currentIndex = i"
+              :aria-label="`Go to slide ${i+1}`"
+            />
+          </div>
+
         </div>
+
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-const whatisWrapRef = ref<HTMLElement | null>(null)
+const currentIndex = ref(1) // Set center image as focused initially
+const trioImages = [
+  'https://fpstorage.sgp1.cdn.digitaloceanspaces.com/www.techsavvies.space/GoldenTrio3.jpg',
+  'https://fpstorage.sgp1.cdn.digitaloceanspaces.com/www.techsavvies.space/Golden5.jpg',
+  'https://fpstorage.sgp1.cdn.digitaloceanspaces.com/www.techsavvies.space/GoldenTrio.jpg'
+]
 
-function step(direction: 'left' | 'right') {
-  const wrap = whatisWrapRef.value
-  if (!wrap) return
-  const pages = wrap.querySelector('.whatis-pages')
-  const total = pages ? pages.children.length : 3
-  const w = wrap.clientWidth || (typeof window !== 'undefined' ? window.innerWidth : 0)
-  if (!w) return
-  const cur = Math.round(wrap.scrollLeft / w)
-  const next = direction === 'left' ? Math.max(0, cur - 1) : Math.min(total - 1, cur + 1)
-  wrap.scrollTo({ left: w * next, behavior: 'smooth' })
+let timer: ReturnType<typeof setInterval> | null = null
+
+const startRotation = () => {
+  if (timer) return
+  timer = setInterval(() => {
+    currentIndex.value = (currentIndex.value + 1) % trioImages.length
+  }, 5000)
+}
+
+const stopRotation = () => {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
 }
 
 onMounted(() => {
-  const wrap = whatisWrapRef.value
-  if (wrap && typeof window !== 'undefined') {
-    const w = wrap.clientWidth || window.innerWidth
-    if (w) wrap.scrollLeft = w * 1
-    const onResize = () => {
-      const pages = wrap.querySelector('.whatis-pages')
-      const total = pages ? pages.children.length : 3
-      const width = wrap.clientWidth || window.innerWidth
-      const cur = Math.round(wrap.scrollLeft / width)
-      const idx = Math.max(0, Math.min(cur, total - 1))
-      wrap.scrollLeft = width * idx
-    }
-    window.addEventListener('resize', onResize)
-    onBeforeUnmount(() => window.removeEventListener('resize', onResize))
-  }
+  startRotation()
 })
+
+onUnmounted(() => {
+  stopRotation()
+})
+
 </script>
+
+<style scoped>
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+</style>

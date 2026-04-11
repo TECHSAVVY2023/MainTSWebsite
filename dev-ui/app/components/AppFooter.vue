@@ -1,57 +1,105 @@
 <template>
-  <footer class="relative overflow-hidden pt-6 pb-3 border-t border-neutral-border bg-white">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 w-full pb-4">
-        <!-- Column 1 -->
-        <div class="flex flex-col items-center gap-0.5 text-center">
-          <img :src="logoUrl" alt="CODEDEV Solutions" class="h-7 w-auto object-contain mb-0.5 opacity-95" />
-          <p class="text-xs text-dark/60 mb-0.5">© 2025 TECH SAVVY Community</p>
-          <h3 class="text-[0.625rem] font-semibold tracking-widest uppercase text-accent-purple mt-2 mb-0.5">Navigate</h3>
-          <nav class="flex flex-col items-center gap-0.5" aria-label="Footer navigation">
-            <NuxtLink to="/" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit">Home</NuxtLink>
-            <a href="#news" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#news')">News</a>
-            <NuxtLink to="/courses" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit">Courses</NuxtLink>
-            <a href="#merch" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#merch')">Merch</a>
-            <a href="#events-reminders" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#events-reminders')">Events Reminder</a>
-            <a href="#community-sponsors" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#community-sponsors')">Sponsors</a>
-            <a href="#community-people" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit" @click.prevent="scrollToSection('#community-people')">Community</a>
-            <NuxtLink to="/login" class="text-[0.8125rem] font-semibold text-accent-purple no-underline mt-1 transition-colors hover:text-accent-light w-fit">Login</NuxtLink>
-          </nav>
-        </div>
-        <!-- Column 2 -->
-        <div class="flex flex-col items-center gap-0.5 text-center">
-          <h3 class="text-[0.625rem] font-semibold tracking-widest uppercase text-accent-purple mb-0.5">Website</h3>
-          <a href="https://www.techsavvies.space" target="_blank" rel="noopener" class="font-medium text-sm text-accent-purple no-underline transition-colors hover:text-accent-light">www.techsavvies.space</a>
-          <p class="text-xs text-dark/60 mb-0">Freelance Dev Community</p>
-          <h3 class="text-[0.625rem] font-semibold tracking-widest uppercase text-accent-purple mt-2 mb-0.5">Legal & contact</h3>
-          <nav class="flex flex-col items-center gap-0.5">
-            <NuxtLink to="/privacy" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit">Privacy Policy</NuxtLink>
-            <NuxtLink to="/terms" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit">Terms of Use</NuxtLink>
-            <NuxtLink to="/contact" class="text-[0.8125rem] text-dark/75 no-underline transition-colors hover:text-accent-purple w-fit">Contact us</NuxtLink>
-          </nav>
-        </div>
-        <!-- Column 3 -->
-        <div class="flex flex-col items-center gap-0.5 text-center">
-          <h3 class="text-[0.625rem] font-semibold tracking-widest uppercase text-accent-purple mb-0.5">Find us</h3>
-          <address class="not-italic text-xs leading-relaxed text-dark/65 m-0">
-            Oracle Press International Inc.<br />
-            Workflow Co-Working Space<br />
-            In front of Ozamiz City Hall, 2nd floor of Mercury Drug/SSS<br />
-            Ozamiz, Philippines
-          </address>
-          <div class="flex justify-center gap-2 mt-1 mb-1">
-            <a href="#" class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-neutral-gray border border-neutral-border text-dark/70 text-xs transition-colors hover:bg-accent-purple/10 hover:text-accent-purple" aria-label="Facebook"><i class="fab fa-facebook-f" /></a>
-            <a href="#" class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-neutral-gray border border-neutral-border text-dark/70 text-xs transition-colors hover:bg-accent-purple/10 hover:text-accent-purple" aria-label="Twitter"><i class="fab fa-twitter" /></a>
-            <a href="#" class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-neutral-gray border border-neutral-border text-dark/70 text-xs transition-colors hover:bg-accent-purple/10 hover:text-accent-purple" aria-label="GitHub"><i class="fab fa-github" /></a>
-            <a href="#" class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-neutral-gray border border-neutral-border text-dark/70 text-xs transition-colors hover:bg-accent-purple/10 hover:text-accent-purple" aria-label="LinkedIn"><i class="fab fa-linkedin-in" /></a>
+  <footer id="main-footer" class="relative overflow-hidden bg-white pt-16 pb-8">
+    <!-- Top bridge divider matching HeroSection stats trust bar -->
+    <div class="absolute top-0 left-0 right-0 z-10 w-full h-px bg-gradient-to-r from-transparent via-violet-50 to-transparent" />
+
+    <div class="container mx-auto px-6 lg:px-16 relative z-10">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-20 mb-16">
+        
+        <!-- Column 1: Brand -->
+        <div class="flex items-center text-center gap-5">
+          <div>
+            <NuxtLink to="/" class="flex items-center shrink-0 w-fit mx-auto mb-10" aria-label="Home">
+            <img :src="logoUrl" alt="TechSavvy" class="h-32 w-auto" />
+          </NuxtLink>
+          <div class="space-y-4 whitespace-nowrap">
+            <p class="text-[0.9375rem] font-bold leading-relaxed text-[#1a0533]">
+              Think Smart, Code Smarter.<br />
+              <span class="text-violet-600">Powering Businesses Through Technology.</span>
+            </p>
+            <!-- <p class="text-xs text-gray-400 font-medium leading-relaxed ">
+              Join the Tech Savvy community and level up your fullstack journey.
+            </p> -->
           </div>
-          <p class="text-xs text-dark/55 m-0">
-            For inquiries: <a href="mailto:info@techsavvies.space" class="text-dark/70 no-underline transition-colors hover:text-accent-purple">info@techsavvies.space</a>
-          </p>
+          </div>
+        </div>
+
+        <!-- Column 2: Navigate -->
+        <div class="flex flex-col items-start gap-6 lg:pl-28">
+          <h3 class="text-[10px] font-black tracking-[0.2em] uppercase text-violet-400">Navigate</h3>
+          <nav class="flex flex-col items-start gap-3.5" aria-label="Footer navigation">
+            <NuxtLink to="/" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600">Home</NuxtLink>
+            <a href="#news" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600" @click.prevent="scrollToSection('#news')">News</a>
+            <NuxtLink to="/courses" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600">Courses</NuxtLink>
+            <a href="#merch" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600" @click.prevent="scrollToSection('#merch')">Merch</a>
+            <a href="#events-reminders" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600" @click.prevent="scrollToSection('#events-reminders')">Events Reminder</a>
+            <a href="#community-sponsors" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600" @click.prevent="scrollToSection('#community-sponsors')">Sponsors</a>
+            <a href="#community-people" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600" @click.prevent="scrollToSection('#community-people')">Community</a>
+          </nav>
+        </div>
+
+        <!-- Column 3: Legal & Resources -->
+        <div class="flex flex-col items-start gap-6">
+          <h3 class="text-[10px] font-black tracking-[0.2em] uppercase text-violet-400">Legal & contact</h3>
+          <nav class="flex flex-col items-start gap-3.5">
+            <NuxtLink to="/privacy" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600">Privacy Policy</NuxtLink>
+            <NuxtLink to="/terms" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600">Terms of Use</NuxtLink>
+            <NuxtLink to="/contact" class="text-[13px] font-semibold text-[#1a0533] no-underline transition-colors hover:text-violet-600">Contact us</NuxtLink>
+            <NuxtLink to="/login" class="inline-flex items-center gap-2 text-[13px] font-black text-violet-600 no-underline mt-2 transition-all hover:translate-x-1">
+              Login to Portal
+              <i class="fas fa-arrow-right text-[10px]"></i>
+            </NuxtLink>
+          </nav>
+        </div>
+
+        <!-- Column 4: Find Us -->
+        <div class="flex flex-col items-start gap-6">
+          <h3 class="text-[10px] font-black tracking-[0.2em] uppercase text-violet-400">Find us</h3>
+          
+          <!-- Location Area styled like Hero card -->
+          <address class="not-italic flex flex-col gap-3">
+            <div class="flex items-start gap-3">
+              <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shadow-sm">
+                <i class="fas fa-map-marker-alt text-violet-600 text-sm"></i>
+              </div>
+              <div class="space-y-1">
+                <p class="text-[11px] text-[#1a0533] font-bold leading-tight">
+                  Oracle Press International Inc.<br />
+                  Workflow Co-Working Space<br />
+                  Mercury Drug/SSS, Ozamiz City
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shadow-sm">
+                <i class="fas fa-paper-plane text-amber-600 text-sm"></i>
+              </div>
+              <a href="mailto:info@techsavvies.space" class="text-[11px] font-bold text-violet-600 no-underline transition-colors hover:text-violet-700">info@techsavvies.space</a>
+            </div>
+          </address>
+
+          <div class="flex items-center gap-2.5 pt-2">
+            <a href="#" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 text-sm transition-all duration-300 hover:bg-violet-600 hover:text-white hover:shadow-[0_8px_20px_rgba(124,58,237,0.3)] hover:-translate-y-0.5" aria-label="Facebook"><i class="fab fa-facebook-f" /></a>
+            <a href="#" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 text-sm transition-all duration-300 hover:bg-violet-600 hover:text-white hover:shadow-[0_8px_20px_rgba(124,58,237,0.3)] hover:-translate-y-0.5" aria-label="Twitter"><i class="fab fa-twitter" /></a>
+            <a href="#" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 text-sm transition-all duration-300 hover:bg-violet-600 hover:text-white hover:shadow-[0_8px_20px_rgba(124,58,237,0.3)] hover:-translate-y-0.5" aria-label="GitHub"><i class="fab fa-github" /></a>
+            <a href="#" class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 text-sm transition-all duration-300 hover:bg-violet-600 hover:text-white hover:shadow-[0_8px_20px_rgba(124,58,237,0.3)] hover:-translate-y-0.5" aria-label="LinkedIn"><i class="fab fa-linkedin-in" /></a>
+          </div>
         </div>
       </div>
-      <div class="pt-3 border-t border-neutral-border text-center">
-        <p class="text-dark/50 text-sm m-0">© 2025 TECH SAVVY Community · Code Camp</p>
+
+      <!-- Footer Bottom -->
+      <div class="relative pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Thin divider matching the stats bar -->
+        <div class="absolute top-0 left-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-violet-50 to-transparent" />
+        
+        <p class="text-[0.7rem] sm:text-xs font-semibold uppercase tracking-[0.1em] text-gray-400">
+          © {{ currentYear }} TECH SAVVY Community · <span class="text-violet-600">Code Camp</span>
+        </p>
+        
+        <div class="flex items-center gap-6">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a0533]/60">All Rights Reserved</span>
+          <a href="https://www.techsavvies.space" target="_blank" rel="noopener" class="text-[10px] font-bold uppercase tracking-widest text-violet-400 hover:text-violet-600 transition-colors">techsavvies.space</a>
+        </div>
       </div>
     </div>
   </footer>
@@ -59,6 +107,7 @@
 
 <script setup lang="ts">
 const { logoUrl } = useAppLogo()
+const currentYear = new Date().getFullYear()
 
 defineProps<{
   scrollToSection: (id: string) => void

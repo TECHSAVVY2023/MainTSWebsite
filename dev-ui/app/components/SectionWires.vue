@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute inset-0 pointer-events-none opacity-90 z-[1]"
+    class="absolute inset-0 pointer-events-none opacity-70 z-0"
     aria-hidden="true"
   >
     <svg
@@ -20,18 +20,18 @@
           <stop offset="100%" stop-color="#6126B1" stop-opacity="0.2" />
         </linearGradient>
       </defs>
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.18]" d="M0 80 Q100 60 180 100 T360 80" stroke="#2E1368" />
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.15]" d="M40 0 L40 120 Q80 180 120 220 T200 260" stroke="#6126B1" />
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.18]" d="M320 120 Q280 200 240 280 T160 380" stroke="#2E1368" />
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.15]" d="M0 280 Q80 260 160 300 T320 280" stroke="#6126B1" />
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.18]" d="M80 400 Q200 360 320 400" stroke="#2E1368" />
-      <path class="fill-none [stroke-width:0.48] [stroke-opacity:0.15]" d="M200 0 L200 80 Q240 140 200 200 T160 320" stroke="#6126B1" />
-      <path class="[stroke-dasharray:30_60] animate-section-wire-flow" d="M0 80 Q100 60 180 100 T360 80" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" stroke-width="1.05" stroke-linecap="round" />
-      <path class="[stroke-dasharray:30_60] animate-section-wire-flow [animation-delay:-0.7s]" d="M40 0 L40 120 Q80 180 120 220 T200 260" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" stroke-width="0.9" stroke-linecap="round" />
-      <path class="[stroke-dasharray:30_60] animate-section-wire-flow [animation-delay:-1.4s]" d="M320 120 Q280 200 240 280 T160 380" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" stroke-width="0.8" stroke-linecap="round" />
-      <path class="[stroke-dasharray:30_60] animate-section-wire-flow [animation-delay:-2.1s]" d="M0 280 Q80 260 160 300 T320 280" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" stroke-width="0.9" stroke-linecap="round" />
-      <path v-if="variant === 'full'" class="[stroke-dasharray:30_60] animate-section-wire-flow [animation-delay:-2.8s]" d="M80 400 Q200 360 320 400" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" stroke-width="0.8" stroke-linecap="round" />
-      <path v-if="variant === 'full'" class="[stroke-dasharray:30_60] animate-section-wire-flow [animation-delay:-3.5s]" d="M200 0 L200 80 Q240 140 200 200 T160 320" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" stroke-width="0.8" stroke-linecap="round" />
+      <path class="wire-static" d="M0 80 Q100 60 180 100 T360 80" stroke="#2E1368" />
+      <path class="wire-static" d="M40 0 L40 120 Q80 180 120 220 T200 260" stroke="#6126B1" />
+      <path class="wire-static" d="M320 120 Q280 200 240 280 T160 380" stroke="#2E1368" />
+      <path class="wire-static" d="M0 280 Q80 260 160 300 T320 280" stroke="#6126B1" />
+      <path class="wire-static" d="M80 400 Q200 360 320 400" stroke="#2E1368" />
+      <path class="wire-static" d="M200 0 L200 80 Q240 140 200 200 T160 320" stroke="#6126B1" />
+      <path class="wire-flow" d="M0 80 Q100 60 180 100 T360 80" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" />
+      <path class="wire-flow" style="animation-delay:-0.7s" d="M40 0 L40 120 Q80 180 120 220 T200 260" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" />
+      <path class="wire-flow" style="animation-delay:-1.4s" d="M320 120 Q280 200 240 280 T160 380" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" />
+      <path class="wire-flow" style="animation-delay:-2.1s" d="M0 280 Q80 260 160 300 T320 280" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" />
+      <path v-if="variant === 'full'" class="wire-flow" style="animation-delay:-2.8s" d="M80 400 Q200 360 320 400" fill="none" :stroke="`url(#${gradientIdPrefix}-1)`" />
+      <path v-if="variant === 'full'" class="wire-flow" style="animation-delay:-3.5s" d="M200 0 L200 80 Q240 140 200 200 T160 320" fill="none" :stroke="`url(#${gradientIdPrefix}-2)`" />
     </svg>
   </div>
 </template>
@@ -45,3 +45,24 @@ withDefaults(
   { gradientIdPrefix: 'swg', variant: 'full' }
 )
 </script>
+
+<style scoped>
+.wire-static {
+  fill: none;
+  stroke-width: 0.7;
+  stroke-opacity: 0.18;
+}
+
+.wire-flow {
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  stroke-dasharray: 24 48;
+  animation: section-wire-flow 3.4s linear infinite;
+}
+
+@keyframes section-wire-flow {
+  to {
+    stroke-dashoffset: -144;
+  }
+}
+</style>

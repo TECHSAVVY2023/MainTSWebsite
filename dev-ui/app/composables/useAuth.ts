@@ -1,11 +1,12 @@
 export function useAuth () {
+  const config = useRuntimeConfig()
   const user = useState<{ id?: string; name?: string; email?: string; image?: string } | null>('auth_user', () => null)
   const token = useState<string | null>('auth_token', () => null)
 
   const isLoggedIn = computed(() => !!token.value)
 
   const init = () => {
-    if (!import.meta.client) return
+    if (!process.client) return
     const storedToken = localStorage.getItem('auth_token')
     const storedUser = localStorage.getItem('auth_user')
     if (storedToken) token.value = storedToken
@@ -39,13 +40,17 @@ export function useAuth () {
   }
 
   const login = () => {
-    if (import.meta.client) {
-      window.location.href = '/api/auth/google'
+    if (!process.client) return
+    const base = String(config.public.apiBase || '').replace(/\/$/, '')
+    if (!base) {
+      console.error('NUXT_PUBLIC_API_BASE is not set; cannot start Google sign-in.')
+      return
     }
+    window.location.href = `${base}/api/techsavvies/auth/google/start/`
   }
 
   const logout = () => {
-    if (import.meta.client) {
+    if (process.client) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
     }

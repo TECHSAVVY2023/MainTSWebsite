@@ -1,7 +1,6 @@
 /**
  * News detail page composable: article, images, lightbox, head.
  */
-import { computed, unref } from 'vue'
 import type { NewsDetailItem } from './useNewsDetail'
 
 export function useNewsDetailPage () {

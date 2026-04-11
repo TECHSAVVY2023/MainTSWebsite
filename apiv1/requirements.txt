@@ -5,4 +5,4 @@ django-cors-headers
 django-filter
 Pillow
 python-dotenv
-django-filter
+PyJWT>=2.8.0,<3

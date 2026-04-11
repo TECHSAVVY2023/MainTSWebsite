@@ -1,7 +1,7 @@
 <template>
   <section class="mb-8 flex flex-col gap-5 sm:mb-10 md:flex-row md:items-center md:justify-between md:gap-8">
     <div class="min-w-0 flex-1">
-      <h1 class="mb-2 bg-gradient-to-r from-accent-purple to-[#9575CD] bg-clip-text text-[clamp(1.75rem,4vw,2.5rem)] font-extrabold leading-tight tracking-[-0.03em] text-transparent">
+      <h1 class="mb-2 bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-600 bg-clip-text text-[clamp(1.75rem,4vw,3rem)] font-black leading-[1.1] tracking-[-0.04em] text-transparent">
         Search
       </h1>
       <p class="mb-0 max-w-xl text-[0.9375rem] leading-relaxed text-dark/70">

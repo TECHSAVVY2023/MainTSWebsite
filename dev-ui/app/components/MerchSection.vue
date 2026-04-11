@@ -7,39 +7,43 @@
     <div class="relative z-10 isolate">
       <div class="container mx-auto px-6 sm:px-10 lg:px-16">
         <div class="mb-8 sm:mb-10 md:mb-12">
-          <SectionWireShield variant="white">
-            <div class="flex flex-col items-start justify-between gap-3 md:flex-row md:items-end">
-            <div class="max-w-[36rem]">
-              <h2 class="mb-1 text-[19px] font-bold leading-tight tracking-tight text-dark sm:text-[22px] md:text-[26px]">
-                Merch
-              </h2>
-              <p class="text-xs leading-relaxed text-dark/60 sm:text-sm">
-                Official Code Camp and community gear — clean fits, same energy as the cohort.
-              </p>
-            </div>
-            <NuxtLink
-              to="/merchandise"
-              class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-accent-purple/25 bg-violet-border px-3.5 py-2 text-xs font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:px-4 sm:text-sm"
-            >
-              View more
-              <i class="fas fa-arrow-right text-[10px] sm:text-xs" aria-hidden="true" />
-            </NuxtLink>
-            </div>
-          </SectionWireShield>
+          <div class="flex flex-col items-start justify-between gap-3 md:flex-row md:items-end">
+            <SectionWireShield variant="white" :wide="false">
+              <div class="max-w-[36rem]">
+                <h2 class="mb-1 text-[19px] font-bold leading-tight tracking-tight text-dark sm:text-[22px] md:text-[26px]">
+                  Merch
+                </h2>
+                <p class="text-xs leading-relaxed text-dark/60 sm:text-sm">
+                  Official Code Camp and community gear — clean fits, same energy as the cohort.
+                </p>
+              </div>
+            </SectionWireShield>
+            <SectionWireShield variant="white" :wide="false">
+              <NuxtLink
+                to="/merchandise"
+                class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-accent-purple/25 bg-violet-border px-3.5 py-2 text-xs font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:px-4 sm:text-sm"
+              >
+                View more
+                <i class="fas fa-arrow-right text-[10px] sm:text-xs" aria-hidden="true" />
+              </NuxtLink>
+            </SectionWireShield>
+          </div>
         </div>
 
-        <div class="mx-auto grid w-full max-w-[58rem] grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-7 md:grid-cols-3 md:gap-8 lg:gap-9">
+        <div
+          class="mx-auto grid w-full max-w-[72rem] grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-6 items-stretch"
+        >
           <article
             v-for="(item, idx) in displayItems"
             :key="item.id || item.name + idx"
-            class="group mx-auto flex w-full max-w-[15.5rem] flex-col text-center sm:max-w-none"
+            class="group flex h-full min-h-0 w-full flex-col text-center"
           >
             <a
               v-if="item.href"
               :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
-              class="relative mx-auto block aspect-square w-full max-w-[12.5rem] overflow-hidden rounded-xl bg-[#e8eaef] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] no-underline transition-shadow duration-300 group-hover:shadow-[0_10px_32px_rgba(97,38,177,0.1)] sm:max-w-[13.5rem]"
+              class="relative mx-auto block aspect-square w-full max-w-none shrink-0 overflow-hidden rounded-xl bg-[#e8eaef] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] no-underline transition-shadow duration-300 group-hover:shadow-[0_10px_32px_rgba(97,38,177,0.1)]"
             >
               <img
                 :src="item.image || defaultImage"
@@ -52,7 +56,7 @@
             </a>
             <div
               v-else
-              class="relative mx-auto aspect-square w-full max-w-[12.5rem] overflow-hidden rounded-xl bg-[#e8eaef] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-shadow duration-300 group-hover:shadow-[0_10px_32px_rgba(97,38,177,0.1)] sm:max-w-[13.5rem]"
+              class="relative mx-auto aspect-square w-full max-w-none shrink-0 overflow-hidden rounded-xl bg-[#e8eaef] shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] transition-shadow duration-300 group-hover:shadow-[0_10px_32px_rgba(97,38,177,0.1)]"
             >
               <img
                 :src="item.image || defaultImage"
@@ -63,9 +67,9 @@
                 @error="onImgError"
               >
             </div>
-            <div class="mt-3.5 flex w-full justify-center px-0.5">
+            <div class="mt-3 flex min-h-0 flex-1 flex-col justify-between px-0.5">
               <SectionWireShield variant="white" :wide="false">
-                <h3 class="text-sm font-semibold tracking-tight text-dark sm:text-[0.9375rem]">
+                <h3 class="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug tracking-tight text-dark sm:min-h-[2.75rem] sm:text-[0.9375rem]">
                   {{ item.name }}
                 </h3>
                 <p class="mt-1 text-sm font-semibold tabular-nums text-secondary sm:text-[0.95rem]">
@@ -73,13 +77,13 @@
                 </p>
                 <p
                   v-if="item.subtitle"
-                  class="mx-auto mt-1.5 max-w-[14rem] text-[11px] leading-relaxed text-dark/80 sm:text-xs sm:leading-snug"
+                  class="mx-auto mt-1.5 line-clamp-2 min-h-[2.25rem] max-w-none text-[11px] leading-relaxed text-dark/80 sm:text-xs sm:leading-snug"
                 >
                   {{ item.subtitle }}
                 </p>
               </SectionWireShield>
             </div>
-            <div class="mt-3 grid w-full grid-cols-2 gap-2">
+            <div class="mt-3 grid w-full shrink-0 grid-cols-2 gap-2">
               <template v-if="!item.href">
                 <button
                   type="button"
@@ -119,7 +123,7 @@
 
 <script setup lang="ts">
 import type { MerchItem } from '~/composables/useMerchCatalog'
-import { DEFAULT_MEDIA_FALLBACK } from '~/constants/defaultMediaAssets'
+import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
 
 const props = withDefaults(
   defineProps<{

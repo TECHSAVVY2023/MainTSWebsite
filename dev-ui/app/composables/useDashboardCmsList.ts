@@ -4,12 +4,34 @@
 // @ts-ignore
 import moment from 'moment'
 
+export interface CmsFileEntry {
+  name?: string
+  url?: string
+}
+
 export interface CmsRaw {
   id: number
   title: string
+  authors?: string
   filters?: string | Record<string, unknown> | null
   approval_status?: string
   created_at?: string
+  /** Full body from API (list responses include this when present). */
+  descriptions?: string
+  links?: string[]
+  files?: CmsFileEntry[] | unknown
+  images?: unknown[]
+  content_id?: string
+  logs?: unknown[]
+}
+
+/** True if `authors` (comma-separated) lists this email (case-insensitive). */
+export function cmsItemHasAuthorEmail (item: CmsRaw, email: string | null | undefined): boolean {
+  const e = (email || '').trim().toLowerCase()
+  if (!e) return false
+  const raw = (item.authors || '').trim()
+  if (!raw) return false
+  return raw.split(',').some(part => part.trim().toLowerCase() === e)
 }
 
 export function useDashboardCmsList () {
@@ -25,7 +47,7 @@ export function useDashboardCmsList () {
       return
     }
     try {
-      const data = await $fetch<unknown>(`${apiBase}/techsavvy_app/cms/list/`)
+      const data = await $fetch<unknown>(`${apiBase}/api/techsavvies/cms/list/`)
       const list = Array.isArray(data)
         ? data
         : (data as Record<string, unknown>)?.data

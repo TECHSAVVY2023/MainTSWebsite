@@ -1,8 +1,6 @@
 /**
  * Search page composable: data, filters, results, and submit logic.
  */
-import type { Ref } from 'vue'
-
 export type SearchNewsItem = {
   id?: string
   date: string

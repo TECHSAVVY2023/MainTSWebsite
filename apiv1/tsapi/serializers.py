@@ -13,8 +13,6 @@ class CmsItemSerializer(serializers.ModelSerializer):
         return super().to_internal_value(normalized)
 
     def validate_filters(self, value):
-        # Backward-compatible: allow object payloads for filters
-        # while model still stores a CharField.
         if isinstance(value, dict):
             return json.dumps(value)
         return value
@@ -26,7 +24,6 @@ class CmsItemSerializer(serializers.ModelSerializer):
             try:
                 data["filters"] = json.loads(raw_filters)
             except json.JSONDecodeError:
-                # Keep legacy plain-string filters untouched.
                 pass
         return data
 

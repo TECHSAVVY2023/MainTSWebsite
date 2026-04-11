@@ -1,7 +1,8 @@
 /**
  * Merch catalog: approved CMS items with category "Merchandise", merged with static fallback.
  */
-import { MERCH_CATALOG_IMAGE_URLS } from '~/constants/defaultMediaAssets'
+import { SAMPLE_MERCH } from '~/constants/sampleMedia'
+import { firstCmsImageUrl } from '~/utils/cmsMedia'
 
 export type MerchItem = {
   id: string
@@ -22,7 +23,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱549',
     unitAmountPhp: 549,
     subtitle: 'Think smart. Code smart. Official Code Camp Season 4 print.',
-    image: MERCH_CATALOG_IMAGE_URLS.tee,
+    image: SAMPLE_MERCH.tee,
     alt: 'Code Camp Season 4 community t-shirt'
   },
   {
@@ -31,7 +32,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱1,090',
     unitAmountPhp: 1090,
     subtitle: 'Mid-weight fleece, embroidered mark — for meetups and late builds.',
-    image: MERCH_CATALOG_IMAGE_URLS.hoodie,
+    image: SAMPLE_MERCH.hoodie,
     alt: 'Tech Savvy hoodie'
   },
   {
@@ -40,7 +41,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱180',
     unitAmountPhp: 180,
     subtitle: 'Vinyl stickers and enamel pin — bundle for laptops and lanyards.',
-    image: MERCH_CATALOG_IMAGE_URLS.stickers,
+    image: SAMPLE_MERCH.stickers,
     alt: 'Tech Savvy stickers and pin set'
   },
   {
@@ -49,7 +50,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱420',
     unitAmountPhp: 420,
     subtitle: 'Soft acrylic knit with woven label — for cool venues and night builds.',
-    image: MERCH_CATALOG_IMAGE_URLS.beanie,
+    image: SAMPLE_MERCH.beanie,
     alt: 'Tech Savvy community beanie'
   },
   {
@@ -58,7 +59,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱380',
     unitAmountPhp: 380,
     subtitle: 'Heavy cotton canvas, long handles — laptops, hoodies, and event swag.',
-    image: MERCH_CATALOG_IMAGE_URLS.tote,
+    image: SAMPLE_MERCH.tote,
     alt: 'Code Camp canvas tote bag'
   },
   {
@@ -67,7 +68,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱290',
     unitAmountPhp: 290,
     subtitle: 'Matte glaze with debossed mark — desk companion for stand-ups.',
-    image: MERCH_CATALOG_IMAGE_URLS.mug,
+    image: SAMPLE_MERCH.mug,
     alt: 'Code Camp ceramic mug'
   },
   {
@@ -76,7 +77,7 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱650',
     unitAmountPhp: 650,
     subtitle: 'Double-wall steel, powder coat — keeps drinks cold through long sessions.',
-    image: MERCH_CATALOG_IMAGE_URLS.bottle,
+    image: SAMPLE_MERCH.bottle,
     alt: 'Tech Savvy insulated water bottle'
   },
   {
@@ -85,10 +86,13 @@ export const MERCH_CATALOG_STATIC: MerchItem[] = [
     priceLabel: 'From ₱220',
     unitAmountPhp: 220,
     subtitle: 'Dot grid, lay-flat binding — sketches, stand-up notes, and API doodles.',
-    image: MERCH_CATALOG_IMAGE_URLS.notebook,
+    image: SAMPLE_MERCH.notebook,
     alt: 'Tech Savvy notebook journal'
   }
 ]
+
+/** @deprecated Use MERCH_CATALOG_STATIC */
+export const MERCH_CATALOG = MERCH_CATALOG_STATIC
 
 export const MERCH_CATALOG_STATE_KEY = 'merch-catalog-cms'
 
@@ -101,7 +105,7 @@ type CmsRaw = {
   filters?: string | Record<string, unknown> | null
   links?: string[]
   files?: { name?: string; url?: string }[] | { name?: string; url?: string } | null
-  images?: string[]
+  images?: unknown[]
 }
 
 function normalizeCmsList (body: unknown): unknown[] {
@@ -168,7 +172,7 @@ function mapCmsItemToMerch (cms: CmsRaw, apiBase: string): MerchItem | null {
   const unitAmountPhp = hasPrice ? unitRaw : 0
   const priceLabel = hasPrice ? `₱${Math.round(unitAmountPhp)}` : 'Price on request'
 
-  const imgFromImages = Array.isArray(cms.images) && cms.images[0] ? cms.images[0] : ''
+  const imgFromImages = firstCmsImageUrl(cms.images)
   let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
   if (fileUrl) fileUrl = resolveMediaUrl(fileUrl, apiBase)
 
@@ -191,9 +195,9 @@ export function useMerchCatalog () {
   useAsyncData(
     'merch-catalog-cms',
     async () => {
-      if (!apiBase) return null
+      if (!apiBase) return []
       try {
-        const url = `${apiBase.replace(/\/$/, '')}/techsavvy_app/cms/list/`
+        const url = `${apiBase.replace(/\/$/, '')}/api/techsavvies/cms/list/`
         const data = await $fetch<unknown>(url)
         const list = normalizeCmsList(data) as CmsRaw[]
         const mapped = list
@@ -204,10 +208,10 @@ export function useMerchCatalog () {
         }
         return mapped
       } catch {
-        return null
+        return []
       }
     },
-    { server: true }
+    { server: true, default: () => [] }
   )
 
   const items = computed(() => (catalogState.value.length > 0 ? catalogState.value : MERCH_CATALOG_STATIC))

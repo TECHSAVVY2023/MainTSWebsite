@@ -158,9 +158,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, toValue } from 'vue'
 import type { MaybeRef } from 'vue'
-import type { MerchItem } from '~/composables/useMerchCatalog'
+import type { MerchItem } from '../../composables/useMerchCatalog'
 
 const props = defineProps<{
   items: MaybeRef<MerchItem[]>

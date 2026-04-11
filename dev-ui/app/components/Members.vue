@@ -247,8 +247,6 @@
 </template>
 
 <script setup>
-import { ref,onMounted } from "vue"
-
 const techSavvyLogo =
 "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/TechSavvyLogo.png"
 
@@ -256,7 +254,7 @@ const workflowLogo =
 "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/WORKFLOWsinglewhite.png"
 
 const config = useRuntimeConfig()
-const API_BASE = `${config.public.apiBase}/techsavvy_members`
+const API_BASE = `${config.public.apiBase}/api/techsavvies`
 
 const members = ref([])
 const sparkles = ref([])

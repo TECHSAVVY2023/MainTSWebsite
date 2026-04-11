@@ -1,7 +1,7 @@
 /**
  * Dashboard API composable – all data from API only.
- * Set NUXT_PUBLIC_API_BASE in .env or runtimeConfig to your API base URL (e.g. https://api.example.com).
- * When not set or request fails, returns empty data so the app still works.
+ * Set NUXT_PUBLIC_API_BASE to the API host (e.g. http://127.0.0.1:8000) or full prefix (…/api/techsavvies).
+ * Calendar requests always resolve to …/api/techsavvies/calendar-events.
  */
 
 export interface SubmissionItem {
@@ -62,14 +62,25 @@ export interface CalendarEventItem {
   title: string
   date: string
   time?: string
+  /** API may send snake_case from Django */
+  end_time?: string
+  endTime?: string
   description?: string
   link?: string
+  kind?: string
 }
 
 function getBase (): string {
   if (import.meta.server) return ''
   const config = useRuntimeConfig()
   return (config.public?.apiBase as string) || ''
+}
+
+/** Host-only base (e.g. http://127.0.0.1:8000) or full API root (…/api/techsavvies) — both supported. */
+function calendarEventsBaseUrl (base: string): string {
+  const t = base.replace(/\/$/, '')
+  if (/\/api\/techsavvies$/i.test(t)) return `${t}/calendar-events`
+  return `${t}/api/techsavvies/calendar-events`
 }
 
 async function apiGet<T> (path: string, defaultValue: T): Promise<T> {
@@ -185,16 +196,38 @@ export function useDashboardApi () {
       return apiPut('notifications', items)
     },
     async getCalendarEvents (): Promise<CalendarEventItem[]> {
-      return apiGet<CalendarEventItem[]>('calendar-events', [])
+      const base = getBase()
+      if (!base) return []
+      const url = calendarEventsBaseUrl(base)
+      try {
+        const res = await fetch(url)
+        if (!res.ok) return []
+        return (await res.json()) as CalendarEventItem[]
+      } catch {
+        return []
+      }
     },
     async saveCalendarEvents (events: CalendarEventItem[]): Promise<boolean> {
-      return apiPut('calendar-events', events)
+      const base = getBase()
+      if (!base) return true
+      const url = calendarEventsBaseUrl(base)
+      try {
+        const res = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(events)
+        })
+        return res.ok
+      } catch {
+        return false
+      }
     },
     async createCalendarEvent (payload: Omit<CalendarEventItem, 'id'>): Promise<CalendarEventItem | null> {
       const base = getBase()
       if (!base) return null
+      const url = calendarEventsBaseUrl(base)
       try {
-        const res = await fetch(`${base.replace(/\/$/, '')}/calendar-events`, {
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -206,10 +239,30 @@ export function useDashboardApi () {
       }
     },
     async updateCalendarEvent (id: string, payload: Partial<CalendarEventItem>): Promise<boolean> {
-      return apiPatch(`calendar-events/${id}`, payload)
+      const base = getBase()
+      if (!base) return false
+      const url = `${calendarEventsBaseUrl(base)}/${id}`
+      try {
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        return res.ok
+      } catch {
+        return false
+      }
     },
     async deleteCalendarEvent (id: string): Promise<boolean> {
-      return apiDelete(`calendar-events/${id}`)
+      const base = getBase()
+      if (!base) return false
+      const url = `${calendarEventsBaseUrl(base)}/${id}`
+      try {
+        const res = await fetch(url, { method: 'DELETE' })
+        return res.ok
+      } catch {
+        return false
+      }
     },
     hasApi (): boolean {
       return !!getBase()

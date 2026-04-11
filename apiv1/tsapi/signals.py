@@ -68,7 +68,6 @@ def cms_item_delete_files(sender, instance, **kwargs):
     """
     media_paths = set()
 
-    # Collect from instance.files  →  [{"name": "...", "url": "http://..."}]
     if isinstance(instance.files, list):
         for entry in instance.files:
             url = entry.get("url", "") if isinstance(entry, dict) else str(entry)
@@ -76,7 +75,6 @@ def cms_item_delete_files(sender, instance, **kwargs):
             if fp:
                 media_paths.add(fp)
 
-    # Collect from instance.images  →  ["http://...", ...]
     if isinstance(instance.images, list):
         for url in instance.images:
             fp = _url_to_filepath(str(url))
@@ -90,7 +88,6 @@ def cms_item_delete_files(sender, instance, **kwargs):
                 os.remove(path)
                 deleted_count += 1
                 print(f"[FILE CLEANUP] Deleted: {path}")
-            # Also remove the matching FileUploadModel record (if any)
             FileUploadModel.objects.filter(file=os.path.relpath(path, settings.MEDIA_ROOT)).delete()
         except Exception as e:
             print(f"[FILE CLEANUP ERROR] {path}: {e}")

@@ -2,16 +2,18 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
-load_dotenv()
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
-# ------------------------------------------------------------
-# Security
-# ------------------------------------------------------------
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in ("1", "true", "yes")
+SECRET_KEY = (os.getenv("DJANGO_SECRET_KEY") or "").strip()
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-dev-only-set-DJANGO_SECRET_KEY-for-production"
+    else:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DEBUG is False.")
 ALLOWED_HOSTS = ['*']
 PUBLIC_SITE = os.getenv("PAYMONGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
 
@@ -19,6 +21,9 @@ PUBLIC_SITE = os.getenv("PAYMONGO_PUBLIC_BASE_URL", "").strip().rstrip("/")
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
     "https://techsavvies.space",
     "https://lsu.edu.ph",
     "https://www.lsu.edu.ph",
@@ -30,8 +35,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.fabricspluscurtains.com",
 ]
 
-# PayMongo (and related) payment settings — single source: tsapi.payment_config + .env
 from tsapi import payment_config as _payment_config
+
+from tsapi import oauth_config as _oauth_config
 
 def _comma_separated_urls(key: str) -> list[str]:
     raw = os.environ.get(key, "")
@@ -48,7 +54,6 @@ def _dedupe_preserve(seq: list[str]) -> list[str]:
     return out
 
 
-# Browser POSTs (admin, DRF, etc.) send Origin; Django 4+ must trust it or CSRF fails (e.g. ngrok front-end).
 _public_site = _payment_config.PAYMONGO_PUBLIC_BASE_URL
 CSRF_TRUSTED_ORIGINS = _dedupe_preserve(
     [
@@ -67,8 +72,6 @@ CSRF_TRUSTED_ORIGINS = _dedupe_preserve(
     )
 )
 
-
-# Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -123,10 +126,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -142,10 +141,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -155,24 +150,17 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
 STATIC_URL = 'static/'
 
-# Media files (user uploads)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ------------------------------------------------------------
-# REST Framework & JWT (boss-style)
-# ------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",  # Public API; use IsAdminUser on admin ViewSets
+        "rest_framework.permissions.AllowAny",
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -186,10 +174,6 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
-
-# ------------------------------------------------------------
-# Email
-# ------------------------------------------------------------
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
@@ -199,17 +183,25 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "TechSavvy <info@techsavvy.space>")
 ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL","info@techsavvy.space")
 
-# ------------------------------------------------------------
-# PayMongo
-# ------------------------------------------------------------
 PAYMONGO_WEBHOOK_SECRET = os.getenv("PAYMONGO_WEBHOOK_SECRET", "").strip()
 PAYMONGO_PUBLIC_BASE_URL = os.getenv("PAYMONGO_PUBLIC_BASE_URL")
 PAYMONGO_SECRET_KEY = os.getenv("PAYMONGO_SECRET_KEY", "").strip()
 PAYMONGO_PAYMENT_METHOD_TYPES = os.getenv("PAYMONGO_PAYMENT_METHOD_TYPES", "card,gcash,paymaya,qrph")
 
-# Re-export for code that reads django.conf.settings (checkout + webhooks).
 PAYMONGO_WEBHOOK_SECRET = _payment_config.PAYMONGO_WEBHOOK_SECRET
 PAYMONGO_PUBLIC_BASE_URL = _payment_config.PAYMONGO_PUBLIC_BASE_URL
 PAYMONGO_SECRET_KEY = _payment_config.PAYMONGO_SECRET_KEY
 PAYMONGO_PAYMENT_METHOD_TYPES = _payment_config.PAYMONGO_PAYMENT_METHOD_TYPES
+
+MERCH_CHECKOUT_DESCRIPTION = (
+    os.getenv("MERCH_CHECKOUT_DESCRIPTION", "Tech Savvy merchandise").strip() or "Tech Savvy merchandise"
+)
+MERCH_SEND_CUSTOM_RECEIPT_EMAIL = os.getenv(
+    "MERCH_SEND_CUSTOM_RECEIPT_EMAIL", "false"
+).lower() in ("1", "true", "yes")
+
+GOOGLE_CLIENT_ID = _oauth_config.GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET = _oauth_config.GOOGLE_CLIENT_SECRET
+FRONTEND_URL = _oauth_config.FRONTEND_URL
+AUTH_JWT_SECRET = _oauth_config.AUTH_JWT_SECRET
 

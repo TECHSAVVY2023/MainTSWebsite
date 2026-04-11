@@ -1,8 +1,8 @@
 /**
  * News detail page composable: article, images, lightbox.
  */
-import { ref, computed, watch } from 'vue'
-import { DEFAULT_NEWS_IMAGE } from '~/constants/defaultMediaAssets'
+import { FALLBACK_NEWS_ITEMS } from '~/constants/fallbackNews'
+import { DEFAULT_NEWS_IMAGE } from '~/constants/sampleMedia'
 
 export type NewsDetailItem = {
   id?: string
@@ -33,22 +33,35 @@ export function useNewsDetail () {
   const newsItems = ref<NewsDetailItem[]>([])
   const lightboxIndex = ref<number | null>(null)
 
-  /** Hydrate list as soon as useAsyncData resolves (SSR + client) so detail view isn’t blank until onMounted. */
+  function mergeDetailItems (api: NewsDetailItem[]): NewsDetailItem[] {
+    if (api.length > 0) return [...api]
+    return FALLBACK_NEWS_ITEMS.map((f) => ({ ...f }))
+  }
+
+  /** CMS list + same demo rows as the landing strip so /news/[slug] resolves for fallback cards. */
   watch(
     cmsListFromApi,
     (v) => {
-      if (Array.isArray(v) && v.length > 0) {
-        newsItems.value = v as NewsDetailItem[]
-      }
+      const api = Array.isArray(v) ? (v as NewsDetailItem[]) : []
+      newsItems.value = mergeDetailItems(api)
     },
     { immediate: true }
   )
 
   const slugParam = computed(() => String(route.params.slug || ''))
 
-  const article = computed<NewsDetailItem | undefined>(() =>
-    newsItems.value.find((n) => getNewsSlug(n) === slugParam.value)
-  )
+  const article = computed<NewsDetailItem | undefined>(() => {
+    const slug = slugParam.value
+    const fromList = newsItems.value.find((n) => getNewsSlug(n) === slug)
+    if (fromList) return fromList
+    // Legacy links used `id` in the URL (e.g. /news/sample-news-2) before slugs were title+date.
+    if (/^sample-news-\d+$/i.test(slug)) {
+      return FALLBACK_NEWS_ITEMS.find((n) => n.id.toLowerCase() === slug.toLowerCase()) as
+        | NewsDetailItem
+        | undefined
+    }
+    return undefined
+  })
 
   const articleImages = computed(() => {
     const a = article.value
@@ -56,19 +69,14 @@ export function useNewsDetail () {
     const arr = a.images
     let urls: string[] = []
     if (Array.isArray(arr) && arr.length > 0) {
-      urls = arr
-        .slice(0, 6)
-        .map((u) => (typeof u === 'string' && u.trim() ? u : DEFAULT_IMAGE))
+      urls = arr.slice(0, 6).filter(Boolean).map((u) => u || DEFAULT_IMAGE)
     } else {
       const single = a.imageUrl
       urls = [single && single.trim() ? single : DEFAULT_IMAGE]
     }
     // Deduplicate: if all images are the same (e.g. fallback), show only one
     const unique = [...new Set(urls)]
-    if (unique.length === 1 && urls.length > 1) {
-      const only = unique[0]
-      return only !== undefined ? [only] : urls
-    }
+    if (unique.length === 1 && urls.length > 1) return [unique[0]]
     return urls
   })
 
@@ -105,23 +113,26 @@ export function useNewsDetail () {
   }
 
   async function loadData () {
+    let api: NewsDetailItem[] = []
     const fromApi = cmsListFromApi.value
     if (Array.isArray(fromApi) && fromApi.length > 0) {
-      newsItems.value = fromApi as NewsDetailItem[]
+      api = fromApi as NewsDetailItem[]
     } else {
       try {
         const list = await fetchCmsList()
-        if (list.length > 0) newsItems.value = list as NewsDetailItem[]
+        if (list.length > 0) api = list as NewsDetailItem[]
       } catch { /* fall through */ }
     }
 
+    let merged = mergeDetailItems(api)
     try {
       const raw = getStorage(APPROVED_NEWS_KEY)
       const approved = JSON.parse(raw || '[]')
       if (Array.isArray(approved) && approved.length > 0) {
-        newsItems.value = [...approved, ...newsItems.value]
+        merged = [...approved, ...merged]
       }
     } catch { /* ignore */ }
+    newsItems.value = merged
   }
 
   return {
