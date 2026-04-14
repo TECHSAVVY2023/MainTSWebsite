@@ -5,12 +5,22 @@
       <div class="min-w-0 flex-1 space-y-1.5">
         <h1 class="text-2xl font-black uppercase leading-none tracking-tighter text-[#1a0533] sm:text-3xl lg:text-4xl">all Community Members</h1>
         <div class="flex items-center gap-3">
-           <span class="text-[10px] font-black text-violet-900 uppercase tracking-widest bg-violet-50 px-3 py-1 rounded-lg border border-violet-100">{{ members.length }} Community Members</span>
+           <span class="text-[10px] font-black text-violet-900 uppercase tracking-widest bg-violet-50 px-3 py-1 rounded-lg border border-violet-100">{{ filteredMembers.length }} Community Members</span>
            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
         </div>
       </div>
       
       <div class="flex min-w-0 flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
+         <button
+           type="button"
+           class="h-11 w-full shrink-0 rounded-xl border px-6 text-[10px] font-black uppercase tracking-widest transition-all sm:w-auto"
+           :class="roleFilter === 'participants'
+             ? 'border-violet-600 bg-violet-600 text-white shadow-lg shadow-violet-600/20'
+             : 'border-violet-200 bg-white text-violet-700 hover:bg-violet-50'"
+           @click="toggleParticipantView"
+         >
+           {{ roleFilter === 'participants' ? 'View Members' : 'View Participants' }}
+         </button>
          <div class="relative min-w-0 flex-1 group sm:max-w-md">
             <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-violet-300 group-focus-within:text-violet-600 transition-colors" />
             <input 
@@ -20,68 +30,139 @@
               class="w-full h-11 pl-11 pr-4 rounded-xl border-2 border-violet-50 focus:border-violet-200 focus:bg-violet-50/30 transition-all outline-none text-[11px] font-bold uppercase tracking-widest text-[#1a0533] placeholder:text-violet-200"
             />
          </div>
-         <button type="button" class="h-11 w-full shrink-0 rounded-xl bg-violet-600 px-6 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-violet-600/20 transition-all hover:scale-[1.02] active:scale-95 sm:w-auto sm:px-8">Add Member</button>
+         <button
+           type="button"
+           class="h-11 w-full shrink-0 rounded-xl bg-violet-600 px-6 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-violet-600/20 transition-all hover:scale-[1.02] active:scale-95 sm:w-auto sm:px-8"
+          @click="openAddModal"
+         >
+           Add Member
+         </button>
       </div>
     </div>
 
-    <!-- 💻 Member Registry Table -->
+    <!-- Member registry: stacked cards (small screens) + table (md+) — no horizontal scroll -->
     <div class="w-full border-2 border-violet-50 overflow-hidden bg-white shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[800px]">
-          <thead class="bg-violet-100 border-b border-violet-100">
+      <div class="md:hidden divide-y divide-violet-50">
+        <button
+          v-for="member in filteredMembers"
+          :key="`card-${member.id}`"
+          type="button"
+          class="flex w-full min-w-0 flex-col gap-3 p-4 text-left transition-colors hover:bg-violet-50/50"
+          :class="{ 'cursor-pointer': isAdmin }"
+          @click="isAdmin ? openDetails(member) : null"
+        >
+          <div class="flex min-w-0 items-center gap-3">
+            <img
+              :src="cleanImageUrl(member.profilePicture)"
+              alt=""
+              class="h-12 w-12 shrink-0 rounded-2xl border-2 border-violet-50 object-cover"
+            >
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-black uppercase tracking-tight text-[#1a0533]">
+                {{ member.firstname }} {{ member.lastname }}
+              </p>
+              <p class="mt-0.5 text-[10px] font-bold uppercase tracking-widest text-violet-400">
+                {{ member.idNumber || '—' }}
+              </p>
+            </div>
+            <div class="shrink-0 flex flex-col items-end gap-1.5">
+              <span
+                class="rounded-lg border px-2 py-1 text-[8px] font-black uppercase tracking-widest"
+                :class="getRoleColor(member.role)"
+              >
+                {{ member.role || 'Member' }}
+              </span>
+              <button
+                v-if="isAdmin && isParticipantRole(member.role)"
+                type="button"
+                class="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-600 hover:text-white"
+                @click.stop="promoteParticipant(member)"
+              >
+                Make Member
+              </button>
+            </div>
+          </div>
+          <div class="space-y-1 pl-[3.75rem] text-xs">
+            <p class="break-all font-bold text-[#1a0533]">
+              <i class="far fa-envelope mr-1 text-violet-300" aria-hidden="true" />
+              {{ member.email || '—' }}
+            </p>
+            <p class="font-black uppercase tracking-wide text-violet-400">
+              <i class="fas fa-phone-alt mr-1 text-[8px]" aria-hidden="true" />
+              {{ member.mobile || '—' }}
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <div class="hidden overflow-x-hidden md:block">
+        <table class="w-full table-fixed border-collapse text-left">
+          <thead class="border-b border-violet-100 bg-violet-100">
             <tr>
-              <th class="py-2 px-10 text-[10px] font-black text-violet-900 uppercase tracking-widest">Member Profile</th>
-              <th class="py-2 px-6 text-[10px] font-black text-violet-900 uppercase tracking-widest">Member Identity</th>
-              <th class="py-2 px-6 text-[10px] font-black text-violet-900 uppercase tracking-widest">Verified Contact</th>
-            
+              <th class="w-[38%] py-3 pl-4 pr-2 text-[10px] font-black uppercase tracking-widest text-violet-900 lg:pl-6">
+                Member Profile
+              </th>
+              <th class="w-[28%] py-3 px-2 text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-4">
+                Member Identity
+              </th>
+              <th class="w-[34%] py-3 pl-2 pr-4 text-[10px] font-black uppercase tracking-widest text-violet-900 lg:pr-6">
+                Verified Contact
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-violet-50">
-            <tr v-for="member in filteredMembers" :key="member.id" class="group/row hover:bg-violet-50/40 transition-colors" :class="{'hover:cursor-pointer': isAdmin}">
-              <!-- Member Profile (Avatar + Name) -->
-              <td class="py-6 px-10">
-
-
-                <div class="flex items-center gap-5" @click="isAdmin ? openDetails(member) : null">
-                   <div class="relative w-12 h-12 shrink-0 group/photo">
-                      <img :src="cleanImageUrl(member.profilePicture)" class="w-full h-full rounded-[1.25rem] object-cover border-2 border-violet-50 p-0.5 bg-white shadow-sm" />
-                   </div>
-                   <div class="min-w-0">
-                      <p class="text-[15px] font-black text-[#1a0533] uppercase tracking-tighter truncate leading-none">{{ member.firstname }} {{ member.lastname }}</p>
-                   </div>
+            <tr
+              v-for="member in filteredMembers"
+              :key="member.id"
+              class="group/row transition-colors hover:bg-violet-50/40"
+              :class="{ 'cursor-pointer': isAdmin }"
+              @click="isAdmin ? openDetails(member) : null"
+            >
+              <td class="py-4 pl-4 pr-2 align-top lg:pl-6">
+                <div class="flex min-w-0 items-center gap-3">
+                  <img
+                    :src="cleanImageUrl(member.profilePicture)"
+                    alt=""
+                    class="h-11 w-11 shrink-0 rounded-2xl border-2 border-violet-50 object-cover"
+                  >
+                  <p class="min-w-0 break-words text-sm font-black uppercase leading-tight tracking-tight text-[#1a0533]">
+                    {{ member.firstname }} {{ member.lastname }}
+                  </p>
                 </div>
               </td>
-
-              <!-- Member Identity (ID + Role) -->
-              <td class="py-6 px-6">
-                <div class="space-y-1.5">
-                  <p class="text-[11px] font-bold text-violet-300 uppercase tracking-widest leading-none">{{ member.idNumber || '0000-000' }}</p>
-                  <div class="inline-block">
-                    <span 
-                      class="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border"
-                      :class="getRoleColor(member.role)"
-                    >
-                      {{ member.role || 'Member' }}
-                    </span>
-                  </div>
+              <td class="px-2 py-4 align-top lg:px-4">
+                <div class="min-w-0 space-y-1.5">
+                  <p class="break-all text-[10px] font-bold uppercase tracking-widest text-violet-400">
+                    {{ member.idNumber || '—' }}
+                  </p>
+                  <span
+                    class="inline-block rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest"
+                    :class="getRoleColor(member.role)"
+                  >
+                    {{ member.role || 'Member' }}
+                  </span>
+                  <button
+                    v-if="isAdmin && isParticipantRole(member.role)"
+                    type="button"
+                    class="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-600 hover:text-white"
+                    @click.stop="promoteParticipant(member)"
+                  >
+                    Make Member
+                  </button>
                 </div>
               </td>
-
-              <!-- Verified Contact (Email + Contact) -->
-              <td class="py-6 px-6">
-                 <div class="space-y-1.5 min-w-[180px]">
-                    <div class="flex items-center gap-2 group/mail cursor-pointer">
-                       <i class="far fa-envelope text-[9px] text-violet-200" />
-                       <p class="text-[12px] font-bold text-[#1a0533] font-roboto truncate leading-none">{{ member.email || '—' }}</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                       <i class="fas fa-phone-alt text-[8px] text-violet-200" />
-                       <p class="text-[10px] font-black text-violet-300 tracking-wider leading-none">{{ member.mobile || '—' }}</p>
-                    </div>
-                 </div>
+              <td class="py-4 pl-2 pr-4 align-top lg:pr-6">
+                <div class="min-w-0 space-y-1.5">
+                  <p class="break-all text-xs font-bold leading-snug text-[#1a0533]">
+                    <i class="far fa-envelope mr-1 text-violet-300" aria-hidden="true" />
+                    {{ member.email || '—' }}
+                  </p>
+                  <p class="break-all text-[10px] font-black uppercase tracking-wide text-violet-400">
+                    <i class="fas fa-phone-alt mr-1 text-[8px]" aria-hidden="true" />
+                    {{ member.mobile || '—' }}
+                  </p>
+                </div>
               </td>
-
-             
             </tr>
           </tbody>
         </table>
@@ -172,6 +253,156 @@
        </Transition>
     </Teleport>
 
+    <!-- ✨ Add Member Modal -->
+    <Teleport to="body">
+      <Transition name="overlay">
+        <div
+          v-if="showAddModal"
+          class="fixed inset-0 z-[220] flex items-center justify-center bg-[#1a0533]/40 p-4 backdrop-blur-sm sm:p-6"
+          @click="closeAddModal"
+        >
+          <div
+            class="relative w-full max-w-4xl overflow-hidden rounded-[2rem] border border-violet-200/70 bg-white shadow-2xl sm:rounded-[2.5rem]"
+            @click.stop
+          >
+            <div class="border-b border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 px-5 py-4 sm:px-8 sm:py-6">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-violet-500">Member Registry</p>
+                  <h2 class="mt-1 text-xl font-black uppercase tracking-tight text-[#1a0533] sm:text-2xl">Add Community Member</h2>
+                  <p class="mt-1 text-xs text-violet-700/80">Create a new member profile without leaving this page.</p>
+                </div>
+                <button
+                  type="button"
+                  class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-violet-700 shadow-sm ring-1 ring-violet-100 transition-colors hover:bg-violet-100 hover:text-violet-900"
+                  @click="closeAddModal"
+                >
+                  <i class="fas fa-times text-sm" />
+                </button>
+              </div>
+            </div>
+
+            <form class="max-h-[72vh] overflow-y-auto p-5 custom-scrollbar sm:p-8" @submit.prevent="submitAddMember">
+              <div class="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+                <div class="md:col-span-2">
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Full Name</label>
+                  <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <input
+                      v-model="addForm.firstname"
+                      required
+                      placeholder="First Name"
+                      class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                    >
+                    <input
+                      v-model="addForm.middlename"
+                      placeholder="Middle Name"
+                      class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                    >
+                    <input
+                      v-model="addForm.lastname"
+                      required
+                      placeholder="Last Name"
+                      class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                    >
+                  </div>
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Birthdate</label>
+                  <input
+                    v-model="addForm.birthdate"
+                    type="date"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Mobile Number</label>
+                  <input
+                    v-model="addForm.mobile"
+                    placeholder="09xxxxxxxxx"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Email</label>
+                  <input
+                    v-model="addForm.email"
+                    type="email"
+                    placeholder="name@email.com"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Website / GitHub</label>
+                  <input
+                    v-model="addForm.website"
+                    placeholder="https://github.com/username"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Role</label>
+                  <input
+                    v-model="addForm.role"
+                    placeholder="Participant"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">ID Number</label>
+                  <input
+                    v-model="addForm.idNumber"
+                    required
+                    placeholder="Approved ID"
+                    class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                  >
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Profile Picture</label>
+                  <input
+                    ref="addFileInput"
+                    type="file"
+                    accept="image/*"
+                    class="w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 py-2 text-xs font-semibold text-violet-900 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-600 file:px-3 file:py-1.5 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:text-white hover:file:bg-violet-700"
+                  >
+                </div>
+              </div>
+
+              <div v-if="addError" class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 whitespace-pre-wrap">
+                {{ addError }}
+              </div>
+              <div v-if="addSuccess" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                Member added successfully.
+              </div>
+
+              <div class="mt-6 flex flex-col-reverse items-stretch gap-3 border-t border-violet-100 pt-5 sm:flex-row sm:items-center sm:justify-end">
+                <button
+                  type="button"
+                  class="h-11 rounded-xl border border-violet-200 px-5 text-[10px] font-black uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-50"
+                  @click="closeAddModal"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  :disabled="addLoading"
+                  class="h-11 rounded-xl bg-violet-600 px-6 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-600/30 transition-all hover:scale-[1.01] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {{ addLoading ? 'Saving Member...' : 'Create Member' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Hidden Inputs -->
     <div v-if="isAdmin" class="hidden">
        <input 
@@ -203,38 +434,76 @@ const props = defineProps({
 });
 
 const config = useRuntimeConfig();
-const API_BASE = `${config.public.apiBase}`;
+
+const API_BASE = computed(() => String(config.public.apiBase || '').replace(/\/$/, ''));
 
 const members = ref([]);
 const selectedMember = ref(null);
 const showModal = ref(false);
+const showAddModal = ref(false);
 const savingStates = ref({});
 const uploadingStates = ref({});
 const fileInputs = ref({});
+const addFileInput = ref(null);
 const searchQuery = ref('');
+const roleFilter = ref('members');
+const addLoading = ref(false);
+const addSuccess = ref(false);
+const addError = ref('');
+const addForm = ref({
+  firstname: '',
+  middlename: '',
+  lastname: '',
+  birthdate: '',
+  role: 'Participant',
+  idNumber: '',
+  mobile: '',
+  email: '',
+  website: '',
+  gcashPoints: 0,
+  bonusPoints: 0,
+  voucherPoints: 0,
+  honorariumPoints: 0,
+  numberOfProjects: 0
+});
 
 const isSaving = computed(() => Object.keys(savingStates.value).some(k => savingStates.value[k] === 'saving'));
 
 const filteredMembers = computed(() => {
   const q = searchQuery.value.trim().toLowerCase();
-  if (!q) return members.value;
-  return members.value.filter(m => 
-    m.firstname?.toLowerCase().includes(q) ||
-    m.lastname?.toLowerCase().includes(q) ||
-    m.email?.toLowerCase().includes(q) ||
-    m.idNumber?.toLowerCase().includes(q)
-  );
+  return members.value.filter((m) => {
+    const matchesRole = roleFilter.value === 'participants'
+      ? isParticipantRole(m.role)
+      : !isParticipantRole(m.role);
+    if (!matchesRole) return false;
+    if (!q) return true;
+    return (
+      m.firstname?.toLowerCase().includes(q) ||
+      m.lastname?.toLowerCase().includes(q) ||
+      m.email?.toLowerCase().includes(q) ||
+      m.idNumber?.toLowerCase().includes(q)
+    );
+  });
 });
 
 onMounted(async () => {
   await fetchMembers();
 });
 
+function normalizeMemberList (raw) {
+  if (Array.isArray(raw)) return raw;
+  if (raw && typeof raw === 'object' && Array.isArray(raw.results)) return raw.results;
+  return [];
+}
+
 const fetchMembers = async () => {
+  const base = API_BASE.value;
+  if (!base) return;
   try {
-    members.value = await $fetch(`${API_BASE}/api/techsavvies/member/list/`);
+    const raw = await $fetch(`${base}/api/techsavvies/member/list/`);
+    members.value = normalizeMemberList(raw);
   } catch (error) {
-    console.error("Error fetching members:", error);
+    console.error('Error fetching members:', error);
   }
 };
 
@@ -247,15 +516,125 @@ const closeModal = () => {
   showModal.value = false;
 };
 
+function isParticipantRole (role) {
+  return String(role || '').toLowerCase().includes('parti');
+}
+
+function toggleParticipantView () {
+  roleFilter.value = roleFilter.value === 'participants' ? 'members' : 'participants';
+}
+
+function resetAddForm () {
+  addForm.value = {
+    firstname: '',
+    middlename: '',
+    lastname: '',
+    birthdate: '',
+    role: 'Participant',
+    idNumber: '',
+    mobile: '',
+    email: '',
+    website: '',
+    gcashPoints: 0,
+    bonusPoints: 0,
+    voucherPoints: 0,
+    honorariumPoints: 0,
+    numberOfProjects: 0
+  };
+  if (addFileInput.value) addFileInput.value.value = '';
+}
+
+function openAddModal () {
+  addError.value = '';
+  addSuccess.value = false;
+  showAddModal.value = true;
+}
+
+function closeAddModal () {
+  showAddModal.value = false;
+  addLoading.value = false;
+}
+
+function formatMemberCreateError (err) {
+  const d = err?.data ?? err?.response?._data;
+  if (!d) return err?.message || 'Request failed';
+  if (typeof d === 'string') return d;
+  if (d.detail) return typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail);
+  if (d.message) return d.message;
+  const fieldErrors = d.non_field_errors || d;
+  if (typeof fieldErrors === 'object') {
+    const parts = [];
+    for (const [k, v] of Object.entries(fieldErrors)) {
+      if (Array.isArray(v)) parts.push(`${k}: ${v.join(', ')}`);
+      else if (v) parts.push(`${k}: ${v}`);
+    }
+    if (parts.length) return parts.join('\n');
+  }
+  return JSON.stringify(d);
+}
+
+async function submitAddMember () {
+  addLoading.value = true;
+  addSuccess.value = false;
+  addError.value = '';
+  const base = API_BASE.value;
+  if (!base) {
+    addError.value = 'NUXT_PUBLIC_API_BASE is not set. Add your API URL to .env.';
+    addLoading.value = false;
+    return;
+  }
+
+  try {
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(addForm.value)) {
+      if (value === '' || value === null || value === undefined) continue;
+      formData.append(key, typeof value === 'number' || typeof value === 'boolean' ? String(value) : value);
+    }
+    if (addFileInput.value?.files?.length) {
+      formData.append('profilePicture', addFileInput.value.files[0]);
+    }
+
+    await $fetch(`${base}/api/techsavvies/member/create/`, {
+      method: 'POST',
+      body: formData,
+      headers: { Accept: 'application/json' }
+    });
+
+    await fetchMembers();
+    addSuccess.value = true;
+    resetAddForm();
+    setTimeout(() => {
+      closeAddModal();
+      addSuccess.value = false;
+    }, 900);
+  } catch (err) {
+    addError.value = formatMemberCreateError(err);
+  } finally {
+    addLoading.value = false;
+  }
+}
+
+async function promoteParticipant (member) {
+  if (!member?.id || !isParticipantRole(member.role)) return;
+  await updateField(member.id, 'role', 'Member');
+  member.role = 'Member';
+  if (selectedMember.value?.id === member.id) {
+    selectedMember.value.role = 'Member';
+  }
+}
+
 const syncField = async (fieldName) => {
   if (!selectedMember.value) return;
   await updateField(selectedMember.value.id, fieldName, selectedMember.value[fieldName]);
 };
 
 const cleanImageUrl = (url) => {
-  if (!url) return "https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User";
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  return `${config.public.apiBase}${url.startsWith("/") ? "" : "/media/"}${url}`;
+  if (!url) return 'https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  const base = API_BASE.value;
+  if (!base) return 'https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User';
+  if (url.startsWith('/')) return `${base}${url}`;
+  return `${base}/media/${url}`;
 };
 
 const getRoleColor = (role) => {
@@ -279,7 +658,7 @@ const handleProfilePictureUpload = async (memberId, event) => {
     uploadingStates.value[memberId] = true;
     const formData = new FormData();
     formData.append("profilePicture", file);
-    await $fetch(`${API_BASE}/api/techsavvies/member/${memberId}/update/`, { method: "PATCH", body: formData });
+    await $fetch(`${API_BASE.value}/api/techsavvies/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     await fetchMembers();
   } catch (error) {
     console.error("Error uploading profile picture:", error);
@@ -293,8 +672,8 @@ const updateField = async (memberId, fieldName, value) => {
   try {
     savingStates.value[stateKey] = 'saving';
     const formData = new FormData();
-    formData.append(fieldName, value);
-    await $fetch(`${API_BASE}/api/techsavvies/member/${memberId}/update/`, { method: 'PATCH', body: formData });
+    formData.append(fieldName, value === null || value === undefined ? '' : String(value));
+    await $fetch(`${API_BASE.value}/api/techsavvies/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     savingStates.value[stateKey] = 'saved';
     
     // Update local members list

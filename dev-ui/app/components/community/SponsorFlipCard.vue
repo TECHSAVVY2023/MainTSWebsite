@@ -1,6 +1,6 @@
 <template>
   <article
-    class="h-full min-h-[288px] cursor-pointer [perspective:1200px] transition-[transform,filter] duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-purple"
+    class="aspect-[4/5] w-full min-h-0 self-start cursor-pointer [perspective:1200px] transition-[transform,filter] duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-purple sm:aspect-auto sm:h-full sm:min-h-[288px] sm:self-stretch"
     tabindex="0"
     :aria-expanded="flipped"
     :aria-label="ariaLabel"
@@ -8,12 +8,12 @@
     @keydown="onCardKeydown"
   >
     <div
-      class="relative h-full min-h-[288px] rounded-2xl transition-transform duration-500 ease-[cubic-bezier(0.34,0.72,0.35,1)] [transform-style:preserve-3d]"
+      class="relative h-full min-h-0 rounded-2xl transition-transform duration-500 ease-[cubic-bezier(0.34,0.72,0.35,1)] [transform-style:preserve-3d] sm:min-h-[288px]"
       :class="flipped ? '[transform:rotateY(180deg)]' : '[transform:rotateY(0deg)]'"
     >
       <!-- Front: dark logo panel + light name bar (matches sponsor card mock) -->
       <div
-        class="absolute inset-0 flex h-full min-h-[288px] flex-col overflow-hidden rounded-2xl border border-[#1a1040]/40 shadow-[0_8px_32px_rgba(26,16,64,0.18)] [backface-visibility:hidden] [transform:rotateY(0deg)]"
+        class="absolute inset-0 flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-[#1a1040]/40 shadow-[0_8px_32px_rgba(26,16,64,0.18)] [backface-visibility:hidden] [transform:rotateY(0deg)] sm:min-h-[288px]"
       >
         <div
           class="relative min-h-0 flex-1 overflow-hidden bg-gradient-to-b"
@@ -41,10 +41,10 @@
         </div>
 
         <div
-          class="relative z-[1] flex shrink-0 flex-col items-center justify-center bg-[#eceff4] px-3 py-3 sm:min-h-[4.5rem] sm:px-4 sm:py-3.5"
+          class="relative z-[1] flex shrink-0 flex-col items-center justify-center bg-[#eceff4] px-2 py-2 sm:min-h-[4.5rem] sm:px-4 sm:py-3.5"
         >
           <p
-            class="line-clamp-2 text-center text-[13px] font-bold leading-snug tracking-tight text-[#1a1a1d] sm:text-sm"
+            class="line-clamp-2 text-center text-[11px] font-bold leading-snug tracking-tight text-[#1a1a1d] sm:text-sm"
           >
             {{ sponsor.name }}
           </p>
@@ -53,7 +53,7 @@
 
       <!-- Back -->
       <div
-        class="absolute inset-0 flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br p-4 text-sm shadow-[0_16px_48px_rgba(26,10,60,0.45)] [backface-visibility:hidden] [transform:rotateY(180deg)] sm:p-5"
+        class="absolute inset-0 flex flex-col gap-2 overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-br p-3 text-sm shadow-[0_16px_48px_rgba(26,10,60,0.45)] [backface-visibility:hidden] [transform:rotateY(180deg)] sm:gap-3 sm:p-5"
         :class="backShellClass"
       >
         <div class="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-white/[0.06] blur-3xl" aria-hidden="true" />
@@ -83,7 +83,7 @@
             :class="kind === 'partner' ? 'from-teal-300/90 to-transparent' : 'from-accent-light to-transparent opacity-80'"
             aria-hidden="true"
           />
-          <p class="line-clamp-4 text-xs leading-relaxed !text-[#FFFFFF]">
+          <p class="line-clamp-3 text-[11px] leading-relaxed !text-[#FFFFFF] sm:line-clamp-4 sm:text-xs">
             {{ sponsor.description || 'Supporting our developer community.' }}
           </p>
         </div>

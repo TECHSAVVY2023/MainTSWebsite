@@ -43,9 +43,6 @@ export default defineNuxtConfig({
   vite: {
     resolve: {
       alias: {
-        // Vite 7 still resolves import("#app-manifest") in node_modules/nuxt/.../manifest.js
-        // for the client graph even when the server branch is dead. Stub = default (no appManifest).
-        // If you enable experimental.appManifest, remove this alias so Nuxt’s virtual module wins.
         "#app-manifest": resolve(__dirname, "stubs/app-manifest-stub.mjs"),
       },
     },

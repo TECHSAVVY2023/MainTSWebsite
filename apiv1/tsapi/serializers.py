@@ -1,7 +1,13 @@
 from rest_framework import serializers
 import json
 
-from .models import CmsItem, FileUploadModel, TechsavvyMembers
+from .models import (
+    CloudDriveFile,
+    CloudDriveFolder,
+    CmsItem,
+    FileUploadModel,
+    TechsavvyMembers,
+)
 
 
 class CmsItemSerializer(serializers.ModelSerializer):
@@ -48,3 +54,36 @@ class TechsavvySerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("ID Number is required.")
         return value
+
+
+class CloudDriveFolderSerializer(serializers.ModelSerializer):
+    files_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = CloudDriveFolder
+        fields = ("id", "owner_email", "name", "created_at", "files_count")
+
+
+class CloudDriveFileSerializer(serializers.ModelSerializer):
+    folder_name = serializers.CharField(source="folder.name", read_only=True)
+    url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CloudDriveFile
+        fields = (
+            "id",
+            "owner_email",
+            "folder",
+            "folder_name",
+            "original_name",
+            "mime_type",
+            "size_bytes",
+            "created_at",
+            "url",
+        )
+
+    def get_url(self, obj):
+        request = self.context.get("request")
+        if request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.file.url

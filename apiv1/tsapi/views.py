@@ -5,6 +5,8 @@ Same URL paths kept for dev-ui compatibility.
 import json
 import re
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -12,8 +14,14 @@ from rest_framework.permissions import AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from .models import CmsItem, FileUploadModel, TechsavvyMembers
-from .serializers import CmsItemSerializer, FileUploadSerializer, TechsavvySerializer
+from .models import CloudDriveFile, CloudDriveFolder, CmsItem, FileUploadModel, TechsavvyMembers
+from .serializers import (
+    CloudDriveFileSerializer,
+    CloudDriveFolderSerializer,
+    CmsItemSerializer,
+    FileUploadSerializer,
+    TechsavvySerializer,
+)
 
 
 def _category_includes_events(cat_val) -> bool:
@@ -148,6 +156,7 @@ class FileUploadViewSet(ModelViewSet):
         )
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class MemberViewSet(ModelViewSet):
     queryset = TechsavvyMembers.objects.all().order_by("-created_at")
     serializer_class = TechsavvySerializer
@@ -225,3 +234,126 @@ def admin_me(request):
 def admin_logout(request):
     """Client should clear tokens; optional blacklist can be added."""
     return Response({"message": "Logged out (client should clear tokens)."})
+
+
+def _normalize_owner_email(request):
+    raw = (
+        request.query_params.get("owner_email")
+        or request.data.get("owner_email")
+        or ""
+    )
+    return str(raw).strip().lower()
+
+
+@api_view(["GET", "POST"])
+@permission_classes([AllowAny])
+def drive_folders(request):
+    owner_email = _normalize_owner_email(request)
+    if not owner_email:
+        return Response({"detail": "owner_email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "GET":
+        rows = CloudDriveFolder.objects.filter(owner_email=owner_email).order_by("name")
+        payload = []
+        for folder in rows:
+            payload.append({
+                "id": folder.id,
+                "owner_email": folder.owner_email,
+                "name": folder.name,
+                "created_at": folder.created_at,
+                "files_count": folder.files.count(),
+            })
+        return Response(payload)
+
+    name = str(request.data.get("name") or "").strip()
+    if not name:
+        return Response({"detail": "Folder name is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    exists = CloudDriveFolder.objects.filter(owner_email=owner_email, name__iexact=name).first()
+    if exists:
+        serializer = CloudDriveFolderSerializer(exists)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    folder = CloudDriveFolder.objects.create(owner_email=owner_email, name=name)
+    return Response(CloudDriveFolderSerializer(folder).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([AllowAny])
+def drive_folder_delete(request, pk: int):
+    owner_email = _normalize_owner_email(request)
+    if not owner_email:
+        return Response({"detail": "owner_email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    folder = CloudDriveFolder.objects.filter(pk=pk, owner_email=owner_email).first()
+    if not folder:
+        return Response({"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if folder.files.exists():
+        return Response(
+            {"detail": "Folder is not empty. Delete files first."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    folder.delete()
+    return Response({"success": True})
+
+
+@api_view(["GET", "POST"])
+@permission_classes([AllowAny])
+def drive_files(request):
+    owner_email = _normalize_owner_email(request)
+    if not owner_email:
+        return Response({"detail": "owner_email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == "GET":
+        qs = CloudDriveFile.objects.filter(owner_email=owner_email).select_related("folder")
+        folder_id = request.query_params.get("folder_id")
+        if folder_id:
+            qs = qs.filter(folder_id=folder_id)
+        q = str(request.query_params.get("q") or "").strip()
+        if q:
+            qs = qs.filter(original_name__icontains=q)
+        rows = qs.order_by("-created_at")
+        serializer = CloudDriveFileSerializer(rows, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    files = request.FILES.getlist("files")
+    if not files:
+        return Response({"detail": "No files provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+    folder = None
+    folder_id = request.data.get("folder_id")
+    if folder_id:
+        folder = CloudDriveFolder.objects.filter(pk=folder_id, owner_email=owner_email).first()
+        if not folder:
+            return Response({"detail": "Folder not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    created = []
+    for f in files:
+        row = CloudDriveFile.objects.create(
+            owner_email=owner_email,
+            folder=folder,
+            file=f,
+            original_name=f.name,
+            mime_type=getattr(f, "content_type", "") or "",
+            size_bytes=int(getattr(f, "size", 0) or 0),
+        )
+        created.append(row)
+    serializer = CloudDriveFileSerializer(created, many=True, context={"request": request})
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(["DELETE"])
+@permission_classes([AllowAny])
+def drive_file_delete(request, pk: int):
+    owner_email = _normalize_owner_email(request)
+    if not owner_email:
+        return Response({"detail": "owner_email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    row = CloudDriveFile.objects.filter(pk=pk, owner_email=owner_email).first()
+    if not row:
+        return Response({"detail": "File not found."}, status=status.HTTP_404_NOT_FOUND)
+    row.file.delete(save=False)
+    row.delete()
+    return Response({"success": True})

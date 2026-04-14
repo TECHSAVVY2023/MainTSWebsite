@@ -178,7 +178,7 @@
 <script setup>
 // Get API base URL from runtime config
 const config = useRuntimeConfig();
-const API_BASE = config.public.apiBase;
+const API_BASE = computed(() => String(config.public.apiBase || '').replace(/\/$/, ''));
 
 const techSavvyLogo =
   "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/TechSavvyLogo.png";
@@ -206,7 +206,7 @@ const form = ref({
   middlename: "",
   lastname: "",
   birthdate: "",
-  role: "",
+  role: "Participant",
   idNumber: "",
   mobile: "",
   email: "",
@@ -218,25 +218,49 @@ const form = ref({
   numberOfProjects: 0,
 });
 
+function formatMemberCreateError (err) {
+  const d = err?.data ?? err?.response?._data;
+  if (!d) return err?.message || "Request failed";
+  if (typeof d === "string") return d;
+  if (d.detail) return typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail);
+  if (d.message) return d.message;
+  const fieldErrors = d.non_field_errors || d;
+  if (typeof fieldErrors === "object") {
+    const parts = [];
+    for (const [k, v] of Object.entries(fieldErrors)) {
+      if (Array.isArray(v)) parts.push(`${k}: ${v.join(", ")}`);
+      else if (v) parts.push(`${k}: ${v}`);
+    }
+    if (parts.length) return parts.join("\n");
+  }
+  return JSON.stringify(d);
+}
+
 const submitForm = async () => {
   loading.value = true;
   success.value = false;
   error.value = "";
 
+  const base = API_BASE.value;
+  if (!base) {
+    error.value = "NUXT_PUBLIC_API_BASE is not set. Add your API URL to .env.";
+    loading.value = false;
+    return;
+  }
+
   try {
     const formData = new FormData();
 
     Object.entries(form.value).forEach(([key, value]) => {
-      if (value !== "" && value !== null && value !== undefined) {
-        formData.append(key, value);
-      }
+      if (value === "" || value === null || value === undefined) return;
+      formData.append(key, typeof value === "number" || typeof value === "boolean" ? String(value) : value);
     });
 
     if (fileInput.value?.files?.length) {
       formData.append("profilePicture", fileInput.value.files[0]);
     }
 
-    await $fetch(`${API_BASE}/api/techsavvies/member/create/`, {
+    await $fetch(`${base}/api/techsavvies/member/create/`, {
       method: "POST",
       body: formData,
       headers: { Accept: "application/json" },
@@ -245,15 +269,18 @@ const submitForm = async () => {
     success.value = true;
 
     Object.keys(form.value).forEach((key) => {
-      form.value[key] =
-        key.includes("Points") || key === "numberOfProjects" ? 0 : "";
+      if (key.includes("Points") || key === "numberOfProjects") {
+        form.value[key] = 0;
+      } else if (key === "role") {
+        form.value[key] = "Participant";
+      } else {
+        form.value[key] = "";
+      }
     });
 
     if (fileInput.value) fileInput.value.value = null;
   } catch (err) {
-    error.value = err?.data?.errors
-      ? JSON.stringify(err.data.errors, null, 2)
-      : err?.data?.message || "Validation error";
+    error.value = formatMemberCreateError(err);
   } finally {
     loading.value = false;
   }

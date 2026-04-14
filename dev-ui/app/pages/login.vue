@@ -1,7 +1,11 @@
 <template>
-  <div class="flex flex-col lg:flex-row min-h-screen lg:h-screen overflow-hidden font-roboto bg-white">
-    <LoginWelcomeBanner class="w-full lg:w-1/2" />
-    <LoginFormSection :login="login" @submit="login.onSubmit" class="w-full lg:w-1/2 pt-3 pb-10 lg:min-h-0 relative" />
+  <div class="flex min-h-screen flex-col overflow-hidden bg-[#e8e2f4] font-roboto lg:h-screen lg:flex-row lg:bg-white">
+    <LoginWelcomeBanner class="w-full shrink-0 lg:w-1/2 lg:min-h-0" />
+    <LoginFormSection
+      :login="login"
+      class="relative flex w-full flex-1 flex-col justify-center px-4 pb-10 pt-2 sm:px-6 lg:w-1/2 lg:flex-none lg:min-h-0 lg:px-8 lg:pb-10 lg:pt-3"
+      @submit="login.onSubmit"
+    />
   </div>
 </template>
 

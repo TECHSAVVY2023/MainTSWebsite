@@ -32,7 +32,7 @@
               </p>
 
               <!-- Vision & Mission Cards -->
-              <div class="grid grid-cols-2 items-stretch gap-4 pt-6 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+              <div class="grid grid-cols-1 items-stretch gap-4 pt-6 sm:gap-5 md:grid-cols-2">
                 <div
                   class="group flex h-full min-h-0 flex-col border rounded-2xl border-violet-100/50 p-5 transition-all hover:bg-white hover:shadow-xl hover:shadow-violet-200/20"
                 >
@@ -60,11 +60,11 @@
         </div>
 
         <!-- Right Column: 3D Community Carousel -->
-        <div class="relative min-h-[550px] md:min-h-[650px] lg:h-auto flex flex-col items-center justify-center">
+        <div class="relative flex min-h-0 flex-col items-center justify-center py-6 sm:min-h-[420px] sm:py-8 md:min-h-[520px] md:py-10 lg:min-h-0 lg:h-auto lg:py-0">
           
-          <!-- 3D Perspective Container -->
+          <!-- 3D Perspective Container: max size scales with viewport + breakpoints -->
           <div 
-            class="relative w-full max-w-[480px] aspect-square flex items-center justify-center"
+            class="relative flex aspect-square w-full max-w-[min(92vw,17.5rem)] items-center justify-center sm:max-w-[min(90vw,22.5rem)] md:max-w-[25rem] lg:max-w-[28rem] xl:max-w-[30rem]"
             @mouseenter="stopRotation"
             @mouseleave="startRotation"
           >
@@ -75,7 +75,7 @@
             <div 
               v-for="(img, index) in trioImages" 
               :key="index"
-              class="rounded-[2.5rem] absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"
+              class="absolute inset-0 rounded-3xl transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] sm:rounded-[2.5rem]"
               :class="[
                 index === currentIndex ? 'z-30 opacity-100 scale-100 translate-x-0 cursor-default shadow-[0_45px_90px_rgba(26,5,51,0.15)]' : 'shadow-lg',
                 index === (currentIndex - 1 + 3) % 3 ? 'z-10 opacity-30 scale-[0.85] -translate-x-[45%] cursor-pointer' : '',
@@ -84,13 +84,13 @@
               @click="currentIndex = index"
             >
               <div 
-                class="w-full h-full rounded-[2.5rem] overflow-hidden border-[6px] border-white bg-white group transition-shadow duration-500"
+                class="group h-full w-full overflow-hidden rounded-3xl border-4 border-white bg-white transition-shadow duration-500 sm:rounded-[2.5rem] sm:border-[6px]"
                 :class="index === currentIndex ? '' : 'shadow-2xl'"
               >
                 <img 
                   :src="img" 
                   alt="Community Life" 
-                  class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                  class="h-full w-full max-w-full object-cover transition-transform duration-1000 group-hover:scale-110"
                 />
                 
                 <!-- Inactive Overlay (Tint only, No Blur) -->
@@ -124,7 +124,7 @@
           </div>
 
           <!-- Enhanced Carousel Dots Navigation -->
-          <div class="flex items-center gap-3 mt-20 lg:mr-32">
+          <div class="mt-12 flex items-center gap-3 sm:mt-16 md:mt-20 lg:mr-32">
             <button 
               v-for="(_, i) in trioImages" 
               :key="i"

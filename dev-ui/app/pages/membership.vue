@@ -173,7 +173,7 @@
 
 <script setup>
 const config = useRuntimeConfig();
-const API_BASE = config.public.apiBase;
+const API_BASE = computed(() => String(config.public.apiBase || '').replace(/\/$/, ''));
 
 
 const loading = ref(false);
@@ -213,32 +213,64 @@ const onFileChange = () => {
   selectedFileName.value = fileInput.value?.files?.[0]?.name || "";
 };
 
+function formatMemberCreateError (err) {
+  const d = err?.data ?? err?.response?._data;
+  if (!d) return err?.message || 'Request failed';
+  if (typeof d === 'string') return d;
+  if (d.detail) return typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail);
+  if (d.message) return d.message;
+  if (typeof d === 'object') {
+    const parts = [];
+    for (const [k, v] of Object.entries(d)) {
+      if (Array.isArray(v)) parts.push(`${k}: ${v.join(', ')}`);
+      else if (v != null) parts.push(`${k}: ${v}`);
+    }
+    if (parts.length) return parts.join('\n');
+  }
+  return JSON.stringify(d);
+}
+
 const submitForm = async () => {
   loading.value = true;
   success.value = false;
-  error.value = "";
+  error.value = '';
+  const base = API_BASE.value;
+  if (!base) {
+    error.value = 'NUXT_PUBLIC_API_BASE is not set. Add your API URL to .env.';
+    loading.value = false;
+    return;
+  }
   try {
     const fd = new FormData();
+    // Membership signup always lands as Participant in members table.
+    form.value.role = 'Participant';
     Object.entries(form.value).forEach(([k, v]) => {
-      if (v !== "" && v !== null && v !== undefined) fd.append(k, v);
+      if (v === '' || v === null || v === undefined) return;
+      fd.append(k, typeof v === 'number' || typeof v === 'boolean' ? String(v) : v);
     });
     if (fileInput.value?.files?.length)
-      fd.append("profilePicture", fileInput.value.files[0]);
+      fd.append('profilePicture', fileInput.value.files[0]);
 
-    await $fetch(`${API_BASE}/api/techsavvies/member/create/`, {
-      method: "POST", body: fd, headers: { Accept: "application/json" },
+    await $fetch(`${base}/api/techsavvies/member/create/`, {
+      method: 'POST', body: fd, headers: { Accept: 'application/json' },
     });
 
     success.value = true;
-    Object.keys(form.value).forEach(k => {
-      form.value[k] = k.includes("Points") || k === "numberOfProjects" ? 0 : "";
+    Object.keys(form.value).forEach((k) => {
+      if (k.includes('Points') || k === 'numberOfProjects') {
+        form.value[k] = 0;
+      } else if (k === 'role') {
+        form.value[k] = 'Participant';
+      } else if (k === 'idNumber') {
+        form.value[k] = 'ID' + Date.now();
+      } else {
+        form.value[k] = '';
+      }
     });
     if (fileInput.value) fileInput.value.value = null;
     selectedFileName.value = "";
   } catch (err) {
-    error.value = err?.data?.errors
-      ? JSON.stringify(err.data.errors, null, 2)
-      : err?.data?.message || "Validation error";
+    error.value = formatMemberCreateError(err);
   } finally {
     loading.value = false;
   }

@@ -549,56 +549,165 @@
           </template>
 
           <template v-else-if="activeView === 'Drive'">
-            <!-- Asset Drive Section (Google Drive Style) -->
-            <div class="space-y-8 sm:space-y-12">
-               <div class="flex flex-col gap-4 px-0 sm:flex-row sm:items-end sm:justify-between sm:gap-6 sm:px-2">
-                 <div class="min-w-0">
-                   <h1 class="text-2xl font-black uppercase leading-tight tracking-tighter text-[#1a0533] sm:text-3xl md:text-4xl">
-                     My <span class="text-violet-600">assets</span>
-                   </h1>
-                   <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">Community files and folders — upload or organize what you share with members.</p>
-                 </div>
-                 <div class="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:gap-3">
-                    <button type="button" class="w-full rounded-xl border-2 border-violet-50 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-violet-600 sm:w-auto sm:px-5 sm:text-[10px]">Folder</button>
-                    <button type="button" class="w-full rounded-xl bg-violet-600 py-2.5 text-center text-[9px] font-black uppercase tracking-widest text-white sm:w-auto sm:px-6 sm:text-[10px]">Upload Asset</button>
-                 </div>
+            <div class="space-y-6 sm:space-y-10">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div class="min-w-0">
+                  <h1 class="text-2xl font-black uppercase leading-tight tracking-tighter text-[#1a0533] sm:text-3xl md:text-4xl">
+                    My <span class="text-violet-600">Drive</span>
+                  </h1>
+                  <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                    Cloud storage with folders, uploads, and file management.
+                  </p>
+                </div>
+                <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <button
+                    type="button"
+                    class="w-full rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-violet-700 hover:bg-violet-50 sm:w-auto sm:text-[10px]"
+                    @click="toggleDriveFolderForm"
+                  >
+                    {{ showCreateFolderForm ? 'Cancel' : 'New Folder' }}
+                  </button>
+                  <button
+                    type="button"
+                    class="w-full rounded-xl bg-violet-600 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-white shadow-lg shadow-violet-600/25 hover:bg-violet-700 sm:w-auto sm:text-[10px]"
+                    :disabled="driveUploading || !currentUserEmail"
+                    @click="triggerDriveUpload"
+                  >
+                    {{ driveUploading ? 'Uploading...' : 'Upload Asset' }}
+                  </button>
+                </div>
               </div>
 
-               <div class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-4 lg:gap-8">
-                  <div v-for="(folder, fidx) in ['Images', 'Tech Documents', 'Project Clips', 'Workshop Assets']" :key="folder"
-                     class="group relative min-w-0 cursor-pointer overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 transition-all duration-300 hover:scale-[1.01] hover:border-transparent sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8 lg:hover:scale-[1.02]"
-                     :class="[
-                        fidx % 4 === 0 ? 'hover:bg-emerald-50' : 
-                        fidx % 4 === 1 ? 'hover:bg-amber-50' :
-                        fidx % 4 === 2 ? 'hover:bg-sky-50' : 'hover:bg-rose-50'
-                     ]"
-                  >
-                     <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 transition-colors group-hover:bg-white sm:mb-6 sm:h-14 sm:w-14 sm:rounded-2xl lg:mb-8"
-                        :class="[
-                           fidx % 4 === 0 ? 'text-emerald-500' : 
-                           fidx % 4 === 1 ? 'text-amber-500' :
-                           fidx % 4 === 2 ? 'text-sky-500' : 'text-rose-500'
-                        ]"
-                     >
-                        <i class="fas fa-folder text-base sm:text-xl" />
-                     </div>
-                     <h4 class="mb-1 break-words text-[11px] font-black uppercase leading-tight text-[#1a0533] sm:text-sm sm:leading-none lg:text-[15px]">{{ folder }}</h4>
-                     <p class="text-[7px] font-bold uppercase leading-snug text-slate-600 sm:text-[9px]">12 Items Shared</p>
-                  </div>
-               </div>
+              <input
+                ref="driveFileInput"
+                type="file"
+                multiple
+                class="hidden"
+                @change="handleDriveUpload"
+              >
 
-               <div class="overflow-hidden rounded-2xl border border-violet-100 bg-white p-5 sm:rounded-3xl sm:p-8 lg:rounded-[3rem] lg:p-10">
-                  <h4 class="mb-4 text-[10px] font-black uppercase text-[#1a0533] sm:mb-8 sm:text-xs">Recent Files</h4>
-                  <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-5 lg:gap-6">
-                     <div v-for="i in 5" :key="i" class="bg-violet-50 p-4 rounded-3xl border border-transparent hover:border-violet-200 transition-colors">
-                        <div class="aspect-square bg-white border border-violet-100 rounded-2xl flex items-center justify-center mb-4 text-violet-600">
-                           <i class="fas text-3xl" :class="i % 2 === 0 ? 'fa-file-pdf' : 'fa-image'" />
-                        </div>
-                        <h5 class="text-[10px] font-black uppercase text-[#1a0533] truncate mb-1">Asset_Module_0{{ i }}.dat</h5>
-                        <p class="text-[8px] font-bold text-slate-600 uppercase">2.4 MB</p>
-                     </div>
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+                <input
+                  v-model="driveSearch"
+                  type="search"
+                  placeholder="Search files..."
+                  class="h-11 rounded-xl border border-violet-100 bg-white px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300"
+                >
+                <select
+                  v-model="selectedFolderFilter"
+                  class="h-11 rounded-xl border border-violet-100 bg-white px-3 text-xs font-bold uppercase tracking-wider text-[#1a0533] outline-none transition-colors focus:border-violet-300"
+                >
+                  <option value="">All folders</option>
+                  <option v-for="folder in driveFolders" :key="`sel-${folder.id}`" :value="String(folder.id)">
+                    {{ folder.name }}
+                  </option>
+                </select>
+                <select
+                  v-model="driveSort"
+                  class="h-11 rounded-xl border border-violet-100 bg-white px-3 text-xs font-bold uppercase tracking-wider text-[#1a0533] outline-none transition-colors focus:border-violet-300"
+                >
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="name">Name A-Z</option>
+                </select>
+              </div>
+
+              <div v-if="showCreateFolderForm" class="rounded-2xl border border-violet-100 bg-white p-4 sm:p-5">
+                <div class="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    v-model="newFolderName"
+                    type="text"
+                    maxlength="120"
+                    placeholder="Folder name"
+                    class="h-11 flex-1 rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
+                    @keyup.enter="createDriveFolder"
+                  >
+                  <button
+                    type="button"
+                    class="h-11 rounded-xl bg-violet-600 px-5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-violet-700"
+                    :disabled="driveLoading || !newFolderName.trim()"
+                    @click="createDriveFolder"
+                  >
+                    Create
+                  </button>
+                </div>
+              </div>
+
+              <p v-if="driveError" class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                {{ driveError }}
+              </p>
+
+              <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
+                <button
+                  type="button"
+                  class="group rounded-2xl border p-4 text-left transition-colors"
+                  :class="selectedFolderFilter === '' ? 'border-violet-300 bg-violet-50' : 'border-violet-100 bg-white hover:bg-violet-50'"
+                  @click="selectedFolderFilter = ''"
+                >
+                  <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-violet-600">
+                    <i class="fas fa-layer-group" />
                   </div>
-               </div>
+                  <p class="text-xs font-black uppercase text-[#1a0533]">All Files</p>
+                  <p class="mt-1 text-[10px] font-bold uppercase text-violet-600">{{ driveFiles.length }} items</p>
+                </button>
+                <button
+                  v-for="folder in driveFolders"
+                  :key="folder.id"
+                  type="button"
+                  class="group rounded-2xl border p-4 text-left transition-colors"
+                  :class="selectedFolderFilter === String(folder.id) ? 'border-violet-300 bg-violet-50' : 'border-violet-100 bg-white hover:bg-violet-50'"
+                  @click="selectedFolderFilter = String(folder.id)"
+                >
+                  <div class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                    <i class="fas fa-folder" />
+                  </div>
+                  <p class="truncate text-xs font-black uppercase text-[#1a0533]">{{ folder.name }}</p>
+                  <p class="mt-1 text-[10px] font-bold uppercase text-violet-600">{{ folder.files_count || 0 }} items</p>
+                </button>
+              </div>
+
+              <div class="overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 sm:p-6 lg:p-8">
+                <h4 class="mb-4 text-[10px] font-black uppercase text-[#1a0533] sm:text-xs">Files</h4>
+                <div v-if="filteredDriveFiles.length === 0" class="rounded-xl border border-dashed border-violet-200 bg-violet-50/50 px-4 py-8 text-center text-xs font-bold uppercase tracking-widest text-violet-600">
+                  No files yet
+                </div>
+                <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                  <div
+                    v-for="file in filteredDriveFiles"
+                    :key="file.id"
+                    class="rounded-2xl border border-violet-100 bg-violet-50/40 p-3"
+                  >
+                    <a
+                      :href="file.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mb-3 flex aspect-square items-center justify-center rounded-xl border border-violet-100 bg-white text-violet-600"
+                    >
+                      <img v-if="isImageDriveFile(file)" :src="file.url" :alt="file.original_name" class="h-full w-full rounded-xl object-cover">
+                      <i v-else class="fas fa-file-alt text-2xl" />
+                    </a>
+                    <p class="truncate text-[10px] font-black uppercase text-[#1a0533]">{{ file.original_name }}</p>
+                    <p class="mt-1 text-[9px] font-bold uppercase text-violet-600">{{ formatDriveSize(file.size_bytes) }}</p>
+                    <div class="mt-3 flex items-center gap-2">
+                      <a
+                        :href="file.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex flex-1 items-center justify-center rounded-lg bg-white px-2 py-1.5 text-[9px] font-black uppercase tracking-widest text-violet-700"
+                      >
+                        Open
+                      </a>
+                      <button
+                        type="button"
+                        class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600"
+                        @click="deleteDriveFile(file.id)"
+                      >
+                        <i class="fas fa-trash text-[10px]" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </template>
 
@@ -1062,6 +1171,10 @@ function normalizeMembersList (raw: unknown): any[] {
   return []
 }
 
+function isParticipantRole (role: unknown): boolean {
+  return String(role || '').trim().toLowerCase().includes('parti')
+}
+
 const hover = reactive({
   id: false,
   mobile: false,
@@ -1180,6 +1293,142 @@ const statCards = computed(() => [
 
 // Placeholder assets count
 const assetsCount = ref(0)
+
+const driveFileInput = ref<HTMLInputElement | null>(null)
+const driveLoading = ref(false)
+const driveUploading = ref(false)
+const driveError = ref('')
+const driveFolders = ref<any[]>([])
+const driveFiles = ref<any[]>([])
+const driveSearch = ref('')
+const driveSort = ref<'newest' | 'oldest' | 'name'>('newest')
+const selectedFolderFilter = ref('')
+const showCreateFolderForm = ref(false)
+const newFolderName = ref('')
+
+const currentUserEmail = computed(() => String(user.value?.email || '').trim().toLowerCase())
+
+const filteredDriveFiles = computed(() => {
+  let rows = driveFiles.value.slice()
+  if (selectedFolderFilter.value) {
+    rows = rows.filter(f => String(f.folder || '') === String(selectedFolderFilter.value))
+  }
+  const q = driveSearch.value.trim().toLowerCase()
+  if (q) {
+    rows = rows.filter((f) => String(f.original_name || '').toLowerCase().includes(q))
+  }
+  if (driveSort.value === 'name') {
+    rows.sort((a, b) => String(a.original_name || '').localeCompare(String(b.original_name || '')))
+  } else if (driveSort.value === 'oldest') {
+    rows.sort((a, b) => +new Date(String(a.created_at || 0)) - +new Date(String(b.created_at || 0)))
+  } else {
+    rows.sort((a, b) => +new Date(String(b.created_at || 0)) - +new Date(String(a.created_at || 0)))
+  }
+  return rows
+})
+
+function toggleDriveFolderForm () {
+  showCreateFolderForm.value = !showCreateFolderForm.value
+}
+
+function triggerDriveUpload () {
+  if (!currentUserEmail.value) return
+  driveFileInput.value?.click()
+}
+
+function formatDriveSize (size: number) {
+  const bytes = Number(size || 0)
+  if (!bytes) return '0 B'
+  const units = ['B', 'KB', 'MB', 'GB']
+  const power = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
+  const val = bytes / Math.pow(1024, power)
+  return `${val.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
+}
+
+function isImageDriveFile (file: any) {
+  const name = String(file?.original_name || '').toLowerCase()
+  const mime = String(file?.mime_type || '').toLowerCase()
+  return mime.startsWith('image/') || /\.(png|jpe?g|gif|webp|svg)$/.test(name)
+}
+
+async function fetchDriveData () {
+  if (!apiBase || !currentUserEmail.value) return
+  driveLoading.value = true
+  driveError.value = ''
+  try {
+    const [foldersRaw, filesRaw] = await Promise.all([
+      $fetch<any[]>(`${apiBase}/api/techsavvies/drive/folders/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+      $fetch<any[]>(`${apiBase}/api/techsavvies/drive/files/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+    ])
+    driveFolders.value = Array.isArray(foldersRaw) ? foldersRaw : []
+    driveFiles.value = Array.isArray(filesRaw) ? filesRaw : []
+    assetsCount.value = driveFiles.value.length
+  } catch (e: any) {
+    driveError.value = e?.message || 'Failed to load drive files.'
+  } finally {
+    driveLoading.value = false
+  }
+}
+
+async function createDriveFolder () {
+  const name = newFolderName.value.trim()
+  if (!name || !apiBase || !currentUserEmail.value) return
+  driveLoading.value = true
+  driveError.value = ''
+  try {
+    await $fetch(`${apiBase}/api/techsavvies/drive/folders/`, {
+      method: 'POST',
+      body: {
+        owner_email: currentUserEmail.value,
+        name,
+      },
+    })
+    newFolderName.value = ''
+    showCreateFolderForm.value = false
+    await fetchDriveData()
+  } catch (e: any) {
+    driveError.value = e?.data?.detail || e?.message || 'Failed to create folder.'
+  } finally {
+    driveLoading.value = false
+  }
+}
+
+async function handleDriveUpload (event: Event) {
+  const target = event.target as HTMLInputElement | null
+  const files = target?.files
+  if (!files?.length || !apiBase || !currentUserEmail.value) return
+  driveUploading.value = true
+  driveError.value = ''
+  try {
+    const fd = new FormData()
+    fd.append('owner_email', currentUserEmail.value)
+    if (selectedFolderFilter.value) fd.append('folder_id', selectedFolderFilter.value)
+    Array.from(files).forEach((file) => fd.append('files', file))
+    await $fetch(`${apiBase}/api/techsavvies/drive/files/`, {
+      method: 'POST',
+      body: fd,
+    })
+    await fetchDriveData()
+  } catch (e: any) {
+    driveError.value = e?.data?.detail || e?.message || 'Upload failed.'
+  } finally {
+    driveUploading.value = false
+    if (target) target.value = ''
+  }
+}
+
+async function deleteDriveFile (fileId: number) {
+  if (!apiBase || !currentUserEmail.value) return
+  if (!window.confirm('Delete this file?')) return
+  try {
+    await $fetch(`${apiBase}/api/techsavvies/drive/files/${fileId}/?owner_email=${encodeURIComponent(currentUserEmail.value)}`, {
+      method: 'DELETE',
+    })
+    await fetchDriveData()
+  } catch (e: any) {
+    driveError.value = e?.data?.detail || e?.message || 'Delete failed.'
+  }
+}
 
 // Library feed: only CMS rows that list the signed-in user in `authors` (comma-separated).
 const myLibraryItems = computed(() =>
@@ -1330,6 +1579,7 @@ onMounted(() => {
   if (user.value?.image) profileImage.value = user.value.image
   fetchItems()
   fetchMembersCount()
+  fetchDriveData()
 })
 
 const fetchMembersCount = async () => {
@@ -1347,7 +1597,7 @@ const fetchMembersCount = async () => {
 
     const raw = await $fetch<unknown>(`${apiBase}/api/techsavvies/member/list/`)
     const membersList = normalizeMembersList(raw)
-    coreMembersCount.value = membersList.length
+    coreMembersCount.value = membersList.filter((m: { role?: string }) => !isParticipantRole(m?.role)).length
 
     const email = (user.value?.email || '').trim().toLowerCase()
     if (!email) {
@@ -1363,6 +1613,12 @@ const fetchMembersCount = async () => {
     if (!currentMember) {
       member.value = null
       memberDirectoryMiss.value = true
+      return
+    }
+
+    if (isParticipantRole(currentMember.role)) {
+      profileRedirectPending.value = true
+      logout()
       return
     }
 
@@ -1384,6 +1640,9 @@ const fetchMembersCount = async () => {
 
 
 watch(() => user.value?.image, (img) => { if (img) profileImage.value = img })
+watch(() => user.value?.email, () => {
+  fetchDriveData()
+})
 
 watch([showContentForm, showReviewDetailModal], ([form, review]) => {
   if (!process.client) return

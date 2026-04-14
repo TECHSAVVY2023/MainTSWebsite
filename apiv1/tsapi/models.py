@@ -54,6 +54,45 @@ class FileUploadModel(models.Model):
         return self.file.name
 
 
+class CloudDriveFolder(models.Model):
+    """Simple cloud-drive folder scoped per owner email."""
+
+    owner_email = models.EmailField(db_index=True)
+    name = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("name", "-created_at")
+        unique_together = ("owner_email", "name")
+
+    def __str__(self) -> str:
+        return f"{self.owner_email} · {self.name}"
+
+
+class CloudDriveFile(models.Model):
+    """Cloud-drive file metadata + binary file."""
+
+    owner_email = models.EmailField(db_index=True)
+    folder = models.ForeignKey(
+        CloudDriveFolder,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="files",
+    )
+    file = models.FileField(upload_to="techsavvy/drive/")
+    original_name = models.CharField(max_length=255)
+    mime_type = models.CharField(max_length=120, blank=True, default="")
+    size_bytes = models.BigIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self) -> str:
+        return f"{self.original_name} ({self.owner_email})"
+
+
 
 class TechsavvyMembers(models.Model):
     """Member model for TechSavvy."""
