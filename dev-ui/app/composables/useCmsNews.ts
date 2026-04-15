@@ -1,6 +1,6 @@
 /**
- * Composable for TechSavvy CMS API (`/api/techsavvies/`).
- * Backend: GET {apiBase}/api/techsavvies/cms/list/ and GET .../cms/<pk>/
+ * Composable for TechSavvy CMS API (`/api/techsavvy/`).
+ * Backend: GET {apiBase}/api/techsavvy/cms/list/ and GET .../cms/<pk>/
  */
 
 import { cmsImageUrlList, firstCmsImageUrl } from '~/utils/cmsMedia'
@@ -117,7 +117,7 @@ function isNewsCategory (filters?: string | Record<string, unknown> | null): boo
   return NEWS_CATEGORIES.some((c) => lower.includes(c.toLowerCase()))
 }
 
-const CMS_LIST_PATH = '/api/techsavvies/cms/list/'
+const CMS_LIST_PATH = '/api/techsavvy/cms/list/'
 
 export function useCmsNews () {
   const config = useRuntimeConfig()

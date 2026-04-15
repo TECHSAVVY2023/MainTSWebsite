@@ -586,7 +586,7 @@
                 @change="handleDriveUpload"
               >
 
-              <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
+              <div class="grid grid-cols-1 gap-2 sm:grid-cols-4 sm:gap-3">
                 <input
                   v-model="driveSearch"
                   type="search"
@@ -609,6 +609,14 @@
                   <option value="newest">Newest first</option>
                   <option value="oldest">Oldest first</option>
                   <option value="name">Name A-Z</option>
+                </select>
+                <select
+                  v-model="driveViewMode"
+                  class="h-11 rounded-xl border border-violet-100 bg-white px-3 text-xs font-bold uppercase tracking-wider text-[#1a0533] outline-none transition-colors focus:border-violet-300"
+                >
+                  <option value="grid">Grid view</option>
+                  <option value="list">List view</option>
+                  <option value="compact">Compact view</option>
                 </select>
               </div>
 
@@ -671,7 +679,7 @@
                 <div v-if="filteredDriveFiles.length === 0" class="rounded-xl border border-dashed border-violet-200 bg-violet-50/50 px-4 py-8 text-center text-xs font-bold uppercase tracking-widest text-violet-600">
                   No files yet
                 </div>
-                <div v-else class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                <div v-else-if="driveViewMode === 'grid'" class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
                   <div
                     v-for="file in filteredDriveFiles"
                     :key="file.id"
@@ -705,6 +713,63 @@
                         <i class="fas fa-trash text-[10px]" />
                       </button>
                     </div>
+                  </div>
+                </div>
+                <div v-else-if="driveViewMode === 'list'" class="divide-y divide-violet-100 rounded-xl border border-violet-100">
+                  <div
+                    v-for="file in filteredDriveFiles"
+                    :key="`list-${file.id}`"
+                    class="flex flex-col gap-3 p-3 sm:flex-row sm:items-center"
+                  >
+                    <div class="flex min-w-0 flex-1 items-center gap-3">
+                      <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-violet-100 bg-violet-50 text-violet-600">
+                        <img v-if="isImageDriveFile(file)" :src="file.url" :alt="file.original_name" class="h-full w-full rounded-xl object-cover">
+                        <i v-else class="fas fa-file-alt text-sm" />
+                      </div>
+                      <div class="min-w-0">
+                        <p class="truncate text-xs font-black uppercase text-[#1a0533]">{{ file.original_name }}</p>
+                        <p class="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600">
+                          {{ file.folder_name || 'Unsorted' }} · {{ formatDriveSize(file.size_bytes) }} · {{ formatDriveDate(file.created_at) }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-2">
+                      <a
+                        :href="file.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex h-8 items-center justify-center rounded-lg bg-violet-50 px-3 text-[9px] font-black uppercase tracking-widest text-violet-700"
+                      >
+                        Open
+                      </a>
+                      <button
+                        type="button"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600"
+                        @click="deleteDriveFile(file.id)"
+                      >
+                        <i class="fas fa-trash text-[10px]" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="space-y-2">
+                  <div
+                    v-for="file in filteredDriveFiles"
+                    :key="`compact-${file.id}`"
+                    class="flex items-center gap-2 rounded-xl border border-violet-100 bg-violet-50/30 px-3 py-2"
+                  >
+                    <i class="fas fa-file text-violet-500 text-xs" />
+                    <a :href="file.url" target="_blank" rel="noopener noreferrer" class="min-w-0 flex-1 truncate text-[11px] font-bold text-[#1a0533] hover:underline">
+                      {{ file.original_name }}
+                    </a>
+                    <span class="text-[10px] font-bold uppercase text-violet-600">{{ formatDriveSize(file.size_bytes) }}</span>
+                    <button
+                      type="button"
+                      class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600"
+                      @click="deleteDriveFile(file.id)"
+                    >
+                      <i class="fas fa-trash text-[9px]" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1302,6 +1367,7 @@ const driveFolders = ref<any[]>([])
 const driveFiles = ref<any[]>([])
 const driveSearch = ref('')
 const driveSort = ref<'newest' | 'oldest' | 'name'>('newest')
+const driveViewMode = ref<'grid' | 'list' | 'compact'>('grid')
 const selectedFolderFilter = ref('')
 const showCreateFolderForm = ref(false)
 const newFolderName = ref('')
@@ -1345,6 +1411,13 @@ function formatDriveSize (size: number) {
   return `${val.toFixed(power === 0 ? 0 : 1)} ${units[power]}`
 }
 
+function formatDriveDate (value: string) {
+  if (!value) return '--'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return '--'
+  return d.toLocaleDateString()
+}
+
 function isImageDriveFile (file: any) {
   const name = String(file?.original_name || '').toLowerCase()
   const mime = String(file?.mime_type || '').toLowerCase()
@@ -1357,8 +1430,8 @@ async function fetchDriveData () {
   driveError.value = ''
   try {
     const [foldersRaw, filesRaw] = await Promise.all([
-      $fetch<any[]>(`${apiBase}/api/techsavvies/drive/folders/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
-      $fetch<any[]>(`${apiBase}/api/techsavvies/drive/files/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+      $fetch<any[]>(`${apiBase}/api/techsavvy/drive/folders/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+      $fetch<any[]>(`${apiBase}/api/techsavvy/drive/files/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
     ])
     driveFolders.value = Array.isArray(foldersRaw) ? foldersRaw : []
     driveFiles.value = Array.isArray(filesRaw) ? filesRaw : []
@@ -1376,7 +1449,7 @@ async function createDriveFolder () {
   driveLoading.value = true
   driveError.value = ''
   try {
-    await $fetch(`${apiBase}/api/techsavvies/drive/folders/`, {
+    await $fetch(`${apiBase}/api/techsavvy/drive/folders/`, {
       method: 'POST',
       body: {
         owner_email: currentUserEmail.value,
@@ -1404,7 +1477,7 @@ async function handleDriveUpload (event: Event) {
     fd.append('owner_email', currentUserEmail.value)
     if (selectedFolderFilter.value) fd.append('folder_id', selectedFolderFilter.value)
     Array.from(files).forEach((file) => fd.append('files', file))
-    await $fetch(`${apiBase}/api/techsavvies/drive/files/`, {
+    await $fetch(`${apiBase}/api/techsavvy/drive/files/`, {
       method: 'POST',
       body: fd,
     })
@@ -1421,7 +1494,7 @@ async function deleteDriveFile (fileId: number) {
   if (!apiBase || !currentUserEmail.value) return
   if (!window.confirm('Delete this file?')) return
   try {
-    await $fetch(`${apiBase}/api/techsavvies/drive/files/${fileId}/?owner_email=${encodeURIComponent(currentUserEmail.value)}`, {
+    await $fetch(`${apiBase}/api/techsavvy/drive/files/${fileId}/?owner_email=${encodeURIComponent(currentUserEmail.value)}`, {
       method: 'DELETE',
     })
     await fetchDriveData()
@@ -1532,7 +1605,7 @@ function handleDelete (id: number) {
 async function confirmDeleteItem () {
   if (!pendingDeleteId.value || !useDashboardCmsList().apiBase) return
   try {
-    await $fetch(`${useDashboardCmsList().apiBase}/api/techsavvies/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
+    await $fetch(`${useDashboardCmsList().apiBase}/api/techsavvy/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
     showDeleteModal.value = false
     pendingDeleteId.value = null
     await fetchItems()
@@ -1567,6 +1640,12 @@ function confirmLogout () { showLogoutModal.value = false; logout() }
 function handleImageError () { profileImage.value = null }
 
 onMounted(() => {
+  if (process.client) {
+    const storedMode = localStorage.getItem('drive_view_mode')
+    if (storedMode === 'grid' || storedMode === 'list' || storedMode === 'compact') {
+      driveViewMode.value = storedMode
+    }
+  }
   const urlToken = new URLSearchParams(window.location.search).get('token')
   if (urlToken) {
     setAuth(urlToken)
@@ -1595,7 +1674,7 @@ const fetchMembersCount = async () => {
       return
     }
 
-    const raw = await $fetch<unknown>(`${apiBase}/api/techsavvies/member/list/`)
+    const raw = await $fetch<unknown>(`${apiBase}/api/techsavvy/member/list/`)
     const membersList = normalizeMembersList(raw)
     coreMembersCount.value = membersList.filter((m: { role?: string }) => !isParticipantRole(m?.role)).length
 
@@ -1642,6 +1721,10 @@ const fetchMembersCount = async () => {
 watch(() => user.value?.image, (img) => { if (img) profileImage.value = img })
 watch(() => user.value?.email, () => {
   fetchDriveData()
+})
+watch(driveViewMode, (mode) => {
+  if (!process.client) return
+  localStorage.setItem('drive_view_mode', mode)
 })
 
 watch([showContentForm, showReviewDetailModal], ([form, review]) => {

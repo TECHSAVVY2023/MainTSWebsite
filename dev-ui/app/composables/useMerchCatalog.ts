@@ -197,7 +197,7 @@ export function useMerchCatalog () {
     async () => {
       if (!apiBase) return []
       try {
-        const url = `${apiBase.replace(/\/$/, '')}/api/techsavvies/cms/list/`
+        const url = `${apiBase.replace(/\/$/, '')}/api/techsavvy/cms/list/`
         const data = await $fetch<unknown>(url)
         const list = normalizeCmsList(data) as CmsRaw[]
         const mapped = list

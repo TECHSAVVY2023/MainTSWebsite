@@ -1,7 +1,7 @@
 /**
  * Dashboard API composable – all data from API only.
- * Set NUXT_PUBLIC_API_BASE to the API host (e.g. http://127.0.0.1:8000) or full prefix (…/api/techsavvies).
- * Calendar requests always resolve to …/api/techsavvies/calendar-events.
+ * Set NUXT_PUBLIC_API_BASE to the API host (e.g. http://127.0.0.1:8000) or full prefix (…/api/techsavvy).
+ * Calendar requests always resolve to …/api/techsavvy/calendar-events.
  */
 
 export interface SubmissionItem {
@@ -76,11 +76,11 @@ function getBase (): string {
   return (config.public?.apiBase as string) || ''
 }
 
-/** Host-only base (e.g. http://127.0.0.1:8000) or full API root (…/api/techsavvies) — both supported. */
+/** Host-only base (e.g. http://127.0.0.1:8000) or full API root (…/api/techsavvy) — both supported. */
 function calendarEventsBaseUrl (base: string): string {
   const t = base.replace(/\/$/, '')
-  if (/\/api\/techsavvies$/i.test(t)) return `${t}/calendar-events`
-  return `${t}/api/techsavvies/calendar-events`
+  if (/\/api\/techsavvy$/i.test(t)) return `${t}/calendar-events`
+  return `${t}/api/techsavvy/calendar-events`
 }
 
 async function apiGet<T> (path: string, defaultValue: T): Promise<T> {

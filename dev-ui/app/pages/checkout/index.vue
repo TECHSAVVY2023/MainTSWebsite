@@ -336,7 +336,7 @@ async function startPayMongoCheckout () {
   submitting.value = true
   try {
     const res = await $fetch<{ checkout_url: string; reference_number: string }>(
-      `${apiBase.replace(/\/$/, '')}/api/techsavvies/merch/checkout/`,
+      `${apiBase.replace(/\/$/, '')}/api/techsavvy/merch/checkout/`,
       {
         method: 'POST',
         body: {

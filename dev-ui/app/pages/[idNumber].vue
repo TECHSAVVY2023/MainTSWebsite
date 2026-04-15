@@ -477,7 +477,7 @@ onMounted(async () => {
   try {
     const encoded = encodeURIComponent(idNumber);
     member.value = await $fetch(
-      `${API_BASE}/api/techsavvies/member/id/${encoded}/`,
+      `${API_BASE}/api/techsavvy/member/id/${encoded}/`,
     );
   } catch (e) {
     console.error("FETCH ERROR:", e);

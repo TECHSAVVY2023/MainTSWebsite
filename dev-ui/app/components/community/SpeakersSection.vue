@@ -1,10 +1,10 @@
 <template>
   <div class="mx-auto w-full max-w-[72rem]">
-    <div class="grid grid-cols-2 items-start gap-3 sm:items-stretch sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+    <div class="grid grid-cols-2 items-stretch gap-3 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
       <article
         v-for="(speaker, idx) in speakers"
         :key="`${speaker.name || 'speaker'}-${idx}`"
-        class="speaker-profile-card group relative flex w-full min-h-0 flex-col self-start overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_rgba(46,19,104,0.06)] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 hover:z-[1] hover:-translate-y-1 hover:scale-[1.02] hover:border-violet-200/90 hover:shadow-[0_22px_44px_-14px_rgba(46,19,104,0.2)] sm:h-full sm:self-stretch"
+        class="speaker-profile-card group relative flex min-h-[18rem] w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_rgba(46,19,104,0.06)] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 hover:z-[1] hover:-translate-y-1 hover:scale-[1.02] hover:border-violet-200/90 hover:shadow-[0_22px_44px_-14px_rgba(46,19,104,0.2)] sm:min-h-[22rem]"
       >
         <div
           class="relative h-16 shrink-0 bg-gradient-to-br from-violet-100/90 via-indigo-50/95 to-white sm:h-24"
@@ -41,13 +41,13 @@
         <div
           class="flex min-h-0 flex-col px-3 pb-3 pt-2 text-left sm:px-6 sm:pb-6 sm:pt-5"
         >
-          <h3 class="text-[0.9rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:text-[1.125rem]">
+          <h3 class="line-clamp-2 min-h-[2.4rem] text-[0.9rem] font-extrabold leading-snug tracking-tight text-slate-900 sm:min-h-[2.8rem] sm:text-[1.125rem]">
             {{ speaker.name || 'Guest Speaker' }}
           </h3>
           <p class="mt-1.5 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-accent-purple sm:mt-2 sm:text-[0.65rem] sm:tracking-[0.22em]">
             {{ speaker.role || 'Speaker' }}
           </p>
-          <p class="mt-2 line-clamp-3 text-xs leading-relaxed text-slate-600 sm:mt-3 sm:line-clamp-5 sm:text-[0.9375rem]">
+          <p class="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-600 sm:mt-3 sm:line-clamp-3 sm:text-[0.9375rem]">
             {{ speaker.topic || 'Technology and innovation.' }}
           </p>
           <a
@@ -55,11 +55,12 @@
             :href="speaker.link"
             target="_blank"
             rel="noopener noreferrer"
-            class="mt-3 inline-flex items-center justify-center gap-1.5 self-start rounded-full border border-accent-purple/30 bg-violet-50/80 px-3 py-1.5 text-[0.7rem] font-semibold text-accent-purple transition-[background-color,color,box-shadow,border-color] duration-300 ease-out hover:border-accent-purple hover:bg-accent-purple hover:text-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-purple/40 focus-visible:ring-offset-2 sm:mt-4 sm:px-4 sm:py-2 sm:text-xs"
+            class="mt-3 inline-flex min-h-[2.1rem] items-center justify-center gap-1.5 self-start rounded-full border border-accent-purple/30 bg-violet-50/80 px-3 py-1.5 text-[0.7rem] font-semibold text-accent-purple transition-[background-color,color,box-shadow,border-color] duration-300 ease-out hover:border-accent-purple hover:bg-accent-purple hover:text-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-purple/40 focus-visible:ring-offset-2 sm:mt-4 sm:px-4 sm:py-2 sm:text-xs"
           >
             View profile
             <i class="fas fa-arrow-right text-[0.65rem] opacity-80" aria-hidden="true" />
           </a>
+          <div v-else class="mt-3 min-h-[2.1rem] sm:mt-4" aria-hidden="true" />
         </div>
       </article>
     </div>

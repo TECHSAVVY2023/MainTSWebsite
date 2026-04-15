@@ -500,7 +500,7 @@ const fetchMembers = async () => {
   const base = API_BASE.value;
   if (!base) return;
   try {
-    const raw = await $fetch(`${base}/api/techsavvies/member/list/`);
+    const raw = await $fetch(`${base}/api/techsavvy/member/list/`);
     members.value = normalizeMemberList(raw);
   } catch (error) {
     console.error('Error fetching members:', error);
@@ -594,7 +594,7 @@ async function submitAddMember () {
       formData.append('profilePicture', addFileInput.value.files[0]);
     }
 
-    await $fetch(`${base}/api/techsavvies/member/create/`, {
+    await $fetch(`${base}/api/techsavvy/member/create/`, {
       method: 'POST',
       body: formData,
       headers: { Accept: 'application/json' }
@@ -658,7 +658,7 @@ const handleProfilePictureUpload = async (memberId, event) => {
     uploadingStates.value[memberId] = true;
     const formData = new FormData();
     formData.append("profilePicture", file);
-    await $fetch(`${API_BASE.value}/api/techsavvies/member/${memberId}/update/`, { method: 'PATCH', body: formData });
+    await $fetch(`${API_BASE.value}/api/techsavvy/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     await fetchMembers();
   } catch (error) {
     console.error("Error uploading profile picture:", error);
@@ -673,7 +673,7 @@ const updateField = async (memberId, fieldName, value) => {
     savingStates.value[stateKey] = 'saving';
     const formData = new FormData();
     formData.append(fieldName, value === null || value === undefined ? '' : String(value));
-    await $fetch(`${API_BASE.value}/api/techsavvies/member/${memberId}/update/`, { method: 'PATCH', body: formData });
+    await $fetch(`${API_BASE.value}/api/techsavvy/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     savingStates.value[stateKey] = 'saved';
     
     // Update local members list

@@ -254,7 +254,7 @@ const workflowLogo =
 "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/WORKFLOWsinglewhite.png"
 
 const config = useRuntimeConfig()
-const API_BASE = `${config.public.apiBase}/api/techsavvies`
+const API_BASE = `${config.public.apiBase}/api/techsavvy`
 
 const members = ref([])
 const sparkles = ref([])

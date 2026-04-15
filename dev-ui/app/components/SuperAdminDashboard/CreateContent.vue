@@ -296,7 +296,7 @@ function handleDelete (id: number) {
 async function confirmDeleteItem () {
   if (!pendingDeleteId.value || !apiBase) return
   try {
-    await $fetch(`${apiBase}/api/techsavvies/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
+    await $fetch(`${apiBase}/api/techsavvy/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
     showDeleteModal.value = false
     pendingDeleteId.value = null
     await fetchItems()

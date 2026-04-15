@@ -6,10 +6,17 @@ export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
   const base = String(config.apiBase || config.public.apiBase || "").replace(/\/$/, "")
   if (!base) {
-    throw createError({ statusCode: 503, statusMessage: "API base not configured" })
+    // Keep homepage resilient in environments where API base is missing.
+    return []
   }
-  const url = `${base}/api/techsavvies/cms/list/`
-  return await $fetch(url, {
-    headers: { Accept: 'application/json' }
-  })
+
+  const url = `${base}/api/techsavvy/cms/list/`
+  try {
+    return await $fetch(url, {
+      headers: { Accept: 'application/json' }
+    })
+  } catch {
+    // Do not throw from this proxy route: homepage can proceed with fallback content.
+    return []
+  }
 })

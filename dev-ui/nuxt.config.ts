@@ -18,6 +18,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   ssr: true, // Ensure SSR is enabled for proper meta tag rendering
   srcDir: 'app',
+  serverDir: "app/server",
   app: {
     head: {
       charset: "utf-8",
@@ -43,7 +44,7 @@ export default defineNuxtConfig({
   vite: {
     resolve: {
       alias: {
-        "#app-manifest": resolve(__dirname, "stubs/app-manifest-stub.mjs"),
+        "#app-manifest": resolve(__dirname, "app/stubs/app-manifest-stub.mjs"),
       },
     },
     plugins: [

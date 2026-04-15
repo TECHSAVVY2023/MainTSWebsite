@@ -14,7 +14,7 @@ import { firstCmsImageUrl } from '~/utils/cmsMedia'
 
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
-const CMS_LIST_PATH = '/api/techsavvies/cms/list/'
+const CMS_LIST_PATH = '/api/techsavvy/cms/list/'
 /** Server proxy — browser calls Nuxt origin; Nitro forwards to Django (see server/api/internal/cms-list.get.ts). */
 const CMS_LIST_PROXY_PATH = '/api/internal/cms-list'
 
@@ -678,7 +678,7 @@ export function useLanding () {
 
     try {
       if (apiBase) {
-        const membersUrl = `${apiBase.replace(/\/$/, '')}/api/techsavvies/member/list/`
+        const membersUrl = `${apiBase.replace(/\/$/, '')}/api/techsavvy/member/list/`
         const members = await $fetch<MemberRoleApiItem[] | Record<string, unknown> | unknown>(membersUrl)
         let normalized: MemberRoleApiItem[] = []
         if (Array.isArray(members)) {

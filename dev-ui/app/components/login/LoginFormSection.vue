@@ -35,7 +35,7 @@
         <p class="text-[10px] font-bold uppercase tracking-widest text-violet-900/90">
           New to TechSavvy?
         </p>
-        <NuxtLink to="/#news" class="mt-3 inline-block rounded-xl border border-violet-400/30 bg-violet-200/35 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-violet-900 no-underline transition-colors hover:border-violet-600 hover:bg-violet-600 hover:text-white sm:px-6 lg:bg-violet-50 lg:text-violet-700">
+        <NuxtLink to="/membership" class="mt-3 inline-block rounded-xl border border-violet-400/30 bg-violet-200/35 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-violet-900 no-underline transition-colors hover:border-violet-600 hover:bg-violet-600 hover:text-white sm:px-6 lg:bg-violet-50 lg:text-violet-700">
           Join the community
         </NuxtLink>
       </div>
