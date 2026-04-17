@@ -10,8 +10,6 @@ urlpatterns = [
     path('api/delgar/', include('delgar_api.urls')),
     path('api/kathies/', include('kathieskitchen.urls')),
     path('api/techsavvy/', include('techsavvyapi.urls')),
-    # Keep legacy TechSavvy routes and add TS API endpoints (auth/cms/drive/merch)
-    # under the same prefix so frontend URLs resolve consistently.
     path('api/techsavvy/', include('tsapi.urls')),
     path('api/techsavvy_app/', include('techsavvy_app.urls')),
     path('api/techsavvy_members/', include('techsavvy_members.urls')),
