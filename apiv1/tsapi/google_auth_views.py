@@ -62,7 +62,7 @@ def google_auth_start(request):
             f"{oauth_config.FRONTEND_URL}/login?error=oauth_not_configured"
         )
 
-    callback_path = reverse("google_oauth_callback")
+    callback_path = reverse("oauth_callback")
     redirect_uri = request.build_absolute_uri(callback_path)
     state = base64.urlsafe_b64encode(redirect_uri.encode("utf-8")).decode("ascii").rstrip("=")
 
@@ -95,7 +95,7 @@ def google_auth_callback(request):
         pad = "=" * (-len(state_b64) % 4)
         redirect_uri = base64.urlsafe_b64decode(state_b64 + pad).decode("utf-8")
     except Exception:
-        callback_path = reverse("google_oauth_callback")
+        callback_path = reverse("oauth_callback")
         redirect_uri = request.build_absolute_uri(callback_path)
 
     try:
