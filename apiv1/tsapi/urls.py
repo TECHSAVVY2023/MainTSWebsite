@@ -2,7 +2,6 @@
 from django.urls import path
 
 from . import views
-from . import google_auth_views
 from tsapi.merch import views as merch_views
 
 urlpatterns = [
@@ -23,8 +22,8 @@ urlpatterns = [
     path("drive/folders/<int:pk>/", views.drive_folder_delete, name="drive_folder_delete"),
     path("drive/files/", views.drive_files, name="drive_files"),
     path("drive/files/<int:pk>/", views.drive_file_delete, name="drive_file_delete"),
-    path("auth/google/start/", google_auth_views.google_auth_start, name="google_oauth_start"),
-    path("auth/callback/", google_auth_views.google_auth_callback, name="oauth_callback"),
+    path("auth/google/start/", views.google_auth_start, name="google_oauth_start"),
+    path("auth/callback/", views.google_auth_callback, name="oauth_callback"),
     path("merch/checkout/", merch_views.create_checkout),
     path("payments/paymongo/create-checkout/", merch_views.create_checkout),
     path("webhooks/paymongo/", merch_views.paymongo_webhook),
