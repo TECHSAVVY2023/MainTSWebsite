@@ -500,7 +500,7 @@ const fetchMembers = async () => {
   const base = API_BASE.value;
   if (!base) return;
   try {
-    const raw = await $fetch(`${base}/api/techsavvy/member/list/`);
+    const raw = await $fetch(`${base}/member/list/`);
     members.value = normalizeMemberList(raw);
   } catch (error) {
     console.error('Error fetching members:', error);
@@ -594,7 +594,7 @@ async function submitAddMember () {
       formData.append('profilePicture', addFileInput.value.files[0]);
     }
 
-    await $fetch(`${base}/api/techsavvy/member/create/`, {
+    await $fetch(`${base}/member/create/`, {
       method: 'POST',
       body: formData,
       headers: { Accept: 'application/json' }
@@ -633,8 +633,9 @@ const cleanImageUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   const base = API_BASE.value;
   if (!base) return 'https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User';
-  if (url.startsWith('/')) return `${base}${url}`;
-  return `${base}/media/${url}`;
+  const origin = base.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '');
+  if (url.startsWith('/')) return `${origin}${url}`;
+  return `${origin}/media/${url}`;
 };
 
 const getRoleColor = (role) => {
@@ -658,7 +659,7 @@ const handleProfilePictureUpload = async (memberId, event) => {
     uploadingStates.value[memberId] = true;
     const formData = new FormData();
     formData.append("profilePicture", file);
-    await $fetch(`${API_BASE.value}/api/techsavvy/member/${memberId}/update/`, { method: 'PATCH', body: formData });
+    await $fetch(`${API_BASE.value}/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     await fetchMembers();
   } catch (error) {
     console.error("Error uploading profile picture:", error);
@@ -673,7 +674,7 @@ const updateField = async (memberId, fieldName, value) => {
     savingStates.value[stateKey] = 'saving';
     const formData = new FormData();
     formData.append(fieldName, value === null || value === undefined ? '' : String(value));
-    await $fetch(`${API_BASE.value}/api/techsavvy/member/${memberId}/update/`, { method: 'PATCH', body: formData });
+    await $fetch(`${API_BASE.value}/member/${memberId}/update/`, { method: 'PATCH', body: formData });
     savingStates.value[stateKey] = 'saved';
     
     // Update local members list

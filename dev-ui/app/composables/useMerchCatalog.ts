@@ -144,7 +144,7 @@ function getFirstFileUrl (files: CmsRaw['files']): string {
 
 function resolveMediaUrl (url: string, apiBase: string): string {
   if (!url || url.startsWith('http')) return url
-  const origin = apiBase.replace(/\/api\/?$/, '').replace(/\/$/, '')
+  const origin = apiBase.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '')
   return origin ? `${origin}${url.startsWith('/') ? '' : '/'}${url}` : url
 }
 
@@ -197,7 +197,7 @@ export function useMerchCatalog () {
     async () => {
       if (!apiBase) return []
       try {
-        const url = `${apiBase.replace(/\/$/, '')}/api/techsavvy/cms/list/`
+        const url = `${apiBase.replace(/\/$/, '')}/cms/list/`
         const data = await $fetch<unknown>(url)
         const list = normalizeCmsList(data) as CmsRaw[]
         const mapped = list

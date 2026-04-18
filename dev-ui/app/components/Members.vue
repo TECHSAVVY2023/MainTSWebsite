@@ -254,7 +254,7 @@ const workflowLogo =
 "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/WORKFLOWsinglewhite.png"
 
 const config = useRuntimeConfig()
-const API_BASE = `${config.public.apiBase}/api/techsavvy`
+const API_BASE = `${config.public.apiBase}`
 
 const members = ref([])
 const sparkles = ref([])
@@ -285,7 +285,8 @@ if(!url) return "https://via.placeholder.com/150"
 
 if(url.startsWith("http")) return url
 
-return `${config.public.apiBase}${url}`
+const origin = String(config.public.apiBase || '').replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '')
+return `${origin}${url.startsWith('/') ? '' : '/'}${url}`
 
 }
 

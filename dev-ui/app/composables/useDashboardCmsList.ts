@@ -47,7 +47,7 @@ export function useDashboardCmsList () {
       return
     }
     try {
-      const data = await $fetch<unknown>(`${apiBase}/api/techsavvy/cms/list/`)
+      const data = await $fetch<unknown>(`${apiBase}/cms/list/`)
       const list = Array.isArray(data)
         ? data
         : (data as Record<string, unknown>)?.data

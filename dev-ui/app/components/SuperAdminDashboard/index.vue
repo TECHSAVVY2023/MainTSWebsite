@@ -1283,7 +1283,12 @@ const totalPoints = computed(
 
 function cleanImageUrl(url: string) {
   if (!url) return ''
-  return url.match(/^.*\.(jpg|jpeg|png|gif|webp)/i)?.[0] || url
+  if (/^https?:\/\//i.test(url)) {
+    return url.match(/^.*\.(jpg|jpeg|png|gif|webp)/i)?.[0] || url
+  }
+  const config = useRuntimeConfig()
+  const origin = String(config.public.apiBase || '').replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '')
+  return `${origin}${url.startsWith('/') ? '' : '/'}${url}`
 }
 const userInitials = computed(() => {
   const name = user.value?.name || 'USER'
@@ -1430,8 +1435,8 @@ async function fetchDriveData () {
   driveError.value = ''
   try {
     const [foldersRaw, filesRaw] = await Promise.all([
-      $fetch<any[]>(`${apiBase}/api/techsavvy/drive/folders/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
-      $fetch<any[]>(`${apiBase}/api/techsavvy/drive/files/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+      $fetch<any[]>(`${apiBase}/drive/folders/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
+      $fetch<any[]>(`${apiBase}/drive/files/?owner_email=${encodeURIComponent(currentUserEmail.value)}`),
     ])
     driveFolders.value = Array.isArray(foldersRaw) ? foldersRaw : []
     driveFiles.value = Array.isArray(filesRaw) ? filesRaw : []
@@ -1449,7 +1454,7 @@ async function createDriveFolder () {
   driveLoading.value = true
   driveError.value = ''
   try {
-    await $fetch(`${apiBase}/api/techsavvy/drive/folders/`, {
+    await $fetch(`${apiBase}/drive/folders/`, {
       method: 'POST',
       body: {
         owner_email: currentUserEmail.value,
@@ -1477,7 +1482,7 @@ async function handleDriveUpload (event: Event) {
     fd.append('owner_email', currentUserEmail.value)
     if (selectedFolderFilter.value) fd.append('folder_id', selectedFolderFilter.value)
     Array.from(files).forEach((file) => fd.append('files', file))
-    await $fetch(`${apiBase}/api/techsavvy/drive/files/`, {
+    await $fetch(`${apiBase}/drive/files/`, {
       method: 'POST',
       body: fd,
     })
@@ -1494,7 +1499,7 @@ async function deleteDriveFile (fileId: number) {
   if (!apiBase || !currentUserEmail.value) return
   if (!window.confirm('Delete this file?')) return
   try {
-    await $fetch(`${apiBase}/api/techsavvy/drive/files/${fileId}/?owner_email=${encodeURIComponent(currentUserEmail.value)}`, {
+    await $fetch(`${apiBase}/drive/files/${fileId}/?owner_email=${encodeURIComponent(currentUserEmail.value)}`, {
       method: 'DELETE',
     })
     await fetchDriveData()
@@ -1605,7 +1610,7 @@ function handleDelete (id: number) {
 async function confirmDeleteItem () {
   if (!pendingDeleteId.value || !useDashboardCmsList().apiBase) return
   try {
-    await $fetch(`${useDashboardCmsList().apiBase}/api/techsavvy/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
+    await $fetch(`${useDashboardCmsList().apiBase}/cms/delete/${pendingDeleteId.value}/`, { method: 'DELETE' })
     showDeleteModal.value = false
     pendingDeleteId.value = null
     await fetchItems()
@@ -1674,7 +1679,7 @@ const fetchMembersCount = async () => {
       return
     }
 
-    const raw = await $fetch<unknown>(`${apiBase}/api/techsavvy/member/list/`)
+    const raw = await $fetch<unknown>(`${apiBase}/member/list/`)
     const membersList = normalizeMembersList(raw)
     coreMembersCount.value = membersList.filter((m: { role?: string }) => !isParticipantRole(m?.role)).length
 

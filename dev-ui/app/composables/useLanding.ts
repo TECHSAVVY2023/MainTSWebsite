@@ -14,7 +14,7 @@ import { firstCmsImageUrl } from '~/utils/cmsMedia'
 
 const APPROVED_NEWS_KEY = 'approvedNewsForLanding'
 const CALENDAR_KEY = 'calendarEventsForLanding'
-const CMS_LIST_PATH = '/api/techsavvy/cms/list/'
+const CMS_LIST_PATH = '/cms/list/'
 /** Server proxy — browser calls Nuxt origin; Nitro forwards to Django (see server/api/internal/cms-list.get.ts). */
 const CMS_LIST_PROXY_PATH = '/api/internal/cms-list'
 
@@ -305,7 +305,7 @@ function mapCmsToNewsItem (
   const imgFromImages = firstCmsImageUrl(cms.images)
   let fileUrl = imgFromImages || getFirstFileUrl(cms.files)
   if (fileUrl && baseUrl && !fileUrl.startsWith('http')) {
-    const origin = baseUrl.replace(/\/api\/?$/, '').replace(/\/$/, '')
+    const origin = baseUrl.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '')
     fileUrl = `${origin}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`
   }
   const link = Array.isArray(cms.links) && cms.links[0] ? cms.links[0] : ''
@@ -467,7 +467,7 @@ export function useLanding () {
     if (!path) return ''
     const p = String(path).trim()
     if (!p || p.startsWith('http')) return p
-    const origin = apiBase.replace(/\/$/, '')
+    const origin = apiBase.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '')
     return `${origin}${p.startsWith('/') ? '' : '/'}${p}`
   }
 
@@ -678,7 +678,7 @@ export function useLanding () {
 
     try {
       if (apiBase) {
-        const membersUrl = `${apiBase.replace(/\/$/, '')}/api/techsavvy/member/list/`
+        const membersUrl = `${apiBase.replace(/\/$/, '')}/member/list/`
         const members = await $fetch<MemberRoleApiItem[] | Record<string, unknown> | unknown>(membersUrl)
         let normalized: MemberRoleApiItem[] = []
         if (Array.isArray(members)) {

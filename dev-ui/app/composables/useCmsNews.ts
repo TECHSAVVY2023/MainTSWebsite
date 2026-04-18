@@ -1,6 +1,6 @@
 /**
  * Composable for TechSavvy CMS API (`/api/techsavvy/`).
- * Backend: GET {apiBase}/api/techsavvy/cms/list/ and GET .../cms/<pk>/
+ * Backend: GET {apiBase}/cms/list/ and GET .../cms/<pk>/
  */
 
 import { cmsImageUrlList, firstCmsImageUrl } from '~/utils/cmsMedia'
@@ -117,7 +117,7 @@ function isNewsCategory (filters?: string | Record<string, unknown> | null): boo
   return NEWS_CATEGORIES.some((c) => lower.includes(c.toLowerCase()))
 }
 
-const CMS_LIST_PATH = '/api/techsavvy/cms/list/'
+const CMS_LIST_PATH = '/cms/list/'
 
 export function useCmsNews () {
   const config = useRuntimeConfig()
@@ -137,7 +137,7 @@ export function useCmsNews () {
   function resolveMediaUrl (url: string, baseUrl?: string): string {
     if (!url || url.startsWith('http')) return url
     const base = baseUrl ?? apiBase
-    const origin = base ? base.replace(/\/api\/?$/, '').replace(/\/$/, '') : ''
+    const origin = base ? base.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '') : ''
     return origin ? `${origin}${url.startsWith('/') ? '' : '/'}${url}` : url
   }
 

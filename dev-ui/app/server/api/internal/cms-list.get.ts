@@ -10,7 +10,7 @@ export default defineEventHandler(async () => {
     return []
   }
 
-  const url = `${base}/api/techsavvy/cms/list/`
+  const url = `${base}/cms/list/`
   try {
     return await $fetch(url, {
       headers: { Accept: 'application/json' }

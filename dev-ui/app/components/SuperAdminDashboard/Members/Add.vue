@@ -260,7 +260,7 @@ const submitForm = async () => {
       formData.append("profilePicture", fileInput.value.files[0]);
     }
 
-    await $fetch(`${base}/api/techsavvy/member/create/`, {
+    await $fetch(`${base}/member/create/`, {
       method: "POST",
       body: formData,
       headers: { Accept: "application/json" },

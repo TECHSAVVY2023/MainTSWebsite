@@ -16,7 +16,7 @@ export const BASE_ASSETS_URL = "https://fpstorage.sgp1.cdn.digitaloceanspaces.co
 
 /**
  * Construct a full API URL from an endpoint
- * @param {string} endpoint - The API endpoint (e.g., 'api/techsavvy/cms/list/')
+ * @param {string} endpoint - The API endpoint (e.g., 'cms/list/')
  * @returns {string} Full API URL
  */
 export const getApiUrl = (endpoint) => {
@@ -33,15 +33,15 @@ export const getApiUrl = (endpoint) => {
 export const API_ENDPOINTS = {
   // CMS Data Posting endpoints
   CMS: {
-    LIST: "api/techsavvy/cms/list/",
-    DETAIL: (id) => `api/techsavvy/cms/${id}/`,
-    CREATE: "api/techsavvy/cms/create/",
-    EDIT: (id) => `api/techsavvy/cms/edit/${id}/`,
-    DELETE: (id) => `api/techsavvy/cms/delete/${id}/`,
+    LIST: "cms/list/",
+    DETAIL: (id) => `cms/${id}/`,
+    CREATE: "cms/create/",
+    EDIT: (id) => `cms/edit/${id}/`,
+    DELETE: (id) => `cms/delete/${id}/`,
   },
 
   // File upload endpoint
-  UPLOAD: "api/techsavvy/cms/upload/",
+  UPLOAD: "cms/upload/",
 };
 
 /**
