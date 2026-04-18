@@ -11,22 +11,65 @@
             <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
               <SectionWireShield :wide="false">
                 <div class="max-w-[42rem]">
-                  <h2 class="mb-1 text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
-                    Event Reminders
-                  </h2>
+                  <div class="mb-1 flex flex-wrap items-center gap-2">
+                    <h2 class="text-[22px] font-bold leading-tight tracking-tight text-dark sm:text-[26px] md:text-[30px]">
+                      Event Reminders
+                    </h2>
+                    <span
+                      v-if="lockedReminders"
+                      class="inline-flex items-center gap-1 rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-800 sm:text-[11px]"
+                    >
+                      <i class="fas fa-lock text-[9px]" aria-hidden="true" />
+                      Members
+                    </span>
+                  </div>
                   <p class="text-sm leading-relaxed text-dark/60 sm:text-base">
                     Upcoming events and schedules for the community.
                   </p>
                 </div>
               </SectionWireShield>
               <SectionWireShield :wide="false">
-                <span class="inline-flex items-center rounded-full border border-accent-purple/25 bg-violet-border px-3.5 py-2 text-xs font-medium text-accent-purple sm:text-sm">
-                  Community Hub
-                </span>
+                <NuxtLink
+                  :to="lockedReminders ? '/login' : '/#events-reminders'"
+                  class="inline-flex items-center gap-2 rounded-full border border-accent-purple/25 bg-violet-border px-3.5 py-2 text-xs font-medium text-accent-purple no-underline transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:text-sm"
+                >
+                  <template v-if="lockedReminders">
+                    <i class="fas fa-lock text-[10px]" aria-hidden="true" />
+                    Sign in to view
+                  </template>
+                  <template v-else>
+                    Community Hub
+                  </template>
+                </NuxtLink>
               </SectionWireShield>
             </div>
           </div>
-          <EventsReminderSection :reminders="safeReminders" />
+          <div class="relative">
+            <EventsReminderSection :reminders="safeReminders" />
+            <div
+              v-if="lockedReminders"
+              class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-neutral-gray/70 px-4 py-10 backdrop-blur-[5px] sm:px-6"
+            >
+              <div class="max-w-sm rounded-2xl border border-violet-200/80 bg-white/95 px-6 py-8 text-center shadow-[0_20px_50px_rgba(46,19,104,0.12)]">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
+                  <i class="fas fa-lock text-2xl" aria-hidden="true" />
+                </div>
+                <p class="text-base font-bold text-dark sm:text-lg">
+                  Member access
+                </p>
+                <p class="mt-2 text-sm leading-relaxed text-dark/65">
+                  Sign in with your community account to unlock event reminders and upcoming schedules.
+                </p>
+                <NuxtLink
+                  to="/login"
+                  class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-violet-700 px-5 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-violet-800"
+                >
+                  <i class="fas fa-sign-in-alt text-xs" aria-hidden="true" />
+                  Sign in
+                </NuxtLink>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -151,6 +194,7 @@ type SponsorItem = {
 }
 
 const props = defineProps<{
+  lockedReminders?: boolean
   reminders?: EventReminderItem[] | unknown
   speakers?: SpeakerItem[] | unknown
   sponsors?: SponsorItem[] | unknown

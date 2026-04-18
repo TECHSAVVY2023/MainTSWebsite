@@ -43,9 +43,19 @@
               <a href="#news"
                 class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
                 @click.prevent="scrollToSection('#news')">News</a>
-              <a href="#courses"
-                class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                @click.prevent="scrollToSection('#courses')">Courses</a>
+              <a
+                href="#courses"
+                class="inline-flex items-center gap-1.5 text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
+                :aria-label="isLoggedIn ? 'Courses' : 'Courses — sign in to unlock full access'"
+                @click.prevent="scrollToSection('#courses')"
+              >
+                Courses
+                <i
+                  v-if="!isLoggedIn"
+                  class="fas fa-lock text-[0.65rem] text-violet-600/90 opacity-90"
+                  aria-hidden="true"
+                />
+              </a>
               <a href="#about"
                 class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
                 @click.prevent="scrollToSection('#about')">About</a>
@@ -65,9 +75,19 @@
               <a href="#merch"
                 class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
                 @click.prevent="scrollToSection('#merch')">Merch</a>
-              <a href="#events-reminders"
-                class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                @click.prevent="scrollToSection('#events-reminders')">Events Reminder</a>
+              <a
+                href="#events-reminders"
+                class="inline-flex items-center gap-1.5 text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
+                :aria-label="isLoggedIn ? 'Events Reminder' : 'Events Reminder — sign in to unlock full access'"
+                @click.prevent="scrollToSection('#events-reminders')"
+              >
+                Events Reminder
+                <i
+                  v-if="!isLoggedIn"
+                  class="fas fa-lock text-[0.65rem] text-violet-600/90 opacity-90"
+                  aria-hidden="true"
+                />
+              </a>
             </div>
 
             <div class="hidden md:flex shrink-0 pl-4 items-center">
@@ -123,9 +143,19 @@
         <a href="#news"
           class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
           @click.prevent="go('#news')">News</a>
-        <a href="#courses"
-          class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
-          @click.prevent="go('#courses')">Courses</a>
+        <a
+          href="#courses"
+          class="flex items-center justify-center gap-2 py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          :aria-label="isLoggedIn ? 'Courses' : 'Courses — sign in to unlock'"
+          @click.prevent="go('#courses')"
+        >
+          <span>Courses</span>
+          <i
+            v-if="!isLoggedIn"
+            class="fas fa-lock text-xs text-violet-600/90"
+            aria-hidden="true"
+          />
+        </a>
         <a href="#about"
           class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
           @click.prevent="go('#about')">About</a>
@@ -145,9 +175,19 @@
         <a href="#merch"
           class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
           @click.prevent="go('#merch')">Merch</a>
-        <a href="#events-reminders"
-          class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
-          @click.prevent="go('#events-reminders')">Events Reminder</a>
+        <a
+          href="#events-reminders"
+          class="flex items-center justify-center gap-2 py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          :aria-label="isLoggedIn ? 'Events Reminder' : 'Events Reminder — sign in to unlock'"
+          @click.prevent="go('#events-reminders')"
+        >
+          <span>Events Reminder</span>
+          <i
+            v-if="!isLoggedIn"
+            class="fas fa-lock text-xs text-violet-600/90"
+            aria-hidden="true"
+          />
+        </a>
       </div>
     </header>
   </div>

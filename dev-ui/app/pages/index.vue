@@ -3,7 +3,7 @@
     <AppHeader :scroll-to-section="landing.scrollToSection" @search="landing.onHeaderSearch" />
     <HeroSection :scroll-to-section="landing.scrollToSection" />
     <NewsSection :items="newsItemsForSection" :default-image="landing.DEFAULT_NEWS_IMAGE" />
-    <CoursesSection :courses="coursesForSection" :default-image="landing.DEFAULT_COURSE_IMAGE" />
+    <CoursesSection :locked="!isLoggedIn" :courses="coursesForSection" :default-image="landing.DEFAULT_COURSE_IMAGE" />
     <AboutSection />
     <ProjectsSection
       :locked="!isLoggedIn"
@@ -13,6 +13,7 @@
     <MerchSection />
     
     <CommunityHubSection
+      :locked-reminders="!isLoggedIn"
       :reminders="eventRemindersForSection"
       :speakers="speakersForSection"
       :sponsors="sponsorsForSection"

@@ -590,15 +590,18 @@ export function useLanding () {
 
     const { token, init: initAuth } = useAuth()
     if (import.meta.client) initAuth()
-    const includeFeaturedProjects = !!token.value
+    const hasMemberAccess = !!token.value
 
-    if (!includeFeaturedProjects) {
+    if (!hasMemberAccess) {
       projects.value = []
+      coursesPreview.value = []
+      calendarEvents.value = []
+      eventReminders.value = []
     }
 
     try {
       const { fetchCmsProjects, fetchCmsCourses } = useCmsNews()
-      if (includeFeaturedProjects) {
+      if (hasMemberAccess) {
         const proj = await fetchCmsProjects()
         if (Array.isArray(proj) && proj.length > 0) {
           projects.value = proj
@@ -606,23 +609,25 @@ export function useLanding () {
             .map((p) => ({ title: p.title, domain: p.domain, developer: p.developer, url: p.url, image: p.image, alt: p.alt }))
         }
       }
-      const courses = await fetchCmsCourses()
-      if (Array.isArray(courses) && courses.length > 0) {
-        coursesPreview.value = courses.slice(0, LANDING_SECTION_MAX_CARDS).map((c) => ({
-          slug: c.slug,
-          title: c.title,
-          instructor: c.instructor,
-          rating: c.rating,
-          duration: c.duration,
-          badge: c.badge,
-          image: c.image
-        }))
+      if (hasMemberAccess) {
+        const courses = await fetchCmsCourses()
+        if (Array.isArray(courses) && courses.length > 0) {
+          coursesPreview.value = courses.slice(0, LANDING_SECTION_MAX_CARDS).map((c) => ({
+            slug: c.slug,
+            title: c.title,
+            instructor: c.instructor,
+            rating: c.rating,
+            duration: c.duration,
+            badge: c.badge,
+            image: c.image
+          }))
+        }
       }
     } catch { /* keep empty */ }
 
     try {
       const api = useDashboardApi()
-      if (api.hasApi()) {
+      if (hasMemberAccess && api.hasApi()) {
         const events = await api.getCalendarEvents()
         if (Array.isArray(events) && events.length > 0) {
           calendarEvents.value = events
@@ -658,23 +663,25 @@ export function useLanding () {
       }
     } catch { /* keep as is */ }
 
-    const cmsCal = landingNewsToCalendarRows(newsItems.value)
-    if (cmsCal.length > 0) {
-      calendarEvents.value = [...cmsCal, ...calendarEvents.value].sort((a, b) =>
-        (a.date || '').localeCompare(b.date || '')
-      )
+    if (hasMemberAccess) {
+      const cmsCal = landingNewsToCalendarRows(newsItems.value)
+      if (cmsCal.length > 0) {
+        calendarEvents.value = [...cmsCal, ...calendarEvents.value].sort((a, b) =>
+          (a.date || '').localeCompare(b.date || '')
+        )
+      }
+
+      calendarEvents.value = dedupeLandingCalEvents(calendarEvents.value)
+
+      const now = new Date()
+      eventReminders.value = [...calendarEvents.value]
+        .filter((event) => {
+          const dt = new Date(event.date)
+          return !Number.isNaN(dt.getTime()) && dt >= now
+        })
+        .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+        .slice(0, 5)
     }
-
-    calendarEvents.value = dedupeLandingCalEvents(calendarEvents.value)
-
-    const now = new Date()
-    eventReminders.value = [...calendarEvents.value]
-      .filter((event) => {
-        const dt = new Date(event.date)
-        return !Number.isNaN(dt.getTime()) && dt >= now
-      })
-      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-      .slice(0, 5)
 
     try {
       if (apiBase) {
@@ -697,16 +704,16 @@ export function useLanding () {
     if (newsItems.value.length === 0) {
       newsItems.value = [...FALLBACK_NEWS_ITEMS].slice(0, LANDING_SECTION_MAX_CARDS)
     }
-    if (includeFeaturedProjects && projects.value.length === 0) {
+    if (hasMemberAccess && projects.value.length === 0) {
       projects.value = [...FALLBACK_PROJECTS].slice(0, LANDING_SECTION_MAX_CARDS)
     }
-    if (coursesPreview.value.length === 0) {
+    if (hasMemberAccess && coursesPreview.value.length === 0) {
       coursesPreview.value = [...FALLBACK_COURSES].slice(0, LANDING_SECTION_MAX_CARDS)
     }
-    if (calendarEvents.value.length === 0) {
+    if (hasMemberAccess && calendarEvents.value.length === 0) {
       calendarEvents.value = [...FALLBACK_REMINDERS]
     }
-    if (eventReminders.value.length === 0) {
+    if (hasMemberAccess && eventReminders.value.length === 0) {
       eventReminders.value = [...FALLBACK_REMINDERS]
     }
     if (communityRoleStats.value.length === 0) {
