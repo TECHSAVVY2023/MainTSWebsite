@@ -14,6 +14,10 @@ export default defineNuxtConfig({
   gtag: {
     id: "G-G6MZR024YE",
   },
+  sourcemap: {
+    server: false,
+    client: false,
+  },
   compatibilityDate: "2025-07-15",
   devtools: { enabled: false },
   ssr: true, // Ensure SSR is enabled for proper meta tag rendering
@@ -42,6 +46,9 @@ export default defineNuxtConfig({
   },
   css: ["~/assets/css/main.css"],
   vite: {
+    build: {
+      sourcemap: false,
+    },
     resolve: {
       alias: {
         "#app-manifest": resolve(__dirname, "app/stubs/app-manifest-stub.mjs"),
@@ -61,7 +68,7 @@ export default defineNuxtConfig({
       /** Public site origin for checkout success/cancel URLs (e.g. https://techsavvies.space) */
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "",
       /** Comma-separated emails that get super-admin UI (dev: add your Google email). */
-      superAdminEmails: process.env.NUXT_PUBLIC_SUPERADMIN_EMAILS || "markanthonyogaoogao@gmail.com",
+      superAdminEmails: process.env.NUXT_PUBLIC_SUPERADMIN_EMAILS || "markanthonyogaoogao@gmail.com,info@techsavvies.space"
     },
   }
 });
