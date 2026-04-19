@@ -88,57 +88,13 @@
 </template>
 
 <script setup>
-import moment from "moment";
-
-const { user } = useAuth();
-
-const profileImage = ref(null);
-
-const currentTime = ref("");
-const currentDate = ref("");
-const greeting = ref("");
-
-const userInitials = computed(() => {
-  const name = user.value?.name || "USER";
-  const nameParts = name.split(" ");
-  if (nameParts.length >= 2) {
-    return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
-  }
-  return name.substring(0, 2).toUpperCase();
-});
-
-const updateTime = () => {
-  const now = moment();
-  currentTime.value = now.format("hh:mm:ss A");
-  currentDate.value = now.format("dddd, MMMM DD, YYYY");
-
-  const hour = now.hour();
-  if (hour < 12) {
-    greeting.value = "Morning";
-  } else if (hour < 18) {
-    greeting.value = "Afternoon";
-  } else {
-    greeting.value = "Evening";
-  }
-};
-
-const handleImageError = () => {
-  profileImage.value = null;
-};
-
-onMounted(() => {
-  updateTime();
-  setInterval(updateTime, 1000);
-
-  if (user.value?.image) {
-    profileImage.value = user.value.image;
-  }
-});
-
-watch(
-  () => user.value?.image,
-  (newImage) => {
-    if (newImage) profileImage.value = newImage;
-  },
-);
+const {
+  user,
+  profileImage,
+  currentTime,
+  currentDate,
+  greeting,
+  userInitials,
+  handleImageError,
+} = useDashboardHeader()
 </script>

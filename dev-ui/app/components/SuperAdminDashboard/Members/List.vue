@@ -171,7 +171,12 @@
 
     <!-- 💎 Premium Details Modal -->
     <Teleport to="body">
-       <Transition name="overlay">
+       <Transition
+          enter-active-class="transition-opacity duration-[400ms] ease-out"
+          leave-active-class="transition-opacity duration-[400ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+       >
           <div v-if="showModal" class="fixed inset-0 z-[200] bg-[#1a0533]/20 backdrop-blur-3xl flex items-center justify-center p-6" @click="closeModal">
              <div class="relative bg-white border-2 border-violet-100 rounded-[3.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500" @click.stop>
                 <!-- Modal Header -->
@@ -187,7 +192,7 @@
                 </div>
 
                 <!-- Modal Content -->
-                <div class="p-10 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div class="custom-scrollbar p-10 max-h-[60vh] overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 [&::-webkit-scrollbar-track]:bg-transparent">
                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <!-- Basic Info -->
                       <div class="space-y-6">
@@ -255,7 +260,12 @@
 
     <!-- ✨ Add Member Modal -->
     <Teleport to="body">
-      <Transition name="overlay">
+      <Transition
+        enter-active-class="transition-opacity duration-[400ms] ease-out"
+        leave-active-class="transition-opacity duration-[400ms] ease-out"
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+      >
         <div
           v-if="showAddModal"
           class="fixed inset-0 z-[220] flex items-center justify-center bg-[#1a0533]/40 p-4 backdrop-blur-sm sm:p-6"
@@ -282,7 +292,7 @@
               </div>
             </div>
 
-            <form class="max-h-[72vh] overflow-y-auto p-5 custom-scrollbar sm:p-8" @submit.prevent="submitAddMember">
+            <form class="custom-scrollbar max-h-[72vh] overflow-y-auto p-5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 [&::-webkit-scrollbar-track]:bg-transparent sm:p-8" @submit.prevent="submitAddMember">
               <div class="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
                 <div class="md:col-span-2">
                   <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Full Name</label>
@@ -413,7 +423,12 @@
     </div>
 
     <!-- Status Toast System -->
-    <Transition name="toast">
+    <Transition
+      enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]"
+      leave-active-class="transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]"
+      enter-from-class="translate-x-[50px] opacity-0"
+      leave-to-class="translate-y-5 opacity-0"
+    >
       <div v-if="isSaving" class="fixed bottom-10 right-10 flex items-center gap-4 bg-[#1a0533] text-white px-8 py-5 rounded-[2rem] shadow-2xl z-[300]">
          <div class="relative w-5 h-5 flex items-center justify-center">
             <div class="absolute inset-0 border-2 border-white/20 rounded-full" />
@@ -431,274 +446,37 @@
 <script setup>
 const props = defineProps({
   isAdmin: { type: Boolean, default: false }
-});
+})
 
-const config = useRuntimeConfig();
-
-const API_BASE = computed(() => String(config.public.apiBase || '').replace(/\/$/, ''));
-
-const members = ref([]);
-const selectedMember = ref(null);
-const showModal = ref(false);
-const showAddModal = ref(false);
-const savingStates = ref({});
-const uploadingStates = ref({});
-const fileInputs = ref({});
-const addFileInput = ref(null);
-const searchQuery = ref('');
-const roleFilter = ref('members');
-const addLoading = ref(false);
-const addSuccess = ref(false);
-const addError = ref('');
-const addForm = ref({
-  firstname: '',
-  middlename: '',
-  lastname: '',
-  birthdate: '',
-  role: 'Participant',
-  idNumber: '',
-  mobile: '',
-  email: '',
-  website: '',
-  gcashPoints: 0,
-  bonusPoints: 0,
-  voucherPoints: 0,
-  honorariumPoints: 0,
-  numberOfProjects: 0
-});
-
-const isSaving = computed(() => Object.keys(savingStates.value).some(k => savingStates.value[k] === 'saving'));
-
-const filteredMembers = computed(() => {
-  const q = searchQuery.value.trim().toLowerCase();
-  return members.value.filter((m) => {
-    const matchesRole = roleFilter.value === 'participants'
-      ? isParticipantRole(m.role)
-      : !isParticipantRole(m.role);
-    if (!matchesRole) return false;
-    if (!q) return true;
-    return (
-      m.firstname?.toLowerCase().includes(q) ||
-      m.lastname?.toLowerCase().includes(q) ||
-      m.email?.toLowerCase().includes(q) ||
-      m.idNumber?.toLowerCase().includes(q)
-    );
-  });
-});
-
-onMounted(async () => {
-  await fetchMembers();
-});
-
-function normalizeMemberList (raw) {
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === 'object' && Array.isArray(raw.results)) return raw.results;
-  return [];
-}
-
-const fetchMembers = async () => {
-  const base = API_BASE.value;
-  if (!base) return;
-  try {
-    const raw = await $fetch(`${base}/member/list/`);
-    members.value = normalizeMemberList(raw);
-  } catch (error) {
-    console.error('Error fetching members:', error);
-  }
-};
-
-const openDetails = (member) => {
-  selectedMember.value = { ...member };
-  showModal.value = true;
-};
-
-const closeModal = () => {
-  showModal.value = false;
-};
-
-function isParticipantRole (role) {
-  return String(role || '').toLowerCase().includes('parti');
-}
-
-function toggleParticipantView () {
-  roleFilter.value = roleFilter.value === 'participants' ? 'members' : 'participants';
-}
-
-function resetAddForm () {
-  addForm.value = {
-    firstname: '',
-    middlename: '',
-    lastname: '',
-    birthdate: '',
-    role: 'Participant',
-    idNumber: '',
-    mobile: '',
-    email: '',
-    website: '',
-    gcashPoints: 0,
-    bonusPoints: 0,
-    voucherPoints: 0,
-    honorariumPoints: 0,
-    numberOfProjects: 0
-  };
-  if (addFileInput.value) addFileInput.value.value = '';
-}
-
-function openAddModal () {
-  addError.value = '';
-  addSuccess.value = false;
-  showAddModal.value = true;
-}
-
-function closeAddModal () {
-  showAddModal.value = false;
-  addLoading.value = false;
-}
-
-function formatMemberCreateError (err) {
-  const d = err?.data ?? err?.response?._data;
-  if (!d) return err?.message || 'Request failed';
-  if (typeof d === 'string') return d;
-  if (d.detail) return typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail);
-  if (d.message) return d.message;
-  const fieldErrors = d.non_field_errors || d;
-  if (typeof fieldErrors === 'object') {
-    const parts = [];
-    for (const [k, v] of Object.entries(fieldErrors)) {
-      if (Array.isArray(v)) parts.push(`${k}: ${v.join(', ')}`);
-      else if (v) parts.push(`${k}: ${v}`);
-    }
-    if (parts.length) return parts.join('\n');
-  }
-  return JSON.stringify(d);
-}
-
-async function submitAddMember () {
-  addLoading.value = true;
-  addSuccess.value = false;
-  addError.value = '';
-  const base = API_BASE.value;
-  if (!base) {
-    addError.value = 'NUXT_PUBLIC_API_BASE is not set. Add your API URL to .env.';
-    addLoading.value = false;
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-    for (const [key, value] of Object.entries(addForm.value)) {
-      if (value === '' || value === null || value === undefined) continue;
-      formData.append(key, typeof value === 'number' || typeof value === 'boolean' ? String(value) : value);
-    }
-    if (addFileInput.value?.files?.length) {
-      formData.append('profilePicture', addFileInput.value.files[0]);
-    }
-
-    await $fetch(`${base}/member/create/`, {
-      method: 'POST',
-      body: formData,
-      headers: { Accept: 'application/json' }
-    });
-
-    await fetchMembers();
-    addSuccess.value = true;
-    resetAddForm();
-    setTimeout(() => {
-      closeAddModal();
-      addSuccess.value = false;
-    }, 900);
-  } catch (err) {
-    addError.value = formatMemberCreateError(err);
-  } finally {
-    addLoading.value = false;
-  }
-}
-
-async function promoteParticipant (member) {
-  if (!member?.id || !isParticipantRole(member.role)) return;
-  await updateField(member.id, 'role', 'Member');
-  member.role = 'Member';
-  if (selectedMember.value?.id === member.id) {
-    selectedMember.value.role = 'Member';
-  }
-}
-
-const syncField = async (fieldName) => {
-  if (!selectedMember.value) return;
-  await updateField(selectedMember.value.id, fieldName, selectedMember.value[fieldName]);
-};
-
-const cleanImageUrl = (url) => {
-  if (!url) return 'https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  const base = API_BASE.value;
-  if (!base) return 'https://ui-avatars.com/api/?background=f1f5f9&color=1a0533&name=User';
-  const origin = base.replace(/\/api\/techsavvy\/?$/i, '').replace(/\/$/, '');
-  if (url.startsWith('/')) return `${origin}${url}`;
-  return `${origin}/media/${url}`;
-};
-
-const getRoleColor = (role) => {
-  const r = (role || '').toLowerCase();
-  if (r.includes('admin')) return 'bg-violet-50 text-violet-600 border-violet-100';
-  if (r.includes('mentor') || r.includes('lead')) return 'bg-emerald-50 text-emerald-600 border-emerald-100';
-  if (r.includes('parti')) return 'bg-sky-50 text-sky-600 border-sky-100';
-  if (r.includes('spons')) return 'bg-rose-50 text-rose-600 border-rose-100';
-  return 'bg-gray-50 text-gray-500 border-gray-100';
-};
-
-const triggerFileUpload = (memberId) => {
-  const input = fileInputs.value[memberId];
-  if (input) input.click();
-};
-
-const handleProfilePictureUpload = async (memberId, event) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-  try {
-    uploadingStates.value[memberId] = true;
-    const formData = new FormData();
-    formData.append("profilePicture", file);
-    await $fetch(`${API_BASE.value}/member/${memberId}/update/`, { method: 'PATCH', body: formData });
-    await fetchMembers();
-  } catch (error) {
-    console.error("Error uploading profile picture:", error);
-  } finally {
-    uploadingStates.value[memberId] = false;
-  }
-};
-
-const updateField = async (memberId, fieldName, value) => {
-  const stateKey = `${memberId}-${fieldName}`;
-  try {
-    savingStates.value[stateKey] = 'saving';
-    const formData = new FormData();
-    formData.append(fieldName, value === null || value === undefined ? '' : String(value));
-    await $fetch(`${API_BASE.value}/member/${memberId}/update/`, { method: 'PATCH', body: formData });
-    savingStates.value[stateKey] = 'saved';
-    
-    // Update local members list
-    const mIdx = members.value.findIndex(m => m.id === memberId);
-    if (mIdx !== -1) members.value[mIdx][fieldName] = value;
-
-    setTimeout(() => { delete savingStates.value[stateKey]; }, 2000);
-  } catch (error) {
-    console.error(`Error updating ${fieldName}:`, error);
-    savingStates.value[stateKey] = 'error';
-  }
-};
+const {
+  cleanImageUrl,
+  members,
+  selectedMember,
+  showModal,
+  showAddModal,
+  savingStates,
+  uploadingStates,
+  fileInputs,
+  addFileInput,
+  searchQuery,
+  roleFilter,
+  addLoading,
+  addSuccess,
+  addError,
+  addForm,
+  isSaving,
+  filteredMembers,
+  openDetails,
+  closeModal,
+  isParticipantRole,
+  toggleParticipantView,
+  openAddModal,
+  closeAddModal,
+  submitAddMember,
+  promoteParticipant,
+  syncField,
+  getRoleColor,
+  triggerFileUpload,
+  handleProfilePictureUpload,
+} = useMemberDirectory(toRef(props, 'isAdmin'))
 </script>
-
-<style scoped>
-.font-roboto { font-family: 'Roboto', sans-serif; }
-.custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #f1f5f9; border-radius: 10px; }
-
-.overlay-enter-active, .overlay-leave-active { transition: opacity 0.4s ease; }
-.overlay-enter-from, .overlay-leave-to { opacity: 0; }
-
-.toast-enter-active, .toast-leave-active { transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
-.toast-enter-from { opacity: 0; transform: translateX(50px); }
-.toast-leave-to { opacity: 0; transform: translateY(20px); }
-</style>

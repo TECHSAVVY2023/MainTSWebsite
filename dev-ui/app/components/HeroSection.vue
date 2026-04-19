@@ -127,8 +127,13 @@
               </div>
 
               <!-- Perspective Stack -->
-              <div class="relative h-full w-full flex items-center justify-center perspective-[1000px]">
-                <TransitionGroup name="slide-stack">
+              <div class="relative flex h-full w-full items-center justify-center perspective-[1000px]">
+                <TransitionGroup
+                  enter-active-class="transition-all duration-[800ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                  leave-active-class="transition-all duration-[800ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                  enter-from-class="translate-x-[30px] scale-90 rotate-y-[-15deg] opacity-0"
+                  leave-to-class="-translate-x-[30px] scale-90 rotate-y-[15deg] opacity-0"
+                >
                   <div
                     v-for="(img, idx) in cardHighlights"
                     v-show="idx === currentSlide"
@@ -169,9 +174,8 @@
               <div class="absolute bottom-2 left-4 right-4 z-40 h-1 bg-white/20 backdrop-blur-sm rounded-full overflow-hidden">
                 <div
                   ref="progressBar"
-                  class="h-full bg-white transition-all duration-[4000ms] shadow-[0_0_8px_white]"
+                  class="h-full bg-white shadow-[0_0_8px_white] animate-progress-shrink"
                   :key="currentSlide"
-                  :style="{ width: '100%' }"
                 />
               </div>
             </div>
@@ -319,31 +323,3 @@ const starStyle = () => ({
   opacity: (Math.random() * 0.15 + 0.05).toString(),
 })
 </script>
-
-<style scoped>
-/* 3D Stack Transition */
-.slide-stack-enter-active,
-.slide-stack-leave-active {
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.slide-stack-enter-from {
-  opacity: 0;
-  transform: translateX(30px) scale(0.9) rotateY(-15deg);
-}
-
-.slide-stack-leave-to {
-  opacity: 0;
-  transform: translateX(-30px) scale(0.9) rotateY(15deg);
-}
-
-/* Progress bar reset animation */
-@keyframes progressShrink {
-  from { width: 100%; }
-  to { width: 0%; }
-}
-
-.progressBar {
-  animation: progressShrink 4s linear infinite;
-}
-</style>

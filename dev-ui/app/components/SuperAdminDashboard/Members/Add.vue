@@ -2,17 +2,17 @@
   <div
     class="relative min-h-screen overflow-hidden flex items-center justify-center lg:p-6 p-2 bg-gradient-to-br from-[#090014] via-[#120024] to-[#1a0033]"
   >
-    <!-- ✨ Sparkles (SSR-safe) -->
+    <!-- âœ¨ Sparkles (SSR-safe) -->
     <div class="absolute inset-0 pointer-events-none">
       <span
         v-for="(sparkle, i) in sparkles"
         :key="i"
-        class="absolute w-1 h-1 rounded-full bg-violet-200/80 animate-twinkle"
+        class="absolute h-1 w-1 rounded-full bg-violet-200/80 animate-twinkle-soft"
         :style="sparkle"
       ></span>
     </div>
 
-    <!-- 🪟 Card -->
+    <!-- ðŸªŸ Card -->
     <div
       class="relative w-full max-w-6xl rounded-3xl lg:p-8 p-3 text-white bg-[#14002b]/80 backdrop-blur-xl border border-violet-500/30"
     >
@@ -158,10 +158,10 @@
 
       <!-- SUCCESS -->
       <p v-if="success" class="mt-4 text-green-400 font-medium text-center">
-        ✅ Member added successfully!
+        âœ… Member added successfully!
       </p>
-        <p v-if="success" class=" text-green-400 font-medium text-center text-xs">
-      Please Check your email. Thank you!
+      <p v-if="success" class=" text-green-400 font-medium text-center text-xs">
+        Please Check your email. Thank you!
       </p>
 
       <!-- ERROR -->
@@ -169,138 +169,22 @@
         v-if="error"
         class="mt-4 text-red-400 text-xs whitespace-pre-wrap text-center"
       >
-        ❌ {{ error }}
+        âŒ {{ error }}
       </pre>
     </div>
   </div>
 </template>
 
 <script setup>
-// Get API base URL from runtime config
-const config = useRuntimeConfig();
-const API_BASE = computed(() => String(config.public.apiBase || '').replace(/\/$/, ''));
-
-const techSavvyLogo =
-  "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/TechSavvyLogo.png";
-const workflowLogo =
-  "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/WORKFLOWsinglewhite.png";
-
-const loading = ref(false);
-const success = ref(false);
-const error = ref("");
-const fileInput = ref(null);
-
-/* ✨ Sparkles (client-only generation) */
-const sparkles = ref([]);
-
-onMounted(() => {
-  sparkles.value = Array.from({ length: 35 }, () => ({
-    left: Math.random() * 100 + "%",
-    top: Math.random() * 100 + "%",
-    animationDelay: Math.random() * 6 + "s",
-  }));
-});
-
-const form = ref({
-  firstname: "",
-  middlename: "",
-  lastname: "",
-  birthdate: "",
-  role: "Participant",
-  idNumber: "",
-  mobile: "",
-  email: "",
-  website: "",
-  gcashPoints: 0,
-  bonusPoints: 0,
-  voucherPoints: 0,
-  honorariumPoints: 0,
-  numberOfProjects: 0,
-});
-
-function formatMemberCreateError (err) {
-  const d = err?.data ?? err?.response?._data;
-  if (!d) return err?.message || "Request failed";
-  if (typeof d === "string") return d;
-  if (d.detail) return typeof d.detail === "string" ? d.detail : JSON.stringify(d.detail);
-  if (d.message) return d.message;
-  const fieldErrors = d.non_field_errors || d;
-  if (typeof fieldErrors === "object") {
-    const parts = [];
-    for (const [k, v] of Object.entries(fieldErrors)) {
-      if (Array.isArray(v)) parts.push(`${k}: ${v.join(", ")}`);
-      else if (v) parts.push(`${k}: ${v}`);
-    }
-    if (parts.length) return parts.join("\n");
-  }
-  return JSON.stringify(d);
-}
-
-const submitForm = async () => {
-  loading.value = true;
-  success.value = false;
-  error.value = "";
-
-  const base = API_BASE.value;
-  if (!base) {
-    error.value = "NUXT_PUBLIC_API_BASE is not set. Add your API URL to .env.";
-    loading.value = false;
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-
-    Object.entries(form.value).forEach(([key, value]) => {
-      if (value === "" || value === null || value === undefined) return;
-      formData.append(key, typeof value === "number" || typeof value === "boolean" ? String(value) : value);
-    });
-
-    if (fileInput.value?.files?.length) {
-      formData.append("profilePicture", fileInput.value.files[0]);
-    }
-
-    await $fetch(`${base}/member/create/`, {
-      method: "POST",
-      body: formData,
-      headers: { Accept: "application/json" },
-    });
-
-    success.value = true;
-
-    Object.keys(form.value).forEach((key) => {
-      if (key.includes("Points") || key === "numberOfProjects") {
-        form.value[key] = 0;
-      } else if (key === "role") {
-        form.value[key] = "Participant";
-      } else {
-        form.value[key] = "";
-      }
-    });
-
-    if (fileInput.value) fileInput.value.value = null;
-  } catch (err) {
-    error.value = formatMemberCreateError(err);
-  } finally {
-    loading.value = false;
-  }
-};
+const {
+  techSavvyLogo,
+  workflowLogo,
+  loading,
+  success,
+  error,
+  fileInput,
+  sparkles,
+  form,
+  submitForm,
+} = useMemberAdd()
 </script>
-
-<style scoped>
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.25;
-    transform: scale(0.6);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.3);
-  }
-}
-
-.animate-twinkle {
-  animation: twinkle 4s infinite ease-in-out;
-}
-</style>

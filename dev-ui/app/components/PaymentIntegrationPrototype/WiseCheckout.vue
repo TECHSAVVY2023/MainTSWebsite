@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-md mx-auto p-8 bg-white rounded-3xl shadow-2xl border border-blue-100 space-y-6 relative overflow-hidden group hover:shadow-blue-100 transition-all duration-300">
     <!-- Brand Accent -->
-    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#00b9ff] via-[#25e297] to-[#00b9ff] bg-[length:200%_auto] animate-gradient"></div>
+    <div class="absolute top-0 left-0 h-1.5 w-full animate-gradient-pan bg-[length:200%_auto] bg-gradient-to-r from-[#00b9ff] via-[#25e297] to-[#00b9ff]"></div>
 
     <!-- Header -->
     <div class="text-center space-y-3">
@@ -120,14 +120,3 @@ const handlePayment = async () => {
   }
 }
 </script>
-
-<style scoped>
-@keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-.animate-gradient {
-  animation: gradient 3s ease infinite;
-}
-</style>

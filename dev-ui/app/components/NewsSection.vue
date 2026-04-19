@@ -38,14 +38,14 @@
               v-for="(item, i) in safeItems"
               :key="item.id || getNewsSlug(item) || i"
               :to="`/news/${getNewsSlug(item)}`"
-              class="news-landing-card flex w-full min-h-0 flex-col self-start overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 no-underline text-inherit animate-fade-in"
+              class="group/news flex w-full min-h-0 flex-col self-start overflow-hidden rounded-xl border border-[rgba(177,138,243,0.42)] bg-white text-gray-900 no-underline text-inherit shadow-[0_0_0_1px_rgba(126,87,194,0.16),0_0_22px_rgba(97,38,177,0.11),0_0_44px_rgba(177,138,243,0.06),0_6px_16px_rgba(46,19,104,0.05)] transition-[border-color,box-shadow] duration-300 hover:border-[rgba(177,138,243,0.55)] hover:shadow-[0_0_0_1px_rgba(126,87,194,0.24),0_0_28px_rgba(97,38,177,0.14),0_0_52px_rgba(177,138,243,0.09),0_8px_20px_rgba(46,19,104,0.07)] animate-fade-in"
               :style="{ animationDelay: `${i * 0.1}s` }"
             >
-              <div class="news-landing-card__media relative aspect-video w-full shrink-0 overflow-hidden bg-gray-100">
+              <div class="relative aspect-video w-full shrink-0 overflow-hidden bg-gray-100">
                 <img
                   :src="item.imageUrl || defaultImage"
                   :alt="item.title"
-                  class="news-landing-card__img h-full w-full object-cover"
+                  class="h-full w-full object-cover transition-transform duration-300 group-hover/news:scale-105"
                   loading="lazy"
                   @error="onImageError($event)"
                 />
@@ -56,16 +56,16 @@
                 >
                   {{ item.title }}
                 </h3>
-                <p class="news-landing-card__meta order-2 line-clamp-1 min-h-[1rem] text-xs uppercase tracking-widest text-gray-400">
+                <p class="order-2 line-clamp-1 min-h-[1rem] text-xs uppercase tracking-widest text-gray-400 transition-opacity duration-300 group-hover/news:opacity-70">
                   {{ formatDate(item.date) }} · TECH SAVVY
                 </p>
-                <div class="news-landing-card__excerpt order-3 relative overflow-hidden">
+                <div class="order-3 relative overflow-hidden max-h-0 opacity-0 transition-all duration-300 group-hover/news:mb-1 group-hover/news:max-h-[5.5rem] group-hover/news:opacity-100">
                   <p class="m-0 whitespace-pre-line text-[0.8125rem] leading-relaxed text-gray-600 line-clamp-3">
                     {{ (item as { description?: string }).description || item.summary }}
                   </p>
                 </div>
                 <span
-                  class="order-4 mt-auto inline-block text-xs font-bold uppercase tracking-widest text-gray-900 transition-colors news-landing-card__cta"
+                  class="order-4 mt-auto inline-block text-xs font-bold uppercase tracking-widest text-gray-900 transition-colors duration-200 group-hover/news:text-[#c9a227]"
                 >
                   READ MORE
                 </span>
@@ -109,69 +109,3 @@ const { formatDate } = useFormatters()
 const { getNewsSlug } = useNewsSlug()
 const onImageError = useImageFallback(props.defaultImage)
 </script>
-
-<style scoped>
-/**
- * Card hover is driven only by `.news-landing-card:hover` (this element = one card).
- * No Tailwind `group` / `group-hover` — those can match a distant ancestor `.group:hover`.
- */
-.news-landing-card {
-  border-color: rgba(177, 138, 243, 0.42);
-  box-shadow:
-    0 0 0 1px rgba(126, 87, 194, 0.16),
-    0 0 22px rgba(97, 38, 177, 0.11),
-    0 0 44px rgba(177, 138, 243, 0.06),
-    0 6px 16px rgba(46, 19, 104, 0.05);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.news-landing-card:hover {
-  border-color: rgba(177, 138, 243, 0.55);
-  box-shadow:
-    0 0 0 1px rgba(126, 87, 194, 0.24),
-    0 0 28px rgba(97, 38, 177, 0.14),
-    0 0 52px rgba(177, 138, 243, 0.09),
-    0 8px 20px rgba(46, 19, 104, 0.07);
-}
-
-.news-landing-card__img {
-  transform: scale(1);
-  transition: transform 0.3s ease;
-}
-
-.news-landing-card:hover .news-landing-card__img {
-  transform: scale(1.05);
-}
-
-.news-landing-card__meta {
-  transition: opacity 0.3s ease;
-}
-
-.news-landing-card:hover .news-landing-card__meta {
-  opacity: 0.7;
-}
-
-.news-landing-card__excerpt {
-  max-height: 0;
-  opacity: 0;
-  margin-bottom: 0;
-  transition:
-    max-height 0.3s ease,
-    opacity 0.3s ease,
-    margin-bottom 0.3s ease;
-}
-
-.news-landing-card:hover .news-landing-card__excerpt {
-  max-height: 5.5rem;
-  opacity: 1;
-  margin-bottom: 0.25rem;
-}
-
-.news-landing-card__cta {
-  transition: color 0.2s ease;
-}
-
-.news-landing-card:hover .news-landing-card__cta {
-  color: #c9a227;
-}
-</style>

@@ -16,7 +16,7 @@
       <span
         v-for="i in 60"
         :key="i"
-        class="sparkle"
+        class="absolute rounded-full bg-[radial-gradient(circle,#a78bfa,transparent)] opacity-70 animate-twinkle-soft"
         :style="randomStyle()"
       ></span>
     </div>
@@ -126,24 +126,3 @@ const randomStyle = () => {
   };
 };
 </script>
-
-<style scoped>
-.sparkle {
-  position: absolute;
-  background: radial-gradient(circle, #a78bfa, transparent);
-  border-radius: 50%;
-  opacity: 0.7;
-  animation: twinkle 4s infinite ease-in-out;
-}
-
-@keyframes twinkle {
-  0%, 100% {
-    opacity: 0.2;
-    transform: scale(0.7);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.4);
-  }
-}
-</style>

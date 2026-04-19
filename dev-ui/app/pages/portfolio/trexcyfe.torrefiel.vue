@@ -337,33 +337,3 @@ const footer = ref({
   event: "5th Anniversary Bootcamp Celebration",
 });
 </script>
-
-<style scoped>
-@keyframes sparkle {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-}
-
-@keyframes float {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-120vh);
-  }
-}
-
-.animate-sparkle {
-  animation: sparkle 1s ease-out forwards;
-}
-
-.animate-float {
-  animation: float infinite linear;
-}
-</style>

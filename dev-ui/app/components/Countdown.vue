@@ -1,9 +1,9 @@
 <template>
-  <div id="countdown" class="text-white text-center text-2xl font-bold">
-    <div id="days">{{ days }} Days</div>
-    <div id="hours">{{ hours }} Hours</div>
-    <div id="minutes">{{ minutes }} Minutes</div>
-    <div id="seconds">{{ seconds }} Seconds</div>
+  <div id="countdown" class="flex flex-wrap items-center justify-center gap-2 text-center text-2xl font-bold text-white sm:gap-3">
+    <div class="rounded bg-black/50 px-3 py-2 after:ml-2 after:content-[':']">{{ days }} Days</div>
+    <div class="rounded bg-black/50 px-3 py-2 after:ml-2 after:content-[':']">{{ hours }} Hours</div>
+    <div class="rounded bg-black/50 px-3 py-2 after:ml-2 after:content-[':']">{{ minutes }} Minutes</div>
+    <div class="rounded bg-black/50 px-3 py-2">{{ seconds }} Seconds</div>
   </div>
 </template>
 
@@ -52,18 +52,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-#countdown div {
-  display: inline-block;
-  margin: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-#countdown div:not(:last-child):after {
-  content: ":";
-  margin-left: 10px;
-}
-</style>

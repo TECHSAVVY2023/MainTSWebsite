@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /** Local Django default when `.env` has no `NUXT_PUBLIC_API_BASE` (avoids empty CMS + demo fallbacks). */
 const defaultPublicApiBase =
   process.env.NUXT_PUBLIC_API_BASE?.trim() ||
-  (process.env.NODE_ENV !== "production" ? "http://127.0.0.1:8000" : "");
+  (process.env.NODE_ENV !== "production" ? "http://http://127.0.0.1:8000/api/techsavvy/" : "https://apidev.techsavvies.space/api/techsavvy/");
 
 export default defineNuxtConfig({
   modules: ["nuxt-gtag"],

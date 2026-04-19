@@ -140,7 +140,12 @@
         </div>
       </section>
 
-      <Transition name="form-slide">
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        leave-active-class="transition-all duration-200 ease-out"
+        enter-from-class="-translate-y-3 opacity-0"
+        leave-to-class="-translate-y-3 opacity-0"
+      >
         <section v-if="showContentForm" ref="formSectionRef" class="mt-5">
           <div class="rounded-2xl bg-white border border-neutral-border overflow-hidden">
             <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-neutral-border">
@@ -163,7 +168,12 @@
     </main>
 
     <Teleport to="body">
-      <Transition name="modal">
+      <Transition
+        enter-active-class="transition-opacity duration-200 ease-out"
+        leave-active-class="transition-opacity duration-200 ease-out"
+        enter-from-class="opacity-0"
+        leave-to-class="opacity-0"
+      >
         <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeleteModal = false" />
           <div class="relative bg-white border border-red-500/20 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
@@ -315,26 +325,3 @@ onMounted(() => {
   fetchItems()
 })
 </script>
-
-<style scoped>
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.2s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.form-slide-enter-active {
-  transition: all 0.3s ease;
-}
-.form-slide-leave-active {
-  transition: all 0.2s ease;
-}
-.form-slide-enter-from,
-.form-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-12px);
-}
-</style>

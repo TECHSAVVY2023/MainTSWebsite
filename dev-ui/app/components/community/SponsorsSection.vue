@@ -71,7 +71,8 @@
 </template>
 
 <script setup lang="ts">
-import SponsorFlipCard, { type SponsorFlipItem } from '~/components/community/SponsorFlipCard.vue'
+import SponsorFlipCard from '~/components/community/SponsorFlipCard.vue'
+import type { SponsorFlipItem } from '~/composables/useSponsorFlipCard'
 import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
 
 withDefaults(

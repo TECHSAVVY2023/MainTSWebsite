@@ -4,7 +4,7 @@
       <article
         v-for="(speaker, idx) in speakers"
         :key="`${speaker.name || 'speaker'}-${idx}`"
-        class="speaker-profile-card group relative flex min-h-[18rem] w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_rgba(46,19,104,0.06)] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 hover:z-[1] hover:-translate-y-1 hover:scale-[1.02] hover:border-violet-200/90 hover:shadow-[0_22px_44px_-14px_rgba(46,19,104,0.2)] sm:min-h-[22rem]"
+        class="group relative flex min-h-[18rem] w-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_rgba(46,19,104,0.06)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 hover:z-[1] hover:-translate-y-1 hover:scale-[1.02] hover:border-violet-200/90 hover:shadow-[0_22px_44px_-14px_rgba(46,19,104,0.2)] sm:min-h-[22rem]"
       >
         <div
           class="relative h-16 shrink-0 bg-gradient-to-br from-violet-100/90 via-indigo-50/95 to-white sm:h-24"
@@ -88,10 +88,3 @@ function getSpeakerImage (speaker: SpeakerItem): string {
   return `https://ui-avatars.com/api/?name=${encoded}&size=256&background=2E1368&color=FFFFFF&bold=true&format=png`
 }
 </script>
-
-<style scoped>
-.speaker-profile-card {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-</style>

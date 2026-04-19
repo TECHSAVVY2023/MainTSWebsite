@@ -1,6 +1,6 @@
 <template>
   <div 
-    class="relative flex min-h-0 min-h-[100dvh] overflow-hidden bg-white font-roboto text-[#1a0533] supports-[height:100dvh]:min-h-[100dvh]"
+    class="relative flex min-h-0 min-h-[100dvh] overflow-hidden bg-white font-[Roboto,sans-serif] text-[#1a0533] supports-[height:100dvh]:min-h-[100dvh]"
   >
     <template v-if="!showAllContent">
       <!-- ── Sidebar ────────────────────────────────────────────── -->
@@ -22,7 +22,7 @@
         </button>
 
         <!-- Navigation Menu -->
-        <nav class="flex-1 space-y-1.5 overflow-y-auto pr-1 custom-scrollbar">
+        <nav class="custom-scrollbar flex-1 space-y-1.5 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent">
           <p class="text-[11px] font-black text-[#1a0533]/50 uppercase tracking-[0.25em] px-4 mb-5">Community Center</p>
           <template v-for="item in navItems" :key="item.label">
             <button
@@ -121,7 +121,7 @@
         </header>
 
         <!-- Main Content (Scrollable) -->
-        <main class="custom-scrollbar relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 xl:p-12">
+        <main class="custom-scrollbar relative min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent sm:p-6 lg:p-8 xl:p-12">
           
           <template v-if="activeView === 'Hub'">
             <!-- Hub / Overview -->
@@ -820,10 +820,20 @@
 
       <!-- ── Mobile Drawer ────────────────────────────────────── -->
       <Teleport to="body">
-        <Transition name="overlay">
+        <Transition
+          enter-active-class="transition-opacity duration-[400ms] ease-out"
+          leave-active-class="transition-opacity duration-[400ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+        >
           <div v-if="drawerOpen" class="fixed inset-0 z-[150] bg-[#1a0533]/20 lg:hidden" @click="drawerOpen = false" />
         </Transition>
-        <Transition name="drawer">
+        <Transition
+          enter-active-class="transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]"
+          leave-active-class="transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)]"
+          enter-from-class="-translate-x-full"
+          leave-to-class="-translate-x-full"
+        >
           <aside
             v-if="drawerOpen"
             class="fixed left-0 top-0 z-[160] flex h-[100dvh] max-h-[100dvh] w-[min(20rem,calc(100vw-0.75rem))] flex-col border-r border-violet-100 bg-white shadow-2xl sm:left-3 sm:top-3 sm:bottom-3 sm:h-auto sm:max-h-none sm:w-80 sm:rounded-[2rem] sm:border lg:hidden lg:rounded-[3rem]"
@@ -839,7 +849,7 @@
                 <button @click="drawerOpen = false" class="text-violet-600 hover:text-violet-900 group"><i class="fas fa-times text-lg" /></button>
               </div>
 
-              <nav class="custom-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 sm:space-y-3">
+              <nav class="custom-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent sm:space-y-3">
                 <template v-for="item in navItems" :key="item.label">
                   <button type="button" @click="item.action ? item.action() : null" class="flex w-full items-center justify-between gap-2 rounded-xl px-4 py-3 transition-all sm:rounded-2xl sm:px-6 sm:py-4" :class="item.active ? 'bg-violet-600 text-white' : 'text-violet-800'">
                     <div class="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
@@ -867,10 +877,15 @@
 
       <!-- Modals (Flat) -->
       <Teleport to="body">
-        <Transition name="modal">
+        <Transition
+          enter-active-class="transition-opacity duration-[400ms] ease-out"
+          leave-active-class="transition-opacity duration-[400ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+        >
           <div v-if="showDeleteModal" class="fixed inset-0 z-[200] flex w-full max-w-[100vw] items-end justify-center overflow-x-hidden p-0 sm:items-center sm:p-4 md:p-6">
             <div class="absolute inset-0 bg-[#1a0533]/20 backdrop-blur-3xl" @click="showDeleteModal = false" />
-            <div class="modal-dialog relative z-10 mx-auto w-full max-w-sm rounded-t-[2rem] border-2 border-violet-100 bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center sm:rounded-[2.5rem] sm:p-10 sm:pb-10 md:rounded-[3.5rem] md:p-12 md:pb-12">
+            <div class="relative z-10 mx-auto w-full max-w-sm rounded-t-[2rem] border-2 border-violet-100 bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center transition-transform duration-[400ms] ease-[cubic-bezier(0.19,1,0.22,1)] sm:rounded-[2.5rem] sm:p-10 sm:pb-10 md:rounded-[3.5rem] md:p-12 md:pb-12" :class="showDeleteModal ? 'translate-y-0 scale-100' : 'translate-y-3 scale-[0.98]'">
               <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 sm:mb-8 sm:h-24 sm:w-24 sm:rounded-3xl">
                 <i class="fas fa-trash-alt text-2xl text-red-400 sm:text-3xl" />
               </div>
@@ -886,10 +901,15 @@
       </Teleport>
 
       <Teleport to="body">
-        <Transition name="modal">
+        <Transition
+          enter-active-class="transition-opacity duration-[400ms] ease-out"
+          leave-active-class="transition-opacity duration-[400ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+        >
           <div v-if="showLogoutModal" class="fixed inset-0 z-[200] flex w-full max-w-[100vw] items-end justify-center overflow-x-hidden p-0 sm:items-center sm:p-4 md:p-6">
             <div class="absolute inset-0 bg-[#1a0533]/20 backdrop-blur-3xl" @click="showLogoutModal = false" />
-            <div class="modal-dialog relative z-10 mx-auto w-full max-w-sm rounded-t-[2rem] border-2 border-violet-100 bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center sm:rounded-[2.5rem] sm:p-10 sm:pb-10 md:rounded-[3.5rem] md:p-12 md:pb-12">
+            <div class="relative z-10 mx-auto w-full max-w-sm rounded-t-[2rem] border-2 border-violet-100 bg-white p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center transition-transform duration-[400ms] ease-[cubic-bezier(0.19,1,0.22,1)] sm:rounded-[2.5rem] sm:p-10 sm:pb-10 md:rounded-[3.5rem] md:p-12 md:pb-12" :class="showLogoutModal ? 'translate-y-0 scale-100' : 'translate-y-3 scale-[0.98]'">
               <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50 sm:mb-8 sm:h-24 sm:w-24 sm:rounded-3xl">
                 <i class="fas fa-sign-out-alt text-2xl text-violet-700 sm:text-3xl" />
               </div>
@@ -906,7 +926,12 @@
 
       <!-- Review upload: read-only detail modal (row / card tap) -->
       <Teleport to="body">
-        <Transition name="review-modal">
+        <Transition
+          enter-active-class="transition-opacity duration-[220ms] ease-out"
+          leave-active-class="transition-opacity duration-[220ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+        >
           <div
             v-if="showReviewDetailModal && reviewDetailItem"
             class="fixed inset-0 z-[188] flex items-end justify-center p-0 sm:items-center sm:p-4 md:p-6"
@@ -918,7 +943,8 @@
               @click="closeReviewDetail"
             />
             <div
-              class="review-modal-dialog relative flex max-h-[min(92dvh,820px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] border-2 border-violet-100 bg-white shadow-[0_25px_80px_-20px_rgba(26,5,51,0.38)] sm:max-h-[min(88vh,820px)] sm:max-w-2xl sm:rounded-[2rem]"
+              class="relative flex max-h-[min(92dvh,820px)] w-full max-w-lg flex-col overflow-hidden rounded-t-[1.75rem] border-2 border-violet-100 bg-white shadow-[0_25px_80px_-20px_rgba(26,5,51,0.38)] transition-all duration-[280ms] ease-[cubic-bezier(0.19,1,0.22,1)] sm:max-h-[min(88vh,820px)] sm:max-w-2xl sm:rounded-[2rem]"
+              :class="showReviewDetailModal ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-[0.98] opacity-0'"
               role="dialog"
               aria-modal="true"
               aria-labelledby="review-detail-title"
@@ -948,7 +974,7 @@
                 </button>
               </div>
 
-              <div class="min-h-0 flex-1 overflow-y-auto custom-scrollbar px-4 py-4 sm:px-6 sm:py-5">
+              <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent sm:px-6 sm:py-5">
                 <dl class="space-y-5 text-sm">
                   <div>
                     <dt class="text-[9px] font-black uppercase tracking-widest text-violet-600">
@@ -1055,7 +1081,12 @@
 
       <!-- CMS create/edit: modal on top of dashboard (not a full-page takeover) -->
       <Teleport to="body">
-        <Transition name="cms-modal">
+        <Transition
+          enter-active-class="transition-opacity duration-[220ms] ease-out"
+          leave-active-class="transition-opacity duration-[220ms] ease-out"
+          enter-from-class="opacity-0"
+          leave-to-class="opacity-0"
+        >
           <div
             v-if="showContentForm"
             class="fixed inset-0 z-[185] flex items-end justify-center p-0 sm:items-center sm:p-4 md:p-6"
@@ -1067,7 +1098,8 @@
               @click.self="closeContentForm"
             />
             <div
-              class="cms-modal-dialog relative flex max-h-[min(96dvh,880px)] w-full max-w-4xl flex-col overflow-hidden rounded-t-[1.75rem] border-2 border-violet-100 bg-white shadow-[0_25px_80px_-20px_rgba(26,5,51,0.35)] sm:max-h-[min(92vh,880px)] sm:rounded-[2rem]"
+              class="relative flex max-h-[min(96dvh,880px)] w-full max-w-4xl flex-col overflow-hidden rounded-t-[1.75rem] border-2 border-violet-100 bg-white shadow-[0_25px_80px_-20px_rgba(26,5,51,0.35)] transition-all duration-[280ms] ease-[cubic-bezier(0.19,1,0.22,1)] sm:max-h-[min(92vh,880px)] sm:rounded-[2rem]"
+              :class="showContentForm ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-[0.6rem] scale-[0.98] opacity-0'"
               role="dialog"
               aria-modal="true"
               aria-labelledby="cms-overlay-title"
@@ -1090,7 +1122,7 @@
                   <i class="fas fa-times mr-2" aria-hidden="true" />Close
                 </button>
               </div>
-              <div class="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
+              <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent">
                 <DashboardCmsForm
                   ref="contentFormRef"
                   :member-content-scope="!isSuperAdmin(user?.email)"
@@ -1755,95 +1787,3 @@ onUnmounted(() => {
   if (process.client) document.body.style.overflow = ''
 })
 </script>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
-
-.font-roboto {
-  font-family: 'Roboto', sans-serif !important;
-}
-
-.custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #f1f5f9; border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #e2e8f0; }
-
-/* Fade the overlay only — transform on the root broke fixed/flex centering on small viewports */
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity 0.4s ease;
-}
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-.modal-enter-active .modal-dialog,
-.modal-leave-active .modal-dialog {
-  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-}
-.modal-enter-from .modal-dialog {
-  transform: translateY(0.75rem) scale(0.98);
-}
-.modal-leave-to .modal-dialog {
-  transform: translateY(0.5rem) scale(0.98);
-}
-
-/* CMS highlight modal: fade backdrop + slight lift on the card */
-.cms-modal-enter-active,
-.cms-modal-leave-active { transition: opacity 0.22s ease; }
-.cms-modal-enter-active .cms-modal-dialog,
-.cms-modal-leave-active .cms-modal-dialog {
-  transition: transform 0.28s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.22s ease;
-}
-.cms-modal-enter-from,
-.cms-modal-leave-to { opacity: 0; }
-.cms-modal-enter-from .cms-modal-dialog,
-.cms-modal-leave-to .cms-modal-dialog {
-  opacity: 0;
-  transform: translateY(0.6rem) scale(0.98);
-}
-
-.review-modal-enter-active,
-.review-modal-leave-active {
-  transition: opacity 0.22s ease;
-}
-.review-modal-enter-active .review-modal-dialog,
-.review-modal-leave-active .review-modal-dialog {
-  transition:
-    transform 0.28s cubic-bezier(0.19, 1, 0.22, 1),
-    opacity 0.22s ease;
-}
-.review-modal-enter-from,
-.review-modal-leave-to {
-  opacity: 0;
-}
-.review-modal-enter-from .review-modal-dialog,
-.review-modal-leave-to .review-modal-dialog {
-  opacity: 0;
-  transform: translateY(0.75rem) scale(0.98);
-}
-
-.overlay-enter-active, .overlay-leave-active { transition: opacity 0.4s ease; }
-.overlay-enter-from, .overlay-leave-to { opacity: 0; }
-
-.drawer-enter-active, .drawer-leave-active { transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); }
-.drawer-enter-from, .drawer-leave-to { transform: translateX(-100%); }
-
-.form-slide-enter-active, .form-slide-leave-active { transition: opacity 0.4s ease, transform 0.4s ease; }
-.form-slide-enter-from, .form-slide-leave-to { opacity: 0; transform: translateY(20px); }
-
-@keyframes animate-in {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes zoom-in {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-</style>

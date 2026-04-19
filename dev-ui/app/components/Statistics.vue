@@ -30,20 +30,20 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(0)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-blue-600 to-purple-600 bg-clip-text text-transparent'"
             >
               {{ displayStats.eventsHeld }}
             </span>
             <span 
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold ml-1 transition-colors duration-300"
+              class="inline-block ml-1 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'text-blue-600'"
             >
               +
             </span>
           </div>
           <p 
-            class="text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
+            class="inline-block text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
             :class="isDarkMode ? 'text-white/80' : 'text-gray-600'"
           >
             Projects
@@ -54,20 +54,20 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(1)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-pink-600 to-indigo-600 bg-clip-text text-transparent'"
             >
               {{ displayStats.liveShows }}
             </span>
             <span 
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold ml-1 transition-colors duration-300"
+              class="inline-block ml-1 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'text-purple-600'"
             >
               +
             </span>
           </div>
           <p 
-            class="text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
+            class="inline-block text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
             :class="isDarkMode ? 'text-white/80' : 'text-gray-600'"
           >
             Partners and Collaborators
@@ -78,20 +78,20 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(2)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-pink-600 to-indigo-600 bg-clip-text text-transparent'"
             >
               {{ displayStats.artistsManaged }}
             </span>
             <span 
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold ml-1 transition-colors duration-300"
+              class="inline-block ml-1 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'text-pink-600'"
             >
               +
             </span>
           </div>
           <p 
-            class="text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
+            class="inline-block text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
             :class="isDarkMode ? 'text-white/80' : 'text-gray-600'"
           >
             Core Members
@@ -102,13 +102,13 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(3)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent'"
             >
               {{ displayStats.happyClients }}
             </span>
             <!-- <span 
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold ml-1 transition-colors duration-300"
+              class="inline-block ml-1 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold transition-colors duration-300"
               :class="isDarkMode ? 'text-white' : 'text-red-600'"
             >
               K
@@ -121,7 +121,7 @@
             </span>
           </div>
           <p 
-            class="text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
+            class="inline-block text-sm sm:text-base md:text-lg font-medium transition-colors duration-300"
             :class="isDarkMode ? 'text-white/80' : 'text-gray-600'"
           >
             Participants
@@ -187,10 +187,3 @@ onMounted(() => {
   }, 300)
 })
 </script>
-
-<style scoped>
-/* Smooth transitions for numbers and labels */
-span, p {
-  display: inline-block;
-}
-</style>

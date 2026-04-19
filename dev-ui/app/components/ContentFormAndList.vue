@@ -672,7 +672,12 @@
     <Teleport to="body">
       <div class="fixed top-4 right-4 z-50 space-y-2">
         <!-- Toast Messages -->
-        <TransitionGroup name="toast">
+        <TransitionGroup
+          enter-active-class="transition-all duration-300 ease-out"
+          leave-active-class="transition-all duration-300 ease-out"
+          enter-from-class="translate-x-[100px] opacity-0"
+          leave-to-class="translate-x-[100px] scale-75 opacity-0"
+        >
           <div
             v-for="toast in toasts"
             :key="toast.id"
@@ -776,24 +781,6 @@
     </Teleport>
   </div>
 </template>
-
-<style scoped>
-/* Toast animations */
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translateX(100px);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: translateX(100px) scale(0.8);
-}
-</style>
 
 <script setup>
 import moment from "moment";
@@ -1650,51 +1637,3 @@ const getYouTubeEmbedUrl = (url) => {
 
 defineExpose({ editPost, openNewContentForm, confirmDelete, loadPosts, posts });
 </script>
-
-<style scoped>
-/* Custom scrollbar for better UX */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Smooth transitions for drag and drop */
-.cursor-move {
-  cursor: move;
-}
-
-/* Image viewer animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.fixed.inset-0 {
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-/* Prevent text selection during drag */
-[draggable="true"] {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-</style>

@@ -123,7 +123,3 @@ useHead({
   title: 'Wise Panel - Tech Savvy'
 })
 </script>
-
-<style scoped>
-/* Any additional premium styling can go here */
-</style>

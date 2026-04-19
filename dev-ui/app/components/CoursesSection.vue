@@ -70,7 +70,7 @@
               <article
                 v-for="(course, i) in safeCourses"
                 :key="course.slug"
-                class="courses-landing-card course-card relative z-10 flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 animate-fade-in"
+                class="group/course course-card relative z-10 flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-[rgba(177,138,243,0.42)] bg-white text-gray-900 shadow-[0_0_0_1px_rgba(126,87,194,0.16),0_0_22px_rgba(97,38,177,0.11),0_0_44px_rgba(177,138,243,0.06),0_6px_16px_rgba(46,19,104,0.05)] transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-[rgba(177,138,243,0.55)] hover:shadow-[0_0_0_1px_rgba(126,87,194,0.24),0_0_28px_rgba(97,38,177,0.14),0_0_52px_rgba(177,138,243,0.09),0_8px_20px_rgba(46,19,104,0.07)] animate-fade-in"
                 :style="{ animationDelay: `${i * 0.1}s` }"
               >
                 <NuxtLink :to="`/courses/${course.slug}`" class="flex h-full min-h-0 flex-col no-underline text-inherit">
@@ -78,7 +78,7 @@
                     <img
                       :src="course.image || defaultImage"
                       :alt="course.title"
-                      class="courses-landing-card__img h-full w-full object-cover"
+                      class="h-full w-full object-cover transition-transform duration-300 group-hover/course:scale-105"
                       loading="lazy"
                       @error="onImageError($event)"
                     />
@@ -104,7 +104,7 @@
                       </span>
                       <span>{{ course.duration }}</span>
                     </div>
-                    <span class="courses-landing-card__cta mt-auto text-xs font-semibold uppercase tracking-wide text-violet">
+                    <span class="mt-auto text-xs font-semibold uppercase tracking-wide text-violet transition-colors duration-200 group-hover/course:text-[#6126b1]">
                       View course
                     </span>
                   </div>
@@ -177,43 +177,3 @@ function onImageError(ev: Event) {
   if (el?.src !== undefined) el.src = props.defaultImage
 }
 </script>
-
-<style scoped>
-.courses-landing-card {
-  border-color: rgba(177, 138, 243, 0.42);
-  box-shadow:
-    0 0 0 1px rgba(126, 87, 194, 0.16),
-    0 0 22px rgba(97, 38, 177, 0.11),
-    0 0 44px rgba(177, 138, 243, 0.06),
-    0 6px 16px rgba(46, 19, 104, 0.05);
-  transform: translateY(0);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.courses-landing-card:hover {
-  border-color: rgba(177, 138, 243, 0.55);
-  box-shadow:
-    0 0 0 1px rgba(126, 87, 194, 0.24),
-    0 0 28px rgba(97, 38, 177, 0.14),
-    0 0 52px rgba(177, 138, 243, 0.09),
-    0 8px 20px rgba(46, 19, 104, 0.07);
-  transform: translateY(-4px);
-}
-
-.courses-landing-card__img {
-  transform: scale(1);
-  transition: transform 0.3s ease;
-}
-
-.courses-landing-card:hover .courses-landing-card__img {
-  transform: scale(1.05);
-}
-
-.courses-landing-card__cta {
-  transition: color 0.2s ease;
-}
-
-.courses-landing-card:hover .courses-landing-card__cta {
-  color: #6126b1;
-}
-</style>

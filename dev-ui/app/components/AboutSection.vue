@@ -102,7 +102,7 @@
             </div>
 
             <!-- Floating Growth Badge (Overlays the active slide) -->
-            <div class="absolute -bottom-10 -right-6 z-40 bg-white/95 backdrop-blur-xl p-5 rounded-3xl shadow-[0_20px_60px_rgba(26,5,51,0.12)] border border-violet-100 hidden sm:block animate-float">
+            <div class="absolute -bottom-10 -right-6 z-40 hidden rounded-3xl border border-violet-100 bg-white/95 p-5 shadow-[0_20px_60px_rgba(26,5,51,0.12)] backdrop-blur-xl sm:block animate-float-card">
               <div class="flex items-center gap-4">
                 <div class="flex -space-x-3">
                   <div v-for="i in 3" :key="i" class="w-10 h-10 rounded-full border-2 border-white bg-violet-100 overflow-hidden shadow-md">
@@ -175,15 +175,3 @@ onUnmounted(() => {
 })
 
 </script>
-
-<style scoped>
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-</style>

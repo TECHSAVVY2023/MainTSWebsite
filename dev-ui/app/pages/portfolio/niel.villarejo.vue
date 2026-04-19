@@ -9,7 +9,7 @@
       <span
         v-for="(p, i) in particles"
         :key="'p' + i"
-        class="absolute w-[6px] h-[6px] rounded-full bg-[#c28b5a]/25 animate-float"
+        class="absolute h-[6px] w-[6px] rounded-full bg-[#c28b5a]/25 animate-[float-up_linear_infinite]"
         :style="p.style"
       ></span>
     </div>
@@ -19,7 +19,7 @@
       <span
         v-for="(s, i) in sparkles"
         :key="'s' + i"
-        class="absolute w-[6px] h-[6px] bg-[#ffd9a8] rounded-full animate-sparkle"
+        class="absolute h-[6px] w-[6px] rounded-full bg-[#ffd9a8] animate-sparkle-burst"
         :style="s.style"
       ></span>
     </div>
@@ -279,33 +279,3 @@ const footer = ref({
   event: "5th Anniversary Bootcamp Celebration",
 });
 </script>
-
-<style scoped>
-@keyframes sparkle {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
-}
-
-@keyframes float {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-120vh);
-  }
-}
-
-.animate-sparkle {
-  animation: sparkle 1s ease-out forwards;
-}
-
-.animate-float {
-  animation: float infinite linear;
-}
-</style>

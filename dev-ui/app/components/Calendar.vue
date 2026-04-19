@@ -52,9 +52,3 @@ onBeforeUnmount(() => {
   clearInterval(interval);
 });
 </script>
-
-<style scoped>
-.bg-green-800 {
-  background-color: #096b2e;
-}
-</style>

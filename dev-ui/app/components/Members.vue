@@ -7,7 +7,7 @@
       <span
         v-for="(sparkle, i) in sparkles"
         :key="i"
-        class="absolute w-1 h-1 rounded-full bg-violet-200/80 animate-twinkle"
+        class="absolute h-1 w-1 rounded-full bg-violet-200/80 animate-twinkle-soft"
         :style="sparkle"
       ></span>
     </div>
@@ -119,35 +119,35 @@
               <td class="p-2">
                 <input v-model="member.firstname"
                   @blur="updateField(member.id,'firstname',member.firstname)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- MIDDLE -->
               <td class="p-2">
                 <input v-model="member.middlename"
                   @blur="updateField(member.id,'middlename',member.middlename)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- LAST -->
               <td class="p-2">
                 <input v-model="member.lastname"
                   @blur="updateField(member.id,'lastname',member.lastname)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- BIRTHDATE -->
               <td class="p-2">
                 <input v-model="member.birthdate"
                   @blur="updateField(member.id,'birthdate',member.birthdate)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- ROLE -->
               <td class="p-2">
                 <input v-model="member.role"
                   @blur="updateField(member.id,'role',member.role)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- SPEAKER TOPIC (TechSavvy members — shown on community speakers) -->
@@ -155,7 +155,7 @@
                 <input
                   v-model="member.speaker_topic"
                   @blur="updateField(member.id,'speaker_topic',member.speaker_topic)"
-                  class="input"
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"
                   placeholder="Talk focus (optional)"
                 />
               </td>
@@ -164,21 +164,21 @@
               <td class="p-2">
                 <input v-model="member.mobile"
                   @blur="updateField(member.id,'mobile',member.mobile)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- EMAIL -->
               <td class="p-2">
                 <input v-model="member.email"
                   @blur="updateField(member.id,'email',member.email)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- WEBSITE -->
               <td class="p-2">
                 <input v-model="member.website"
                   @blur="updateField(member.id,'website',member.website)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- POINTS -->
@@ -186,35 +186,35 @@
                 <input type="number"
                   v-model.number="member.gcashPoints"
                   @blur="updateField(member.id,'gcashPoints',member.gcashPoints)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <td class="p-2">
                 <input type="number"
                   v-model.number="member.bonusPoints"
                   @blur="updateField(member.id,'bonusPoints',member.bonusPoints)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <td class="p-2">
                 <input type="number"
                   v-model.number="member.voucherPoints"
                   @blur="updateField(member.id,'voucherPoints',member.voucherPoints)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <td class="p-2">
                 <input type="number"
                   v-model.number="member.honorariumPoints"
                   @blur="updateField(member.id,'honorariumPoints',member.honorariumPoints)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <td class="p-2">
                 <input type="number"
                   v-model.number="member.numberOfProjects"
                   @blur="updateField(member.id,'numberOfProjects',member.numberOfProjects)"
-                  class="input"/>
+                  class="w-full rounded border border-violet-500/30 bg-transparent px-2 py-1 text-[13px]"/>
               </td>
 
               <!-- DELETE -->
@@ -361,25 +361,3 @@ await fetchMembers()
 
 }
 </script>
-
-<style scoped>
-
-.input{
-width:100%;
-background:transparent;
-border:1px solid rgba(139,92,246,0.3);
-border-radius:6px;
-padding:4px 8px;
-font-size:13px;
-}
-
-@keyframes twinkle{
-0%,100%{opacity:.3;transform:scale(.7)}
-50%{opacity:1;transform:scale(1.3)}
-}
-
-.animate-twinkle{
-animation:twinkle 4s infinite ease-in-out
-}
-
-</style>

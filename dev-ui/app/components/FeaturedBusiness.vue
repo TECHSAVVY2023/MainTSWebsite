@@ -35,8 +35,8 @@
         aria-label="Community sponsor and partner logos"
       >
         <div
-          class="featured-marquee flex items-center whitespace-nowrap"
-          :class="reduceMotion ? '' : 'animate-marquee'"
+        class="flex items-center whitespace-nowrap"
+        :class="reduceMotion ? 'mx-auto flex-wrap justify-center gap-y-3 px-4 whitespace-normal sm:max-w-[72rem]' : 'marquee-track inline-flex w-max'"
         >
           <div
             v-for="set in marqueeRepeatCount"
@@ -55,7 +55,7 @@
                 :href="item.link"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="partner-card group relative z-0 block h-[3.25rem] w-[8.5rem] shrink-0 origin-center overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm ring-1 ring-black/[0.03] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:ease-out motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100 hover:z-20 hover:scale-110 hover:border-violet-200 hover:shadow-lg hover:ring-violet-500/15 focus-visible:z-20 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 sm:h-14 sm:w-40 md:h-16 md:w-44"
+                class="group relative z-0 block h-[3.25rem] w-[8.5rem] shrink-0 origin-center overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm ring-1 ring-black/[0.03] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:ease-out motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100 hover:z-20 hover:scale-110 hover:border-violet-200 hover:shadow-lg hover:ring-violet-500/15 focus-visible:z-20 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60 sm:h-14 sm:w-40 md:h-16 md:w-44"
                 aria-label="Visit partner website"
               >
                 <img
@@ -70,7 +70,7 @@
               </a>
               <div
                 v-else
-                class="partner-card group relative z-0 block h-[3.25rem] w-[8.5rem] shrink-0 origin-center overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm ring-1 ring-black/[0.03] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:ease-out motion-reduce:hover:scale-100 hover:z-20 hover:scale-110 hover:border-violet-200 hover:shadow-lg hover:ring-violet-500/15 sm:h-14 sm:w-40 md:h-16 md:w-44"
+                class="group relative z-0 block h-[3.25rem] w-[8.5rem] shrink-0 origin-center overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100 shadow-sm ring-1 ring-black/[0.03] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] transform-gpu transition-[transform,box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-200 motion-reduce:ease-out motion-reduce:hover:scale-100 hover:z-20 hover:scale-110 hover:border-violet-200 hover:shadow-lg hover:ring-violet-500/15 sm:h-14 sm:w-40 md:h-16 md:w-44"
                 aria-hidden="true"
               >
                 <img
@@ -190,43 +190,21 @@ function onImgError (e: Event) {
 </script>
 
 <style scoped>
-.partner-card {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+.marquee-track {
+  animation: community-marquee 55s linear infinite;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(calc(-100% / 3));
-  }
-}
-
-.featured-marquee.animate-marquee {
-  display: inline-flex;
-  width: max-content;
-  animation: marquee 55s linear infinite;
-  will-change: transform;
-}
-
-.featured-marquee.animate-marquee:hover {
+.marquee-track:hover {
   animation-play-state: paused;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .featured-marquee {
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100% !important;
-    max-width: 72rem;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    white-space: normal;
-    row-gap: 0.75rem;
+@keyframes community-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-100% / 3));
   }
 }
 </style>
