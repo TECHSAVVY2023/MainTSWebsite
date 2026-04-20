@@ -5,7 +5,7 @@
   >
     <SectionWires gradient-id-prefix="swg-courses" />
     <div class="relative z-10 isolate flex-1 flex flex-col">
-      <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
+      <div class="container mx-auto relative flex-1 flex flex-col">
         <div class="mb-8 sm:mb-12">
           <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
             <SectionWireShield :wide="false">
@@ -47,14 +47,19 @@
 
         <div class="relative mx-auto w-full max-w-[72rem]">
           <div
-            class="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch gap-3 sm:gap-4"
-            :class="locked ? 'min-h-[280px] sm:min-h-[320px]' : ''"
+            class="grid w-full grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 items-stretch gap-3 sm:gap-4"
+            :class="locked ? 'min-h-[200px] sm:min-h-[320px]' : ''"
           >
             <template v-if="locked">
               <div
                 v-for="n in 4"
                 :key="'course-sk-' + n"
-                class="flex flex-col h-full min-h-0 overflow-hidden rounded-xl border border-gray-200/80 bg-[#f0eef5]/90 animate-pulse"
+                :class="[
+                  'min-h-0 overflow-hidden rounded-xl border border-gray-200/80 bg-[#f0eef5]/90 animate-pulse',
+                  n === 1 ? 'flex flex-col' : 'hidden',
+                  n === 2 ? 'min-[480px]:flex min-[480px]:flex-col' : '',
+                  n >= 3 ? 'lg:flex lg:flex-col' : ''
+                ]"
                 aria-hidden="true"
               >
                 <div class="aspect-video w-full shrink-0 bg-gray-300/60" />
@@ -115,21 +120,21 @@
 
           <div
             v-if="locked"
-            class="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-neutral-gray/70 px-4 py-10 backdrop-blur-[5px] sm:px-6"
+            class="absolute inset-0 z-10 flex items-start justify-center rounded-2xl bg-neutral-gray/40 px-3 py-4 backdrop-blur-[2px] sm:items-center sm:bg-neutral-gray/70 sm:px-6 sm:py-10 sm:backdrop-blur-[5px]"
           >
-            <div class="max-w-sm rounded-2xl border border-violet-200/80 bg-white/95 px-6 py-8 text-center shadow-[0_20px_50px_rgba(46,19,104,0.12)]">
-              <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-                <i class="fas fa-lock text-2xl" aria-hidden="true" />
+            <div class="w-full max-w-[18rem] rounded-2xl border border-violet-200/80 bg-white/95 px-4 py-5 text-center shadow-[0_14px_32px_rgba(46,19,104,0.10)] sm:max-w-sm sm:px-6 sm:py-8 sm:shadow-[0_20px_50px_rgba(46,19,104,0.12)]">
+              <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 sm:mb-4 sm:h-14 sm:w-14">
+                <i class="fas fa-lock text-xl sm:text-2xl" aria-hidden="true" />
               </div>
-              <p class="text-base font-bold text-dark sm:text-lg">
+              <p class="text-[15px] font-bold text-dark sm:text-lg">
                 Member access
               </p>
-              <p class="mt-2 text-sm leading-relaxed text-dark/65">
+              <p class="mt-1.5 text-xs leading-relaxed text-dark/65 sm:mt-2 sm:text-sm">
                 Sign in with your community account to unlock courses and browse the full learning catalog.
               </p>
               <NuxtLink
                 to="/login"
-                class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-violet-700 px-5 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-violet-800"
+                class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-violet-700 px-5 py-2.5 text-sm font-semibold text-white no-underline transition-colors hover:bg-violet-800 sm:mt-5 sm:py-3"
               >
                 <i class="fas fa-sign-in-alt text-xs" aria-hidden="true" />
                 Sign in

@@ -411,8 +411,16 @@ export function useLanding () {
     { immediate: true }
   )
 
+  const resolvedNewsItems = computed<LandingNewsItem[]>(() => {
+    if (newsItems.value.length > 0) return newsItems.value
+    if (Array.isArray(cmsListFromApi.value) && cmsListFromApi.value.length > 0) {
+      return cmsListFromApi.value as LandingNewsItem[]
+    }
+    return []
+  })
+
   const newsItemsDisplay = computed(() =>
-    newsItems.value
+    resolvedNewsItems.value
       .filter((item) => isNewsItem(item as { filters?: string | Record<string, unknown> | null }))
       .slice(0, LANDING_SECTION_MAX_CARDS)
   )
@@ -664,7 +672,7 @@ export function useLanding () {
     } catch { /* keep as is */ }
 
     if (hasMemberAccess) {
-      const cmsCal = landingNewsToCalendarRows(newsItems.value)
+      const cmsCal = landingNewsToCalendarRows(resolvedNewsItems.value)
       if (cmsCal.length > 0) {
         calendarEvents.value = [...cmsCal, ...calendarEvents.value].sort((a, b) =>
           (a.date || '').localeCompare(b.date || '')
@@ -700,8 +708,8 @@ export function useLanding () {
       }
     } catch { /* keep fallback values */ }
 
-    buildSponsorsAndPartners(newsItems.value)
-    if (newsItems.value.length === 0) {
+    buildSponsorsAndPartners(resolvedNewsItems.value)
+    if (resolvedNewsItems.value.length === 0) {
       newsItems.value = [...FALLBACK_NEWS_ITEMS].slice(0, LANDING_SECTION_MAX_CARDS)
     }
     if (hasMemberAccess && projects.value.length === 0) {

@@ -8,7 +8,7 @@
         Latest from the community
       </p>
     </div>
-    <div class="shrink-0 w-full sm:w-[280px] min-w-[200px] max-w-[320px] ml-auto">
+    <div class="w-full sm:ml-auto sm:w-[280px] sm:max-w-[320px]">
       <div class="relative">
         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-dark/50 text-base pointer-events-none" aria-hidden="true" />
         <input

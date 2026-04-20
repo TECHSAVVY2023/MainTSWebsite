@@ -5,7 +5,7 @@
   >
     <SectionWires gradient-id-prefix="swg-news" />
     <div class="relative z-10 isolate flex-1 flex flex-col">
-      <div class="container mx-auto px-8 sm:px-12 lg:px-20 relative flex-1 flex flex-col">
+      <div class="container mx-auto relative flex-1 flex flex-col">
         <div class="mb-8 sm:mb-12">
           <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
             <SectionWireShield :wide="false">
@@ -32,7 +32,7 @@
 
         <div class="w-full max-w-[72rem] mx-auto">
           <div
-            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 items-start"
+            class="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 items-start"
           >
             <NuxtLink
               v-for="(item, i) in safeItems"

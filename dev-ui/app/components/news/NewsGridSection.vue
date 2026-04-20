@@ -1,6 +1,6 @@
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
-    <div v-for="(item, i) in safeItems" :key="i" class="w-full max-w-[280px] mx-2 sm:mx-3">
+  <div class="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
+    <div v-for="(item, i) in safeItems" :key="i" class="w-full max-w-[280px]">
       <NewsCard :item="item" :default-image="defaultImage" />
     </div>
   </div>

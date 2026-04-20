@@ -1,13 +1,13 @@
 <template>
-  <section id="about" class="py-24 md:py-32 bg-white relative overflow-hidden">
+  <section id="about" class="relative overflow-hidden bg-white py-20 md:py-28">
     <!-- Subtle background wires for continuity-->
     <SectionWires gradient-id-prefix="swg-about-new" /> 
     
-    <div class="container mx-auto px-2 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-32 items-center">
+    <div class="container mx-auto relative z-10">
+      <div class="grid grid-cols-1 items-center gap-14 lg:grid-cols-2 lg:gap-24">
         
         <!-- Left Column: Typographic Story -->
-        <div class=" bg-white pr-10 py-5">
+        <div class="bg-white py-2 lg:pr-8">
           <SectionWireShield>
             <div class="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-100">
               <!-- <span class="flex h-2 w-2 rounded-full bg-violet-600 animate-pulse" /> -->
@@ -15,11 +15,12 @@
               <span class="text-[0.65rem] font-bold uppercase tracking-wider text-violet-700">About Our Community</span>
             </div>
             
-            <h2 class="text-4xl md:text-5xl font-extrabold text-[#1a0533] leading-[1.1] mb-8 tracking-tight flex whitespace-nowrap">
-              What is <span class="pr-5 bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent pl-3">TECH SAVVY?</span>
+            <h2 class="mb-6 flex flex-wrap gap-x-2 text-3xl font-extrabold leading-[1.1] tracking-tight text-[#1a0533] sm:text-4xl md:mb-8 md:text-5xl">
+              <span>What is</span>
+              <span class="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">TECH SAVVY?</span>
             </h2>
             
-            <div class="space-y-6 text-gray-600 leading-relaxed text-base md:text-lg">
+            <div class="space-y-5 text-base leading-relaxed text-gray-600 md:text-lg">
               <p>
                 A vibrant IT community in Misamis Occidental, <span class="font-bold text-gray-900 decoration-violet-200 decoration-4">started April 30, 2023</span> at 
                 

@@ -7,10 +7,10 @@
     <!-- Subtle star particles -->
     <div class="absolute inset-0 z-0 pointer-events-none">
       <span
-        v-for="i in 40"
-        :key="i"
+        v-for="(style, index) in heroStarStyles"
+        :key="index"
         class="absolute rounded-full bg-violet-400 animate-pulse opacity-0"
-        :style="starStyle()"
+        :style="style"
       />
     </div>
 
@@ -27,7 +27,7 @@
 
     <!-- Main content -->
     <div class="relative z-20 flex flex-1 items-center">
-      <div class="container mx-auto px-6 lg:px-16 py-24 pt-28 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="container mx-auto grid grid-cols-1 items-center gap-10 py-20 pt-28 sm:gap-12 sm:py-24 lg:grid-cols-2">
 
         <!-- Left: Text -->
         <div class="text-left">
@@ -52,7 +52,7 @@
           </p>
 
           <!-- Description -->
-          <p class="text-sm sm:text-base text-gray-500 max-w-lg whitespace-nowrap">
+          <p class="max-w-lg text-sm text-gray-500 sm:text-base">
             Think Smart, Code Smarter and Powering Businesses Through Technology.
          
           </p>
@@ -78,7 +78,7 @@
           </div>
 
           <!-- Social proof -->
-          <div class="mt-10 flex items-center gap-3">
+          <div class="mt-8 flex flex-wrap items-center gap-3 sm:mt-10">
             <div class="flex -space-x-2">
               <div
                 v-for="(color, n) in avatarColors"
@@ -237,14 +237,14 @@
 
     <!-- Stats trust bar — bridges hero into NewsSection -->
     <div class="relative z-20 mt-auto w-full" style="background: #F7F6FB;">
-      <div class="container mx-auto px-6 lg:px-16">
+      <div class="container mx-auto">
         <!-- Thin violet divider line -->
         <div class="w-full h-px bg-gradient-to-r from-transparent via-violet-200 to-transparent mb-0" />
-        <div class="grid grid-cols-2 sm:grid-cols-4 divide-x divide-violet-100 py-5">
+        <div class="grid grid-cols-2 divide-y divide-violet-100 py-4 sm:grid-cols-4 sm:divide-x sm:divide-y-0 sm:py-5">
           <div
             v-for="stat in stats"
             :key="stat.label"
-            class="flex flex-col items-center justify-center gap-0.5 px-4 text-center"
+            class="flex flex-col items-center justify-center gap-0.5 px-3 py-3 text-center sm:px-4 sm:py-0"
           >
             <span class="text-2xl sm:text-3xl font-black text-violet-700 leading-none tracking-tight">
               {{ stat.value }}
@@ -305,6 +305,34 @@ const stats = [
 const tags = ['Bootcamps', 'Workshops', 'Webinars', 'Trainings']
 
 const avatarColors = ['#a78bfa', '#f59e0b', '#34d399', '#60a5fa']
+const HERO_STAR_COUNT = 40
+
+type HeroStarStyle = {
+  top: string
+  left: string
+  width: string
+  height: string
+  animationDelay: string
+  animationDuration: string
+  opacity: string
+}
+
+function createHeroStarStyle (): HeroStarStyle {
+  return {
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    width: `${Math.random() * 3 + 1}px`,
+    height: `${Math.random() * 3 + 1}px`,
+    animationDelay: `${Math.random() * 6}s`,
+    animationDuration: `${Math.random() * 4 + 3}s`,
+    opacity: (Math.random() * 0.15 + 0.05).toString()
+  }
+}
+
+const heroStarStyles = useState<HeroStarStyle[]>(
+  'hero-section-star-styles',
+  () => Array.from({ length: HERO_STAR_COUNT }, createHeroStarStyle)
+)
 
 const mouseX = ref(0)
 const mouseY = ref(0)
@@ -312,14 +340,4 @@ const handleMouseMove = (e: MouseEvent) => {
   mouseX.value = e.clientX
   mouseY.value = e.clientY
 }
-
-const starStyle = () => ({
-  top: Math.random() * 100 + '%',
-  left: Math.random() * 100 + '%',
-  width: Math.random() * 3 + 1 + 'px',
-  height: Math.random() * 3 + 1 + 'px',
-  animationDelay: Math.random() * 6 + 's',
-  animationDuration: Math.random() * 4 + 3 + 's',
-  opacity: (Math.random() * 0.15 + 0.05).toString(),
-})
 </script>

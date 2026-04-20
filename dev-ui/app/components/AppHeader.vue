@@ -33,10 +33,10 @@
           'bg-white/80 backdrop-blur-[20px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-b border-white/20 shadow-lg': headerScrolled,
           'bg-white/95 backdrop-blur-[16px]': !headerScrolled 
         }">
-        <div class="container mx-auto px-5 sm:px-8">
-          <div class="flex items-center justify-between h-16">
-            <a href="#hero" class="flex items-center shrink-0 pr-4" aria-label="Back to hero" @click.prevent="onLogoClick">
-              <img :src="logoUrl" alt="TechSavvy" class="h-12" />
+        <div class="container mx-auto">
+          <div class="flex min-h-16 items-center justify-between gap-3 py-2">
+            <a href="#hero" class="flex min-w-0 items-center shrink pr-2 sm:pr-4" aria-label="Back to hero" @click.prevent="onLogoClick">
+              <img :src="logoUrl" alt="TechSavvy" class="h-10 w-auto sm:h-12" />
             </a>
 
             <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8">
@@ -105,7 +105,7 @@
             </div>
 
             <button type="button"
-              class="md:hidden p-2.5 rounded-lg text-dark/70 hover:text-dark hover:bg-neutral-gray transition-colors"
+              class="md:hidden inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-dark/70 hover:text-dark hover:bg-neutral-gray transition-colors"
               aria-label="Open menu" :aria-expanded="mobileMenuOpen" aria-controls="mobileMenu"
               @click="mobileMenuOpen = !mobileMenuOpen">
               <i class="fas fa-bars text-xl" />
@@ -125,7 +125,7 @@
 
       <!-- Mobile menu -->
       <div id="mobileMenu"
-        class="fixed top-0 right-0 bottom-0 w-[280px] max-w-[85vw] z-40 bg-white/98 backdrop-blur-xl py-12 px-6 overflow-y-auto shadow-2xl transition-transform duration-300 md:hidden text-center"
+        class="fixed top-0 right-0 bottom-0 z-40 w-[20rem] max-w-[88vw] bg-white/98 px-5 py-10 overflow-y-auto shadow-2xl transition-transform duration-300 md:hidden text-center"
         role="dialog" aria-label="Navigation menu" :aria-hidden="!mobileMenuOpen"
         :class="mobileMenuOpen ? 'translate-x-0 pointer-events-auto' : 'translate-x-full pointer-events-none'">
         <button type="button"
@@ -133,19 +133,19 @@
           aria-label="Close menu" @click="mobileMenuOpen = false">
           <i class="fas fa-times" />
         </button>
-        <form role="search" class="relative flex items-center w-full mb-3" @submit.prevent="onSearch">
+        <form role="search" class="relative mb-4 flex w-full items-center" @submit.prevent="onSearch">
           <i class="fas fa-search absolute left-4 text-dark/65 text-sm pointer-events-none" aria-hidden="true" />
           <input v-model="headerSearchQuery" type="search" autocomplete="off"
             placeholder="Search news, courses, projects..."
-            class="w-full py-2.5 pl-10 pr-4 rounded-xl bg-white border border-dark/20 text-dark text-[0.9375rem] font-medium shadow-sm shadow-black/5 outline-none transition-all placeholder:text-dark/60 hover:border-accent-purple/35 focus:border-accent-purple/60 focus:ring-[3px] focus:ring-accent-purple/20"
+            class="w-full rounded-xl border border-dark/20 bg-white py-3 pl-10 pr-4 text-[0.9375rem] font-medium text-dark shadow-sm shadow-black/5 outline-none transition-all placeholder:text-dark/60 hover:border-accent-purple/35 focus:border-accent-purple/60 focus:ring-[3px] focus:ring-accent-purple/20"
             aria-label="Search" />
         </form>
         <a href="#news"
-          class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           @click.prevent="go('#news')">News</a>
         <a
           href="#courses"
-          class="flex items-center justify-center gap-2 py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           :aria-label="isLoggedIn ? 'Courses' : 'Courses — sign in to unlock'"
           @click.prevent="go('#courses')"
         >
@@ -157,11 +157,11 @@
           />
         </a>
         <a href="#about"
-          class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           @click.prevent="go('#about')">About</a>
         <a
           href="#projects"
-          class="flex items-center justify-center gap-2 py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           :aria-label="isLoggedIn ? 'Projects' : 'Projects — sign in to unlock'"
           @click.prevent="go('#projects')"
         >
@@ -173,11 +173,11 @@
           />
         </a>
         <a href="#merch"
-          class="block py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           @click.prevent="go('#merch')">Merch</a>
         <a
           href="#events-reminders"
-          class="flex items-center justify-center gap-2 py-3 text-[0.9375rem] font-medium text-dark/90 no-underline border-b border-neutral-border text-center transition-colors hover:text-dark"
+          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
           :aria-label="isLoggedIn ? 'Events Reminder' : 'Events Reminder — sign in to unlock'"
           @click.prevent="go('#events-reminders')"
         >

@@ -1,9 +1,9 @@
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
+  <div class="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
     <div
       v-for="(project, idx) in safeProjects"
       :key="project?.title || project?.url || idx"
-      class="w-full max-w-[280px] mx-2 sm:mx-3 bg-[#f8f7f5] border border-black/5 group relative overflow-hidden rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)]"
+      class="w-full max-w-[280px] bg-[#f8f7f5] border border-black/5 group relative overflow-hidden rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)]"
     >
       <div class="aspect-[4/3] relative bg-gray-200 overflow-hidden">
         <img

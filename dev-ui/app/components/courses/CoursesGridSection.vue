@@ -4,11 +4,11 @@
       <i class="fas fa-graduation-cap text-4xl mb-4 opacity-50" :aria-hidden="true" />
       <p>No courses match your search. Try a different filter.</p>
     </div>
-    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
+    <div v-else class="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 justify-items-center">
       <article
         v-for="course in courses"
         :key="course.id"
-        class="w-full max-w-[280px] mx-2 sm:mx-3 group bg-[rgba(35,21,89,0.95)] rounded-lg sm:rounded-xl overflow-hidden border border-white/20 card-violet-glow-aura transition-all duration-200 hover:-translate-y-0.5"
+        class="w-full max-w-[280px] group bg-[rgba(35,21,89,0.95)] rounded-lg sm:rounded-xl overflow-hidden border border-white/20 card-violet-glow-aura transition-all duration-200 hover:-translate-y-0.5"
       >
         <NuxtLink :to="`/courses/${course.slug}`" class="block no-underline text-inherit">
           <div class="relative aspect-[4/3] overflow-hidden bg-[rgba(35,21,89,0.95)]">
