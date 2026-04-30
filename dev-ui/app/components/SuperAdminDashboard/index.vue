@@ -190,11 +190,12 @@
                   <i class="fas fa-user-clock text-amber-500 text-4xl mb-2"></i>
                   <h3 class="text-[13px] font-black uppercase text-amber-800 tracking-wider">You’re signed in</h3>
                   <p class="max-w-md text-xs font-medium text-amber-900/80 leading-relaxed">
-                    <span class="font-bold">{{ user?.email }}</span> is not in the community member list yet.
-                    Ask an admin to add your account, or check that the API member list includes your email.
+                    <span class="font-bold">{{ user?.email }}</span> is not in the community member list yet. <br>
+                    You are currently browsing as a <span class="font-black text-amber-900">Guest Account</span>.
                   </p>
-                  <p class="max-w-sm text-[10px] font-bold uppercase tracking-widest text-amber-700/70">
-                    Library and other tabs still work — only profile sync needs a member record.
+                  <p class="max-w-full text-xs font-medium text-amber-900/80 leading-relaxed">
+                    Visit <a href="https://www.techsavvies.space/membership" target="_blank" rel="noopener noreferrer" 
+                    class="font-black text-violet-700 cursor-pointer">www.techsavvies.space/membership</a> to become a member, or ask an admin to add your account.
                   </p>
                </div>
 
@@ -1584,11 +1585,13 @@ const navItems = computed(() => {
   }[] = [
     { label: 'My Profile', icon: 'fas fa-user-circle', active: activeView.value === 'Profile', action: () => { activeView.value = 'Profile'; drawerOpen.value = false } },
     { label: 'Library Feed', icon: 'fas fa-newspaper', active: activeView.value === 'Library', action: () => { activeView.value = 'Library'; drawerOpen.value = false } },
+    { label: 'Community Stats', icon: 'fas fa-th-large', active: activeView.value === 'Stats', action: () => { activeView.value = 'Stats'; drawerOpen.value = false } },
+    { label: 'Members', icon: 'fas fa-users', active: activeView.value === 'Directory', action: () => { activeView.value = 'Directory'; drawerOpen.value = false } },
   ]
   if (isSuperAdmin(user.value?.email)) {
     const n = pendingMemberSubmissions.value.length
     items.push({
-      label: 'Review uploads',
+      label: 'Review Uploads',
       icon: 'fas fa-clipboard-check',
       active: activeView.value === 'Reviews',
       badge: n > 0 ? n : undefined,
@@ -1597,8 +1600,6 @@ const navItems = computed(() => {
   }
   items.push(
     { label: 'My Assets', icon: 'fas fa-folder-open', active: activeView.value === 'Drive', action: () => { activeView.value = 'Drive'; drawerOpen.value = false } },
-    { label: 'Members', icon: 'fas fa-users', active: activeView.value === 'Directory', action: () => { activeView.value = 'Directory'; drawerOpen.value = false } },
-    { label: 'Community Stats', icon: 'fas fa-th-large', active: activeView.value === 'Stats', action: () => { activeView.value = 'Stats'; drawerOpen.value = false } },
   )
   return items.filter((item) => {
     if (item.label === 'Members' && !isSuperAdmin(user.value?.email)) return false

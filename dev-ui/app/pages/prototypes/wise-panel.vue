@@ -96,10 +96,7 @@ const loading = ref(false)
 const fetchPayments = async () => {
   loading.value = true
   try {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    const apiBase = isLocal ? 'http://127.0.0.1:8000' : 'https://api.techsavvies.space'
-    
-    const res = await fetch(`${apiBase}/api/wise-experiment/list-payments/`)
+    const res = await fetch(`${config.apiBase}/api/wise-experiment/list-payments/`)
     const data = await res.json()
     payments.value = data || []
   } catch (error) {

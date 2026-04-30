@@ -1,17 +1,30 @@
 <template>
   <div class="font-inter text-dark min-h-screen bg-white">
-    <AppHeader :scroll-to-section="landing.scrollToSection" @search="landing.onHeaderSearch" />
+    <AppHeader
+      :scroll-to-section="landing.scrollToSection"
+      @search="landing.onHeaderSearch"
+    />
     <HeroSection :scroll-to-section="landing.scrollToSection" />
-    <NewsSection :items="newsItemsForSection" :default-image="landing.DEFAULT_NEWS_IMAGE" />
-    <CoursesSection :locked="!isLoggedIn" :courses="coursesForSection" :default-image="landing.DEFAULT_COURSE_IMAGE" />
+    <NewsSection
+      :items="newsItemsForSection"
+      :default-image="landing.DEFAULT_NEWS_IMAGE"
+    />
     <AboutSection />
+
+    <MerchSection />
+
+    <CoursesSection
+      :locked="!isLoggedIn"
+      :courses="coursesForSection"
+      :default-image="landing.DEFAULT_COURSE_IMAGE"
+    />
+
     <ProjectsSection
       :locked="!isLoggedIn"
       :projects="projectsForSection"
       :default-image="landing.DEFAULT_PROJECT_IMAGE"
     />
-    <MerchSection />
-    
+
     <CommunityHubSection
       :locked-reminders="!isLoggedIn"
       :reminders="eventRemindersForSection"
@@ -25,17 +38,18 @@
         :partners="partnersForSection"
       />
     </ClientOnly>
-    
+
     <AppFooter :scroll-to-section="landing.scrollToSection" />
-    
+
     <!-- Floating Scroll to Top FAB -->
     <ScrollToTop />
+    <ScrollToDown />
   </div>
 </template>
 
 <script setup lang="ts">
-const { isLoggedIn, init } = useAuth()
-onMounted(() => init())
+const { isLoggedIn, init } = useAuth();
+onMounted(() => init());
 
 const {
   landing,
@@ -45,6 +59,6 @@ const {
   eventRemindersForSection,
   speakersForSection,
   sponsorsForSection,
-  partnersForSection
-} = useLandingPage()
+  partnersForSection,
+} = useLandingPage();
 </script>

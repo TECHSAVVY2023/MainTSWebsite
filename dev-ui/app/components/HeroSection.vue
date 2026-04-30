@@ -52,7 +52,7 @@
           </p>
 
           <!-- Description -->
-          <p class="max-w-lg text-sm text-gray-500 sm:text-base">
+          <p class="max-w-lg text-sm text-gray-500 sm:text-base whitespace-nowrap">
             Think Smart, Code Smarter and Powering Businesses Through Technology.
          
           </p>
@@ -88,7 +88,7 @@
               />
             </div>
             <p class="text-xs text-gray-400">
-              Join <span class="text-violet-700 font-semibold">200+</span> students already enrolled
+              Join <span class="text-violet-700 font-semibold">50+</span> core members and <span class="text-violet-700 font-semibold">800+</span> participants in our thriving community!
             </p>
           </div>
 
@@ -98,7 +98,7 @@
         <div class="hidden lg:flex items-center justify-center relative">
 
           <!-- Glow ring -->
-          <div class="absolute w-[600px] h-[600px] rounded-full border-2 border-violet-100 bg-violet-50/50" />
+          <div class="absolute w-[600px] h-[600px] rounded-full border-2 border-yellow-100 bg-yellow-50/50" />
 
           <!-- Main card -->
           <div class="relative z-10 bg-white border border-violet-100 rounded-3xl p-7 w-8/12 shadow-[0_24px_64px_rgba(124,58,237,0.12),0_4px_16px_rgba(124,58,237,0.06)] animate-[cardFloat_6s_ease-in-out_infinite]">
@@ -236,18 +236,18 @@
     />
 
     <!-- Stats trust bar — bridges hero into NewsSection -->
-    <div class="relative z-20 mt-auto w-full" style="background: #F7F6FB;">
+    <div ref="statsRef" class="relative z-20 mt-auto w-full" style="background: #F7F6FB;">
       <div class="container mx-auto">
         <!-- Thin violet divider line -->
         <div class="w-full h-px bg-gradient-to-r from-transparent via-violet-200 to-transparent mb-0" />
         <div class="grid grid-cols-2 divide-y divide-violet-100 py-4 sm:grid-cols-4 sm:divide-x sm:divide-y-0 sm:py-5">
           <div
             v-for="stat in stats"
-            :key="stat.label"
+            :key="stat.key"
             class="flex flex-col items-center justify-center gap-0.5 px-3 py-3 text-center sm:px-4 sm:py-0"
           >
-            <span class="text-2xl sm:text-3xl font-black text-violet-700 leading-none tracking-tight">
-              {{ stat.value }}
+            <span class="text-2xl sm:text-3xl font-black leading-none tracking-tight bg-gradient-to-b from-violet-700 to-red-500 bg-clip-text text-transparent">
+              {{ displayStats[stat.key as keyof typeof displayStats] }}<span class="text-xl sm:text-2xl">+</span>
             </span>
             <span class="text-[0.7rem] sm:text-xs font-semibold uppercase tracking-widest text-gray-400 mt-1">
               {{ stat.label }}
@@ -268,6 +268,7 @@ const props = defineProps<{
 const techSavvyLogo = 'https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/TechSavvyLogo.png'
 
 const cardHighlights = [
+  // "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/GDGZC2026.jpg",
   "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/group-pic/WorkflowHighlight-1.jpg",
   "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/group-pic/googleZamPenMorning.jpg",
   "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/group-pic/googleCDO.jpg",
@@ -287,24 +288,89 @@ const prevSlide = () => {
   currentSlide.value = (currentSlide.value - 1 + cardHighlights.length) % cardHighlights.length
 }
 
+const statsRef = ref(null)
+const hasAnimatedStats = ref(false)
+
+const displayStats = ref({
+  projects: 0,
+  partners: 0,
+  members: 0,
+  participants: 0
+})
+
+const stats = [
+  { value: '10+', label: 'Projects', key: 'projects', target: 10 },
+  { value: '20+', label: 'Partners and Collaborators', key: 'partners', target: 20 },
+  { value: '50+', label: 'Core Members', key: 'members', target: 50 },
+  { value: '800+', label: 'Participants', key: 'participants', target: 800 },
+]
+
+const animateStatCounter = (key: string, target: number, duration = 1800, delay = 0) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const start = Date.now()
+      const easeOutQuad = (t: number) => 1 - (1 - t) * (1 - t)
+
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - start
+        const progress = Math.min(elapsed / duration, 1)
+        const easedProgress = easeOutQuad(progress)
+        const current = Math.floor(easedProgress * target)
+
+        displayStats.value[key as keyof typeof displayStats.value] = current
+
+        if (progress >= 1) {
+          displayStats.value[key as keyof typeof displayStats.value] = target
+          clearInterval(timer)
+          resolve(undefined)
+        }
+      }, 20)
+    }, delay)
+  })
+}
+
+const startStatsAnimation = async () => {
+  if (hasAnimatedStats.value) return
+  hasAnimatedStats.value = true
+
+  await Promise.all(
+    stats.map((stat, index) =>
+      animateStatCounter(stat.key, stat.target, 1800, index * 100)
+    )
+  )
+}
+
 onMounted(() => {
   slideInterval.value = setInterval(nextSlide, 4000)
+
+  // Intersection Observer for stats animation
+  if (!statsRef.value) return
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !hasAnimatedStats.value) {
+          startStatsAnimation()
+        }
+      })
+    },
+    {
+      threshold: 0.3
+    }
+  )
+  observer.observe(statsRef.value)
+
+  onBeforeUnmount(() => {
+    observer.disconnect()
+  })
 })
 
 onBeforeUnmount(() => {
   if (slideInterval.value) clearInterval(slideInterval.value)
 })
 
-const stats = [
-  { value: '10+', label: 'Projects' },
-  { value: '20+', label: 'Partners and Collaborators' },
-  { value: '50+', label: 'Core Members' },
-  { value: '800+', label: 'Participants' },
-]
-
 const tags = ['Bootcamps', 'Workshops', 'Webinars', 'Trainings']
 
-const avatarColors = ['#a78bfa', '#f59e0b', '#34d399', '#60a5fa']
+const avatarColors = ['#ffffff', '#0038a8', '#ce1126', '#fcd116']
 const HERO_STAR_COUNT = 40
 
 type HeroStarStyle = {

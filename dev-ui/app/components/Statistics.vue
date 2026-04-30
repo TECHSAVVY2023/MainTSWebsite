@@ -30,8 +30,7 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(0)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
-              :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-blue-600 to-purple-600 bg-clip-text text-transparent'"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300 bg-gradient-to-b from-red-500 to-purple-600 bg-clip-text text-transparent"
             >
               {{ displayStats.eventsHeld }}
             </span>
@@ -54,8 +53,7 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(1)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
-              :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-pink-600 to-indigo-600 bg-clip-text text-transparent'"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300 bg-gradient-to-b from-red-500 to-indigo-600 bg-clip-text text-transparent"
             >
               {{ displayStats.liveShows }}
             </span>
@@ -78,8 +76,7 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(2)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
-              :class="isDarkMode ? 'text-white' : 'bg-gradient-to-b from-pink-600 to-indigo-600 bg-clip-text text-transparent'"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300 bg-gradient-to-b from-red-500 to-indigo-600 bg-clip-text text-transparent"
             >
               {{ displayStats.artistsManaged }}
             </span>
@@ -102,8 +99,7 @@
         <div class="text-center group cursor-default" @mouseenter="animateStat(3)">
           <div class="mb-3 sm:mb-4 flex justify-center items-baseline">
             <span 
-              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300"
-              :class="isDarkMode ? 'text-white' : 'bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent'"
+              class="inline-block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold transition-colors duration-300 bg-gradient-to-b from-red-500 to-pink-600 bg-clip-text text-transparent"
             >
               {{ displayStats.happyClients }}
             </span>

@@ -1,31 +1,16 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 
-# JWT Settings
-from datetime import timedelta
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-9vkz-a5n)4&fs#kfw1x)c_3h7)n#1iiduy1-ccf+&sr233!@)-'
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
-
-ALLOWED_HOSTS = ['apidev.techsavvies.space','127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['apidev.techsavvies.space', 'api.techsavvies.space','127.0.0.1', 'localhost']
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -42,6 +27,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'tsapi',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -74,17 +60,28 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'apiv1.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# ------------------------------------------------------------
+# DATABASE
+# ------------------------------------------------------------
+if os.getenv("DB_NAME"):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME'),
+            'USER': os.getenv('DB_USER'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
     }
-}
+else:
+    # Fallback (DEV ONLY)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 SIMPLE_JWT = {
@@ -104,7 +101,7 @@ SIMPLE_JWT = {
 
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
-    'USER_ID_FIELD': 'user_id',
+    'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
 
@@ -140,6 +137,10 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
@@ -160,6 +161,15 @@ REST_FRAMEWORK = {
     ],
 }
 
+# ------------------------------------------------------------
+# Password validation
+# ------------------------------------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+]
 
 # ------------------------------------------------------------
 # SECURITY & ORIGINS
@@ -219,29 +229,9 @@ SESSION_COOKIE_AGE = 86400
 SESSION_COOKIE_SECURE = False  
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
-
-# Delgar
 CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token
+CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = True
-
-
-#Delgar
-FRONTEND_DELGAR_BASE_URL = os.getenv('FRONTEND_DELGAR_BASE_URL')
-DELGAR_AUTH_ORIGIN = os.getenv('DELGAR_AUTH_ORIGIN')
-GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
-GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
-
-# ------------------------------------------------------------
-# Password validation
-# ------------------------------------------------------------
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
-]
-
 
 # ------------------------------------------------------------
 # Email
@@ -256,6 +246,30 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "TechSavvy <info@techsavvy.
 ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL","info@techsavvy.space")
 
 # ------------------------------------------------------------
+# Google Auth SSO
+# ------------------------------------------------------------
+AUTH_SECRET=os.getenv('AUTH_SECRET')
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+AUTH_ORIGIN = os.getenv('AUTH_ORIGIN')
+
+# Frontend URLs for Redirection
+FRONTEND_DELGAR_URL = os.getenv('FRONTEND_DELGAR_URL', 'https://delgar.store')
+FRONTEND_KATHIES_URL = os.getenv('FRONTEND_KATHIES_URL', 'https://kathieskitchen.com')
+FRONTEND_TECHSAVVY_URL = os.getenv('FRONTEND_TECHSAVVY_URL', 'https://techsavvies.space')
+FRONTEND_WORKFLOW_URL = os.getenv('FRONTEND_WORKFLOW_URL', 'https://workflow.techsavvies.space')
+FRONTEND_LOCAL_URL = os.getenv('FRONTEND_LOCAL_URL', 'http://localhost:3000')
+
+# Mapping for Dynamic Redirection
+FRONTEND_URLS = {
+    'delgar': FRONTEND_DELGAR_URL,
+    'kathies': FRONTEND_KATHIES_URL,
+    'techsavvy': FRONTEND_TECHSAVVY_URL,
+    'workflow': FRONTEND_WORKFLOW_URL,
+    'local': FRONTEND_LOCAL_URL,
+}
+
+# ------------------------------------------------------------
 # Stripe Settings
 # ------------------------------------------------------------
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
@@ -267,22 +281,13 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 # ------------------------------------------------------------
 PAYMONGO_SECRET_KEY = os.getenv("PAYMONGO_SECRET_KEY")
 PAYMONGO_PUBLIC_KEY = os.getenv("PAYMONGO_PUBLIC_KEY")
-
-# Workflow
-WORKFLOW_PAYMONGO_SECRET_KEY = os.getenv('WORKFLOW_PAYMONGO_SECRET_KEY')
-WORKFLOW_PAYMONGO_PUBLIC_KEY = os.getenv('WORKFLOW_PAYMONGO_PUBLIC_KEY')
-WORKFLOW_PAYMONGO_WEBHOOK_SECRET = os.getenv('WORKFLOW_PAYMONGO_WEBHOOK_SECRET')
+PAYMONGO_WEBHOOK_SECRET = os.getenv('PAYMONGO_WEBHOOK_SECRET')
 
 # ------------------------------------------------------------
 # Wise Settings
 # ------------------------------------------------------------
 WISE_API_KEY = os.getenv("WISE_API_KEY")
 WISE_PROFILE_ID = os.getenv("WISE_PROFILE_ID")
-
-# ------------------------------------------------------------
-# Frontend URL
-# ------------------------------------------------------------
-FRONTEND_URL = os.getenv("FRONTEND_URL", "https://techsavvies.space")
 
 # ------------------------------------------------------------
 # Static & Media
@@ -306,10 +311,9 @@ STORAGES = {
     },
 }
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# ------------------------------------------------------------
+# File Upload
+# ------------------------------------------------------------
 MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/{AWS_LOCATION}/"
 STATIC_URL = 'staticfiles/'
 STATIC_ROOT = 'staticfiles/'
@@ -319,7 +323,6 @@ STATIC_ROOT = 'staticfiles/'
 # ------------------------------------------------------------
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000
-
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
@@ -336,3 +339,4 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+TECHSAVVY_FRONTEND_URL = os.getenv("TECHSAVVY_FRONTEND_URL")

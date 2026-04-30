@@ -88,10 +88,7 @@ const handlePayment = async () => {
   loading.value = true
 
   try {
-    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    const apiBase = isLocal ? 'http://127.0.0.1:8000' : 'https://api.techsavvies.space'
-
-    const res = await fetch(`${apiBase}/api/wise-experiment/create-payment-link/`, {
+    const res = await fetch(`${config.apiBase}/api/wise-experiment/create-payment-link/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -15,6 +15,6 @@ def _env_string(key: str, default: str = "") -> str:
 GOOGLE_CLIENT_ID: str = _env_string("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET: str = _env_string("GOOGLE_CLIENT_SECRET")
 
-FRONTEND_URL: str = _env_string("FRONTEND_URL", "https://techsavvies.space").rstrip("/")
+FRONTEND_URL: str = _env_string("FRONTEND_URL").rstrip("/")
 
 AUTH_JWT_SECRET: str = _env_string("AUTH_JWT_SECRET") or _env_string("DJANGO_SECRET_KEY") or "change-this-secret"

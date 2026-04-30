@@ -35,7 +35,7 @@ const pay = async () => {
 
   try {
     const res = await fetch(
-      'https://api.techsavvies.space/api/paymongo-experiment/create-checkout-session/',
+      `${config.apiBase}/api/paymongo-experiment/create-checkout-session/`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

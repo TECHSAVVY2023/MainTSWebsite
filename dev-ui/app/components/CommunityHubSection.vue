@@ -114,7 +114,7 @@
     >
       <SectionWires gradient-id-prefix="swg-community-people" />
       <div class="relative z-10 isolate flex-1 flex flex-col">
-        <div class="container mx-auto relative flex-1 flex flex-col">
+        <div class="w-11/12 mx-auto relative flex-1 flex flex-col">
           <div class="mb-8 sm:mb-12">
             <div class="flex flex-col items-start justify-between gap-3 sm:gap-4 md:flex-row md:items-end">
               <SectionWireShield :wide="false">

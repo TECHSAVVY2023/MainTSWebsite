@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-auto w-full max-w-[72rem]">
-    <div class="grid grid-cols-2 items-stretch gap-3 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+  <div class="mx-auto w-full">
+    <div class="grid grid-cols-2 items-stretch gap-3 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-6">
       <article
         v-for="(speaker, idx) in speakers"
         :key="`${speaker.name || 'speaker'}-${idx}`"

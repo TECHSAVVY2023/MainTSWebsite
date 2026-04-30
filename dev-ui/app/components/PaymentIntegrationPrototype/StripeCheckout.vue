@@ -84,7 +84,7 @@ const pay = async () => {
   loading.value = true
 
   try {
-    const res = await fetch('https://api.techsavvies.space/api/stripe-experiment/create-checkout-session/', {
+    const res = await fetch(`${config.apiBase}/api/stripe-experiment/create-checkout-session/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

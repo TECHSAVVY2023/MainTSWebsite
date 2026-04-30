@@ -10,7 +10,7 @@
     <button
       v-show="isVisible"
       @click="scrollToTop"
-      class="fixed bottom-8 right-8 z-50 flex items-center justify-center w-12 h-12 rounded-2xl bg-violet-600 text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-all duration-300 hover:bg-violet-700 hover:shadow-[0_12px_32px_rgba(124,58,237,0.45)] hover:-translate-y-1 active:scale-95 group"
+      class="fixed bottom-24 right-8 z-50 flex items-center justify-center w-12 h-12 rounded-2xl bg-violet-600 text-white shadow-[0_8px_24px_rgba(124,58,237,0.35)] transition-all duration-300 hover:bg-violet-700 hover:shadow-[0_12px_32px_rgba(124,58,237,0.45)] hover:-translate-y-1 active:scale-95 group"
       aria-label="Scroll to top"
     >
       <i class="fas fa-chevron-up transition-transform duration-300 group-hover:-translate-y-0.5"></i>

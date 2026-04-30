@@ -40,50 +40,18 @@
             </a>
 
             <div class="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-8">
-              <a href="#news"
-                class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                @click.prevent="scrollToSection('#news')">News</a>
               <a
-                href="#courses"
+                v-for="item in navBarList"
+                :key="item.href"
+                :href="item.href"
                 class="inline-flex items-center gap-1.5 text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                :aria-label="isLoggedIn ? 'Courses' : 'Courses — sign in to unlock full access'"
-                @click.prevent="scrollToSection('#courses')"
+                :aria-label="item.restricted && !isLoggedIn ? `${item.label} — sign in to unlock full access` : item.label"
+                @click.prevent="scrollToSection(item.href)"
+                :class="item.restricted && !isLoggedIn ? 'opacity-70' : ''"
               >
-                Courses
+                {{ item.label }}
                 <i
-                  v-if="!isLoggedIn"
-                  class="fas fa-lock text-[0.65rem] text-violet-600/90 opacity-90"
-                  aria-hidden="true"
-                />
-              </a>
-              <a href="#about"
-                class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                @click.prevent="scrollToSection('#about')">About</a>
-              <a
-                href="#projects"
-                class="inline-flex items-center gap-1.5 text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                :aria-label="isLoggedIn ? 'Projects' : 'Projects — sign in to unlock full access'"
-                @click.prevent="scrollToSection('#projects')"
-              >
-                Projects
-                <i
-                  v-if="!isLoggedIn"
-                  class="fas fa-lock text-[0.65rem] text-violet-600/90 opacity-90"
-                  aria-hidden="true"
-                />
-              </a>
-              <a href="#merch"
-                class="text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                @click.prevent="scrollToSection('#merch')">Merch</a>
-              <a
-                href="#events-reminders"
-                class="inline-flex items-center gap-1.5 text-dark/85 text-lg font-medium tracking-wide pt-2 pb-2 border-b-2 border-transparent transition-colors hover:text-dark hover:border-accent-purple"
-                :aria-label="isLoggedIn ? 'Events Reminder' : 'Events Reminder — sign in to unlock full access'"
-                @click.prevent="scrollToSection('#events-reminders')"
-              >
-                Events Reminder
-                <i
-                  v-if="!isLoggedIn"
+                  v-if="item.restricted && !isLoggedIn"
                   class="fas fa-lock text-[0.65rem] text-violet-600/90 opacity-90"
                   aria-hidden="true"
                 />
@@ -140,54 +108,21 @@
             class="w-full rounded-xl border border-dark/20 bg-white py-3 pl-10 pr-4 text-[0.9375rem] font-medium text-dark shadow-sm shadow-black/5 outline-none transition-all placeholder:text-dark/60 hover:border-accent-purple/35 focus:border-accent-purple/60 focus:ring-[3px] focus:ring-accent-purple/20"
             aria-label="Search" />
         </form>
-        <a href="#news"
-          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          @click.prevent="go('#news')">News</a>
-        <a
-          href="#courses"
-          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          :aria-label="isLoggedIn ? 'Courses' : 'Courses — sign in to unlock'"
-          @click.prevent="go('#courses')"
-        >
-          <span>Courses</span>
-          <i
-            v-if="!isLoggedIn"
-            class="fas fa-lock text-xs text-violet-600/90"
-            aria-hidden="true"
-          />
-        </a>
-        <a href="#about"
-          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          @click.prevent="go('#about')">About</a>
-        <a
-          href="#projects"
-          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          :aria-label="isLoggedIn ? 'Projects' : 'Projects — sign in to unlock'"
-          @click.prevent="go('#projects')"
-        >
-          <span>Projects</span>
-          <i
-            v-if="!isLoggedIn"
-            class="fas fa-lock text-xs text-violet-600/90"
-            aria-hidden="true"
-          />
-        </a>
-        <a href="#merch"
-          class="block rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          @click.prevent="go('#merch')">Merch</a>
-        <a
-          href="#events-reminders"
-          class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
-          :aria-label="isLoggedIn ? 'Events Reminder' : 'Events Reminder — sign in to unlock'"
-          @click.prevent="go('#events-reminders')"
-        >
-          <span>Events Reminder</span>
-          <i
-            v-if="!isLoggedIn"
-            class="fas fa-lock text-xs text-violet-600/90"
-            aria-hidden="true"
-          />
-        </a>
+        <template v-for="item in navBarList" :key="item.href">
+          <a
+            :href="item.href"
+            class="flex items-center justify-center gap-2 rounded-xl border-b border-neutral-border py-3.5 text-[0.9375rem] font-medium text-dark/90 no-underline text-center transition-colors hover:bg-neutral-gray/60 hover:text-dark"
+            :aria-label="item.restricted && !isLoggedIn ? `${item.label} — sign in to unlock` : item.label"
+            @click.prevent="go(item.href)"
+          >
+            <span>{{ item.label }}</span>
+            <i
+              v-if="item.restricted && !isLoggedIn"
+              class="fas fa-lock text-xs text-violet-600/90"
+              aria-hidden="true"
+            />
+          </a>
+        </template>
       </div>
     </header>
   </div>
@@ -210,6 +145,15 @@ const props = defineProps<{
 const emit = defineEmits<{
   search: [query: string]
 }>()
+
+const navBarList = [
+  { label: 'News', href: '#news', restricted: false },
+  { label: 'About', href: '#about', restricted: false },
+  { label: 'Merch', href: '#merch', restricted: false },
+  { label: 'Courses', href: '#courses', restricted: true },
+  { label: 'Projects', href: '#projects', restricted: true },
+  { label: 'Events Reminder', href: '#events-reminders', restricted: true }
+]
 
 function go(id: string) {
   props.scrollToSection(id)

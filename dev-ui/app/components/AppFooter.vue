@@ -9,10 +9,10 @@
         <!-- Column 1: Brand -->
         <div class="flex items-center justify-center text-center lg:justify-start lg:text-left">
           <div class="max-w-full">
-            <NuxtLink to="/" class="mx-auto mb-6 flex w-fit shrink-0 items-center lg:mx-0" aria-label="Home">
+            <NuxtLink to="/" class="mx-auto mb-6 flex w-fit shrink-0 items-center lg:mx-auto" aria-label="Home">
             <img :src="logoUrl" alt="TechSavvy" class="h-20 w-auto sm:h-24" />
           </NuxtLink>
-          <div class="space-y-3">
+          <div class="space-y-3 text-center">
             <p class="text-sm font-bold leading-relaxed text-[#1a0533] sm:text-[0.9375rem]">
               Think Smart, Code Smarter.<br />
               <span class="text-violet-600">Powering Businesses Through Technology.</span>
@@ -59,19 +59,19 @@
           <!-- Location Area styled like Hero card -->
           <address class="not-italic flex flex-col gap-3">
             <div class="flex items-start gap-3">
-              <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shadow-sm">
+              <div class="shrink-0 w-8 h-8 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center shadow-sm">
                 <i class="fas fa-map-marker-alt text-violet-600 text-sm"></i>
               </div>
               <div class="space-y-1">
                 <p class="text-[11px] text-[#1a0533] font-bold leading-tight">
-                  Oracle Press International Inc.<br />
+                  <!-- Oracle Press International Inc.<br /> -->
                   Workflow Co-Working Space<br />
                   Mercury Drug/SSS, Ozamiz City
                 </p>
               </div>
             </div>
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shadow-sm">
+              <div class="shrink-0 w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center shadow-sm">
                 <i class="fas fa-paper-plane text-amber-600 text-sm"></i>
               </div>
               <a href="mailto:info@techsavvies.space" class="text-[11px] font-bold text-violet-600 no-underline transition-colors hover:text-violet-700">info@techsavvies.space</a>
@@ -98,7 +98,7 @@
         
         <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-6">
           <span class="text-[10px] font-bold uppercase tracking-widest text-[#1a0533]/60">All Rights Reserved</span>
-          <a href="https://www.techsavvies.space" target="_blank" rel="noopener" class="text-[10px] font-bold uppercase tracking-widest text-violet-400 hover:text-violet-600 transition-colors">techsavvies.space</a>
+          <a href="https://www.techsavvies.space" target="_blank" rel="noopener" class="text-[10px] font-bold uppercase tracking-widest text-violet-400 hover:text-violet-600 transition-colors">www.techsavvies.space</a>
         </div>
       </div>
     </div>
