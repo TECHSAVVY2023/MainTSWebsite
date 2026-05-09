@@ -46,7 +46,7 @@ export function useAuth () {
       console.error('NUXT_PUBLIC_API_BASE is not set; cannot start Google sign-in.')
       return
     }
-    window.location.href = `${base}/auth/google/start/`
+    window.location.href = `${base}/api/techsavvy/auth/google/start/`
   }
 
   const logout = () => {

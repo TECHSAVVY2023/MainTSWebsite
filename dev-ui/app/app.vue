@@ -1,6 +1,7 @@
 <template>
-  <!-- Sample comment: the global layout wraps every routed page. -->
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <div>
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </div>
 </template>
