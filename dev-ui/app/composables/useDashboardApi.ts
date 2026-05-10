@@ -79,8 +79,8 @@ function getBase (): string {
 /** Host-only base (e.g. http://127.0.0.1:8000) or full API root (…/api/techsavvy) — both supported. */
 function calendarEventsBaseUrl (base: string): string {
   const t = base.replace(/\/$/, '')
-  if (/\/api\/techsavvy$/i.test(t)) return `${t}/calendar-events`
-  return `${t}/api/techsavvy/calendar-events`
+  if (/\/api\/techsavvy$/i.test(t)) return `${t}calendar-events`
+  return `${t}/calendar-events`
 }
 
 async function apiGet<T> (path: string, defaultValue: T): Promise<T> {

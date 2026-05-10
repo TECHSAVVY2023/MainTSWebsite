@@ -33,7 +33,7 @@ export function useAuth () {
 
   const login = () => {
     if (!process.client) return
-    const base = String(config.public.apiBase || '').replace(/\/$/, '')
+    const base = String(config.public.apiBase || '')
     if (!base) {
       console.error('NUXT_PUBLIC_API_BASE is not set; cannot start Google sign-in.')
       return
@@ -43,7 +43,7 @@ export function useAuth () {
 
   const logout = async () => {
     if (process.client) {
-      const base = String(config.public.apiBase || '').replace(/\/$/, '')
+      const base = String(config.public.apiBase || '')
       try {
         // Tell backend to clear HttpOnly cookies
         await $fetch(`${base}auth/logout/`, {
