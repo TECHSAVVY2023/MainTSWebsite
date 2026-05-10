@@ -38,7 +38,7 @@ export function useAuth () {
       console.error('NUXT_PUBLIC_API_BASE is not set; cannot start Google sign-in.')
       return
     }
-    window.location.href = `${base}/api/techsavvy/auth/google/start/`
+    window.location.href = `${base}auth/google/start/`
   }
 
   const logout = async () => {
@@ -46,7 +46,7 @@ export function useAuth () {
       const base = String(config.public.apiBase || '').replace(/\/$/, '')
       try {
         // Tell backend to clear HttpOnly cookies
-        await $fetch(`${base}/api/techsavvy/auth/logout/`, {
+        await $fetch(`${base}auth/logout/`, {
           method: 'POST',
         })
       } catch (e) {
