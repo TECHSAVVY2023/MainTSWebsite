@@ -7,7 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 /** Local Django default when `.env` has no `NUXT_PUBLIC_API_BASE` (avoids empty CMS + demo fallbacks). */
 const defaultPublicApiBase =
   process.env.NUXT_PUBLIC_API_BASE?.trim() ||
-  (process.env.NODE_ENV !== "production" ? "http://http://127.0.0.1:8000/api/techsavvy/" : "https://apidev.techsavvies.space/api/techsavvy/");
+  (process.env.NODE_ENV !== "production" ? "http://localhost:8000/api/techsavvy/" : "https://apidev.techsavvies.space/api/techsavvy/");
 
 export default defineNuxtConfig({
   modules: ["nuxt-gtag"],
@@ -68,7 +68,7 @@ export default defineNuxtConfig({
       /** Public site origin for checkout success/cancel URLs (e.g. https://techsavvies.space) */
       siteUrl: process.env.NUXT_PUBLIC_SITE_URL || "",
       /** Comma-separated emails that get super-admin UI (dev: add your Google email). */
-      superAdminEmails: process.env.NUXT_PUBLIC_SUPERADMIN_EMAILS || "markanthonyogaoogao@gmail.com,info@techsavvies.space"
+      superAdminEmails: process.env.NUXT_PUBLIC_SUPERADMIN_EMAILS || "dancyrus.geralde@nmsc.edu.ph,info@techsavvies.space"
     },
   }
 });

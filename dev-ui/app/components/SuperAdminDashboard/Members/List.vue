@@ -217,30 +217,81 @@
                       <div class="space-y-6">
                          <h3 class="text-[10px] font-black text-violet-200 uppercase tracking-[0.2em] border-b border-violet-50 pb-2">Account Vault</h3>
                          <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-violet-50/30 p-4 rounded-3xl border border-violet-100/50 space-y-2">
-                               <label class="text-[8px] font-black text-violet-900 uppercase leading-none">GCash Points</label>
+                            <div class="bg-violet-50/30 p-4 rounded-3xl border border-violet-100/50 flex items-center justify-between">
+                               <div class="space-y-1">
+                                  <label class="text-[8px] font-black text-violet-900 uppercase leading-none block">GCash Points</label>
+                                  <div class="flex items-center gap-1">
+                                     <span class="text-xs font-black text-violet-300">₱</span>
+                                     <span class="text-lg font-black text-violet-600 leading-none">{{ selectedMember.gcashPoints || 0 }}</span>
+                                  </div>
+                               </div>
+                               <button v-if="isAdmin" @click="openAdjustPointsModal('gcash')" class="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all">Adjust</button>
+                            </div>
+
+                            <div class="bg-violet-50/30 p-4 rounded-3xl border border-violet-100/50 flex items-center justify-between">
+                               <div class="space-y-1">
+                                  <label class="text-[8px] font-black text-violet-900 uppercase leading-none block">Bonus Awards</label>
+                                  <div class="flex items-center gap-1">
+                                     <span class="text-xs font-black text-violet-300">₱</span>
+                                     <span class="text-lg font-black text-violet-600 leading-none">{{ selectedMember.bonusPoints || 0 }}</span>
+                                  </div>
+                               </div>
+                               <button v-if="isAdmin" @click="openAdjustPointsModal('bonus')" class="px-2.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all">Adjust</button>
+                            </div>
+
+                            <div class="bg-sky-50/30 p-4 rounded-3xl border border-sky-100/50 flex items-center justify-between">
+                               <div class="space-y-1">
+                                  <label class="text-[8px] font-black text-sky-500 uppercase leading-none block">Voucher Fund</label>
+                                  <div class="flex items-center gap-1">
+                                     <span class="text-lg font-black text-sky-600 leading-none">{{ selectedMember.voucherPoints || 0 }}</span>
+                                  </div>
+                               </div>
+                               <button v-if="isAdmin" @click="openAdjustPointsModal('voucher')" class="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all">Adjust</button>
+                            </div>
+
+                            <div class="bg-emerald-50/30 p-4 rounded-3xl border border-emerald-100/50 flex items-center justify-between">
+                               <div class="space-y-1">
+                                  <label class="text-[8px] font-black text-emerald-600 uppercase leading-none block">Honorarium</label>
+                                  <div class="flex items-center gap-1">
+                                     <span class="text-xs font-black text-emerald-400">₱</span>
+                                     <span class="text-lg font-black text-emerald-600 leading-none">{{ selectedMember.honorariumPoints || 0 }}</span>
+                                  </div>
+                               </div>
+                               <button v-if="isAdmin" @click="openAdjustPointsModal('honorarium')" class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[9px] font-black uppercase tracking-wider transition-all">Adjust</button>
+                            </div>
+
+                            <div class="bg-amber-50/30 p-4 rounded-3xl border border-amber-100/50 space-y-2 col-span-2">
+                               <label class="text-[8px] font-black text-amber-500 uppercase block leading-none">Global Projects</label>
                                <div class="flex items-center gap-1">
-                                  <span class="text-xs font-black text-violet-300">₱</span>
-                                  <input type="number" v-model.number="selectedMember.gcashPoints" class="bg-transparent border-none p-0 text-lg font-black text-violet-600 w-full focus:ring-0" @blur="syncField('gcashPoints')" />
+                                  <input type="number" v-model.number="selectedMember.numberOfProjects" :disabled="!isAdmin" class="bg-transparent border-none p-0 text-lg font-black text-amber-600 w-full focus:ring-0 disabled:opacity-80" @blur="syncField('numberOfProjects')" />
                                </div>
                             </div>
-                            <div class="bg-violet-50/30 p-4 rounded-3xl border border-violet-100/50 space-y-2">
-                               <label class="text-[8px] font-black text-violet-900 uppercase leading-none">Bonus Awards</label>
-                               <div class="flex items-center gap-1">
-                                  <span class="text-xs font-black text-violet-300">₱</span>
-                                  <input type="number" v-model.number="selectedMember.bonusPoints" class="bg-transparent border-none p-0 text-lg font-black text-violet-600 w-full focus:ring-0" @blur="syncField('bonusPoints')" />
-                               </div>
+                         </div>
+
+                         <!-- Points Transactions Log -->
+                         <div class="space-y-4 pt-4 border-t border-violet-100/50">
+                            <div class="flex items-center justify-between">
+                               <h4 class="text-[9px] font-black text-violet-400 uppercase tracking-[0.2em]">Transaction Log</h4>
+                               <span class="text-[8px] font-bold text-violet-300 uppercase">{{ (selectedMember.points_transactions || []).length }} Transactions</span>
                             </div>
-                            <div class="bg-sky-50/30 p-4 rounded-3xl border border-sky-100/50 space-y-2">
-                               <label class="text-[8px] font-black text-sky-400 uppercase leading-none">Voucher Fund</label>
-                               <div class="flex items-center gap-1">
-                                  <input type="number" v-model.number="selectedMember.voucherPoints" class="bg-transparent border-none p-0 text-lg font-black text-sky-600 w-full focus:ring-0" @blur="syncField('voucherPoints')" />
-                               </div>
+                            <div v-if="!(selectedMember.points_transactions && selectedMember.points_transactions.length)" class="text-center py-6 bg-violet-50/10 rounded-2xl border border-dashed border-violet-100/30">
+                               <p class="text-[10px] font-bold text-violet-300 uppercase tracking-wider">No transaction history found</p>
                             </div>
-                            <div class="bg-amber-50/30 p-4 rounded-3xl border border-amber-100/50 space-y-2">
-                               <label class="text-[8px] font-black text-amber-400 uppercase leading-none">Global Projects</label>
-                               <div class="flex items-center gap-1">
-                                  <input type="number" v-model.number="selectedMember.numberOfProjects" class="bg-transparent border-none p-0 text-lg font-black text-amber-600 w-full focus:ring-0" @blur="syncField('numberOfProjects')" />
+                            <div v-else class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                               <div v-for="tx in selectedMember.points_transactions" :key="tx.id" class="p-3 bg-violet-50/20 rounded-2xl border border-violet-100/40 flex items-center justify-between text-[10px]">
+                                  <div class="space-y-1">
+                                     <p class="font-black text-[#1a0533]">
+                                        <span class="uppercase tracking-wider text-violet-600 mr-1.5">{{ tx.point_type }}</span>
+                                        <span :class="tx.amount >= 0 ? 'text-green-600' : 'text-rose-600'" class="font-black font-mono">
+                                           {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount }}
+                                        </span>
+                                     </p>
+                                     <p class="text-[9px] text-[#1a0533]/60 italic font-bold">"{{ tx.reason || 'No reason provided' }}"</p>
+                                  </div>
+                                  <div class="text-right space-y-0.5">
+                                     <p class="text-[8px] font-black uppercase text-[#1a0533]/80 leading-none">by {{ tx.created_by }}</p>
+                                     <p class="text-[7px] text-violet-400 leading-none">{{ formatDate(tx.created_at) }}</p>
+                                  </div>
                                </div>
                             </div>
                          </div>
@@ -413,6 +464,64 @@
       </Transition>
     </Teleport>
 
+    <!-- ✨ Adjust Points Modal -->
+    <Teleport to="body">
+       <Transition
+         enter-active-class="transition-opacity duration-[300ms] ease-out"
+         leave-active-class="transition-opacity duration-[300ms] ease-out"
+         enter-from-class="opacity-0"
+         leave-to-class="opacity-0"
+       >
+          <div v-if="showAdjustPointsModal" class="fixed inset-0 z-[230] flex items-center justify-center bg-[#1a0533]/40 p-4 backdrop-blur-sm" @click="closeAdjustPointsModal">
+             <div class="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-violet-200/70 bg-white shadow-2xl" @click.stop>
+                <div class="border-b border-violet-100 bg-gradient-to-r from-violet-50 to-indigo-50 px-6 py-4">
+                   <div class="flex items-center justify-between">
+                      <div>
+                         <p class="text-[9px] font-black uppercase tracking-widest text-violet-500">Vault Operations</p>
+                         <h3 class="mt-0.5 text-base font-black uppercase tracking-tight text-[#1a0533]">Adjust Points</h3>
+                      </div>
+                      <button @click="closeAdjustPointsModal" class="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-violet-700 shadow-sm ring-1 ring-violet-100 hover:bg-violet-100">
+                         <i class="fas fa-times text-xs" />
+                      </button>
+                   </div>
+                </div>
+
+                <div class="p-6 space-y-4">
+                   <div>
+                      <label class="mb-1 block text-[8px] font-black uppercase tracking-widest text-[#1a0533]/70">Points Target</label>
+                      <select v-model="adjustPointsForm.pointType" class="h-10 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-xs font-semibold text-[#1a0533] outline-none focus:border-violet-300 focus:bg-white">
+                         <option value="gcash">GCash Points</option>
+                         <option value="bonus">Bonus Awards</option>
+                         <option value="voucher">Voucher Fund</option>
+                         <option value="honorarium">Honorarium Points</option>
+                      </select>
+                   </div>
+
+                   <div>
+                      <label class="mb-1 block text-[8px] font-black uppercase tracking-widest text-[#1a0533]/70">Amount (Use negative to deduct)</label>
+                      <input v-model.number="adjustPointsForm.amount" type="number" class="h-10 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-xs font-semibold text-[#1a0533] outline-none focus:border-violet-300 focus:bg-white" placeholder="0" />
+                   </div>
+
+                   <div>
+                      <label class="mb-1 block text-[8px] font-black uppercase tracking-widest text-[#1a0533]/70">Reason for Adjustment</label>
+                      <textarea v-model="adjustPointsForm.reason" rows="3" required class="w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 py-2 text-xs font-semibold text-[#1a0533] outline-none focus:border-violet-300 focus:bg-white" placeholder="Provide a short description for auditing..."></textarea>
+                   </div>
+
+                   <p v-if="adjustPointsError" class="text-[10px] font-bold text-rose-600 uppercase tracking-wide bg-rose-50 px-3 py-2 rounded-xl border border-rose-100">{{ adjustPointsError }}</p>
+                </div>
+
+                <div class="px-6 py-4 bg-violet-50/30 flex items-center justify-end gap-3">
+                   <button @click="closeAdjustPointsModal" class="h-10 px-4 rounded-xl border border-violet-100 text-violet-700 bg-white font-black uppercase text-[9px] tracking-wider hover:bg-violet-50">Cancel</button>
+                   <button @click="submitAdjustPoints" :disabled="adjustPointsLoading" class="h-10 px-5 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-black uppercase text-[9px] tracking-wider disabled:opacity-50 flex items-center gap-2">
+                      <span v-if="adjustPointsLoading" class="w-3.5 h-3.5 border border-white/20 border-t-white rounded-full animate-spin"></span>
+                      Confirm Adjustment
+                   </button>
+                </div>
+             </div>
+          </div>
+       </Transition>
+    </Teleport>
+
     <!-- Hidden Inputs -->
     <div v-if="isAdmin" class="hidden">
        <input 
@@ -444,6 +553,8 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
+
 const props = defineProps({
   isAdmin: { type: Boolean, default: false }
 })
@@ -478,5 +589,54 @@ const {
   getRoleColor,
   triggerFileUpload,
   handleProfilePictureUpload,
+  adjustPoints,
 } = useMemberDirectory(toRef(props, 'isAdmin'))
+
+const showAdjustPointsModal = ref(false)
+const adjustPointsForm = ref({
+  pointType: 'gcash',
+  amount: 0,
+  reason: ''
+})
+const adjustPointsLoading = ref(false)
+const adjustPointsError = ref('')
+
+const openAdjustPointsModal = (pointType = 'gcash') => {
+  adjustPointsForm.value = {
+    pointType: pointType,
+    amount: 0,
+    reason: ''
+  }
+  adjustPointsError.value = ''
+  showAdjustPointsModal.value = true
+}
+
+const closeAdjustPointsModal = () => {
+  showAdjustPointsModal.value = false
+}
+
+const submitAdjustPoints = async () => {
+  if (!selectedMember.value) return
+  adjustPointsLoading.value = true
+  adjustPointsError.value = ''
+  try {
+    await adjustPoints(
+      selectedMember.value.id,
+      adjustPointsForm.value.pointType,
+      adjustPointsForm.value.amount,
+      adjustPointsForm.value.reason
+    )
+    closeAdjustPointsModal()
+  } catch (err) {
+    adjustPointsError.value = err.data?.error || err.message || 'Failed to adjust points'
+  } finally {
+    adjustPointsLoading.value = false
+  }
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return date.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
 </script>

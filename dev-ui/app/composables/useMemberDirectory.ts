@@ -187,6 +187,45 @@ export function useMemberDirectory (isAdmin: MaybeRefOrGetter<boolean>) {
     }
   }
 
+  async function adjustPoints (memberId: string | number, pointType: string, amount: number, reason: string) {
+    if (!apiBase.value) return
+    const stateKey = `${memberId}-${pointType}-adjust`
+    try {
+      savingStates.value[stateKey] = 'saving'
+      const response = await $fetch<any>(`${apiBase.value}/member/${memberId}/adjust-points/`, {
+        method: 'POST',
+        body: {
+          point_type: pointType,
+          amount: amount,
+          reason: reason
+        }
+      })
+      savingStates.value[stateKey] = 'saved'
+
+      const mIdx = members.value.findIndex(m => m.id === memberId)
+      if (mIdx !== -1) {
+        members.value[mIdx] = {
+          ...members.value[mIdx],
+          ...response
+        }
+      }
+      if (selectedMember.value?.id === memberId) {
+        selectedMember.value = {
+          ...selectedMember.value,
+          ...response
+        }
+      }
+
+      setTimeout(() => {
+        delete savingStates.value[stateKey]
+      }, 2000)
+    } catch (error) {
+      console.error(`Error adjusting ${pointType}:`, error)
+      savingStates.value[stateKey] = 'error'
+      throw error
+    }
+  }
+
   onMounted(async () => {
     await fetchMembers()
   })
@@ -221,5 +260,6 @@ export function useMemberDirectory (isAdmin: MaybeRefOrGetter<boolean>) {
     getRoleColor,
     triggerFileUpload,
     handleProfilePictureUpload,
+    adjustPoints,
   }
 }

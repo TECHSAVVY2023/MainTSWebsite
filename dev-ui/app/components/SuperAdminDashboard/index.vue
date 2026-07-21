@@ -1149,6 +1149,7 @@ import moment from 'moment'
 import { cmsItemHasAuthorEmail, type CmsFileEntry, type CmsRaw } from '~/composables/useDashboardCmsList'
 import { updateCMSPost } from '~/utils/api'
 import DashboardCmsForm from './ContentFormAndList.vue'
+import CreateContent from './CreateContent.vue'
 
 // ── Views Management ────────────────────────────────────────────
 const activeView = ref('Profile')
