@@ -28,7 +28,8 @@ export function useAuth () {
         id: parsed.id,
         name: parsed.name,
         email: parsed.email,
-        image: parsed.picture
+        image: parsed.picture,
+        picture: parsed.picture
       };
     } catch (e) {
       console.error('Failed to parse tsapi_user cookie:', e);

@@ -1,16 +1,18 @@
 <template>
-  <div>
-    <!-- Header Card -->
-    <div class="bg-linear-to-r rounded-3xl shadow p-8 mb-6">
-      <div
-        class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
-      >
+  <div class="relative mb-6 sm:mb-8">
+    <!-- Header Banner Card -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-900 via-purple-900 to-violet-950 p-6 sm:p-8 text-white shadow-xl shadow-indigo-950/20 border border-white/10">
+      <!-- Ambient Lighting Layer -->
+      <div class="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl pointer-events-none" />
+      <div class="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none" />
+
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <!-- User Info Section -->
-        <div class="flex items-center gap-6">
-          <div class="relative">
+        <div class="flex items-center gap-5 sm:gap-6">
+          <div class="relative shrink-0">
             <div
               v-if="profileImage"
-              class="w-20 h-20 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white"
+              class="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl border-2 border-white/20 shadow-2xl overflow-hidden bg-white/10 backdrop-blur-md"
             >
               <img
                 :src="profileImage"
@@ -21,65 +23,43 @@
             </div>
             <div
               v-else
-              class="w-20 h-20 rounded-full border-4 border-white shadow-lg bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center"
+              class="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl border-2 border-white/20 shadow-2xl bg-gradient-to-br from-violet-500 via-purple-600 to-pink-500 flex items-center justify-center backdrop-blur-md"
             >
-              <span class=" text-2xl font-bold">{{
-                userInitials
-              }}</span>
+              <span class="text-2xl font-black text-white tracking-wider">{{ userInitials }}</span>
             </div>
-            <div
-              class="absolute -bottom-1 -right-1 bg-green-400 w-6 h-6 rounded-full border-2 border-white"
-            ></div>
+            <!-- Live Status Indicator -->
+            <span class="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center" aria-label="Online">
+              <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span class="relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-indigo-950 bg-emerald-500" />
+            </span>
           </div>
 
-          <div class="">
-            <h1 class="text-3xl font-bold mb-1 flex items-center gap-2">
-              Good {{ greeting }} 👋
+          <div class="min-w-0">
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight mb-1 flex items-center gap-2">
+              Good {{ greeting }} <span class="animate-bounce inline-block text-xl sm:text-2xl">👋</span>
             </h1>
-            <p class="text-sm opacity-90 mb-2">
-              Welcome back to your dashboard
+            <p class="text-xs sm:text-sm text-purple-200/90 font-medium mb-3">
+              Welcome back to your command center
             </p>
 
-            <div
-              class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-2 inline-block"
-            >
-              <p class="font-bold text-lg">
-                {{ user?.name?.toUpperCase() || "USER" }}
+            <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-4 py-2 inline-block shadow-inner">
+              <p class="font-black text-sm sm:text-base tracking-wide text-white">
+                {{ user?.name?.toUpperCase() || "ADMINISTRATOR" }}
               </p>
-              <p class="text-xs opacity-90">{{ user?.email || "" }}</p>
+              <p class="text-[11px] font-mono text-purple-200/80 truncate">{{ user?.email || "" }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Clock Section -->
-        <div
-          class="bg-white/20 backdrop-blur-sm rounded-2xl px-8 py-4 "
-        >
-          <div class="flex items-center gap-2 justify-center text-sm">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fill-rule="evenodd"
-                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                clip-rule="evenodd"
-              />
-            </svg>
+        <!-- Clock & Date Section -->
+        <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-6 py-4 shrink-0 flex flex-col justify-center text-center shadow-lg">
+          <div class="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-purple-200/90 mb-1.5">
+            <i class="far fa-calendar-alt text-violet-300" />
             <span>{{ currentDate }}</span>
           </div>
-          <div class="flex items-center gap-3">
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span class="text-3xl font-bold font-mono">{{ currentTime }}</span>
+          <div class="flex items-center justify-center gap-2.5">
+            <i class="far fa-clock text-lg text-emerald-400 animate-pulse" />
+            <span class="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">{{ currentTime }}</span>
           </div>
         </div>
       </div>

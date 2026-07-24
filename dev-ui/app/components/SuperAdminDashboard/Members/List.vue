@@ -198,10 +198,20 @@
                       <div class="space-y-6">
                          <h3 class="text-[10px] font-black text-violet-200 uppercase tracking-[0.2em] border-b border-violet-50 pb-2">Profile & Records</h3>
                          <div class="grid gap-4">
-                            <div class="space-y-1.5">
-                               <label class="text-[9px] font-black text-violet-300 uppercase block">Full Registered Name</label>
-                               <input v-model="selectedMember.firstname" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('firstname')" />
-                            </div>
+                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div class="space-y-1.5">
+                                   <label class="text-[9px] font-black text-violet-300 uppercase block">First Name</label>
+                                   <input v-model="selectedMember.firstname" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('firstname')" />
+                                </div>
+                                <div class="space-y-1.5">
+                                   <label class="text-[9px] font-black text-violet-300 uppercase block">Last Name</label>
+                                   <input v-model="selectedMember.lastname" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('lastname')" />
+                                </div>
+                             </div>
+                             <div class="space-y-1.5">
+                                <label class="text-[9px] font-black text-violet-300 uppercase block">Middle Name</label>
+                                <input v-model="selectedMember.middlename" placeholder="Optional" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('middlename')" />
+                             </div>
                             <div class="space-y-1.5">
                                <label class="text-[9px] font-black text-violet-300 uppercase block">Email Address</label>
                                <input v-model="selectedMember.email" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('email')" />

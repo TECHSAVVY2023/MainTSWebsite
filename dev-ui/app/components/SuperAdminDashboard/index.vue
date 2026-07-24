@@ -227,13 +227,16 @@
                     <div class="absolute -top-40 -right-40 w-96 h-96 bg-violet-50 rounded-full blur-3xl opacity-60 z-0 pointer-events-none transition-transform duration-700 group-hover:scale-110"></div>
                     
                     <!-- Portrait -->
-                    <div class="perspective relative z-10 h-40 w-40 shrink-0 sm:h-48 sm:w-48 lg:h-56 lg:w-56">
-                      <div class="relative w-full h-full mx-auto transition-transform duration-500 transform-style-3d group-hover:rotate-y-180 cursor-pointer">
-                        <div class="absolute w-full h-full backface-hidden rounded-[2.5rem] border-[6px] border-white shadow-[0_20px_40px_-15px_rgba(124,58,237,0.15)] ring-1 ring-violet-50 overflow-hidden bg-violet-50 flex items-center justify-center">
-                          <img v-if="member.profilePicture" :src="cleanImageUrl(member.profilePicture)" class="h-full w-full object-cover object-[50%_35%] rounded-[2rem]" />
-                        </div>
-                      </div>
-                    </div>
+                     <div class="perspective relative z-10 h-40 w-40 shrink-0 sm:h-48 sm:w-48 lg:h-56 lg:w-56">
+                       <div class="relative w-full h-full mx-auto transition-transform duration-500 transform-style-3d group-hover:rotate-y-180 cursor-pointer">
+                         <div class="absolute w-full h-full backface-hidden rounded-[2.5rem] border-[6px] border-white shadow-[0_20px_40px_-15px_rgba(124,58,237,0.15)] ring-1 ring-violet-50 overflow-hidden bg-violet-50 flex items-center justify-center">
+                           <img v-if="displayProfileImage" :src="displayProfileImage" class="h-full w-full object-cover object-[50%_35%] rounded-[2rem]" alt="Profile picture" />
+                           <div v-else class="h-full w-full bg-gradient-to-br from-violet-500 via-purple-600 to-indigo-600 flex items-center justify-center rounded-[2rem]">
+                             <span class="text-4xl sm:text-5xl font-black text-white tracking-widest">{{ userInitials }}</span>
+                           </div>
+                         </div>
+                       </div>
+                     </div>
 
                     <!-- Main Info -->
                     <div class="relative z-10 w-full flex-1 py-2 text-center lg:text-left">
@@ -282,7 +285,14 @@
                     
                     <!-- Contact & Web -->
                     <div class="group relative overflow-hidden rounded-2xl border border-violet-100 p-4 sm:rounded-3xl sm:p-8 lg:rounded-[3rem] lg:p-10">
-                       <h4 class="mb-5 flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#1a0533] sm:mb-8 sm:gap-3 sm:text-xs"><i class="fas fa-address-book text-violet-600"></i> Contact Details</h4>
+                       <div class="mb-5 flex items-center justify-between sm:mb-8">
+                          <h4 class="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-[#1a0533] sm:gap-3 sm:text-xs">
+                             <i class="fas fa-address-book text-violet-600"></i> Contact Details
+                          </h4>
+                          <button type="button" @click="openEditProfileModal" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-violet-200 bg-violet-50 text-[10px] font-black uppercase tracking-wider text-violet-800 hover:bg-violet-600 hover:text-white transition-all shadow-xs">
+                             <i class="fas fa-edit text-xs"></i> Edit Contact Details
+                          </button>
+                       </div>
                        
                        <div class="relative z-10 grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-1 lg:gap-3">
                           <div class="group/item flex min-w-0 flex-col gap-1 rounded-xl border border-transparent bg-white p-3 transition-colors hover:border-violet-100 sm:rounded-2xl sm:p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
@@ -1156,6 +1166,92 @@
         </Transition>
       </Teleport>
 
+      <!-- Edit Contact Details Modal -->
+      <Teleport to="body">
+        <Transition name="fade">
+          <div v-if="showEditProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-4 transition-all duration-300">
+            <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-xl w-full border border-violet-100 max-h-[90vh] overflow-y-auto custom-scrollbar">
+              <div class="flex items-center justify-between mb-6 pb-4 border-b border-violet-50">
+                <div>
+                  <h3 class="text-xl font-black text-[#1a0533] uppercase tracking-tight">Edit Contact Details</h3>
+                  <p class="text-xs font-bold text-violet-600 uppercase tracking-wider mt-0.5">Update your community vault records</p>
+                </div>
+                <button type="button" @click="closeEditProfileModal" class="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-50 text-violet-900 hover:text-red-500 transition-all">
+                  <i class="fas fa-times text-sm" />
+                </button>
+              </div>
+
+              <form @submit.prevent="saveProfileDetails" class="space-y-4">
+                <div v-if="profileSaveError" class="p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs font-bold text-rose-600">
+                  {{ profileSaveError }}
+                </div>
+
+                <div v-if="profileSaveSuccess" class="p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-bold text-emerald-700 flex items-center gap-2">
+                  <i class="fas fa-check-circle text-sm" /> Profile updated successfully!
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">First Name</label>
+                    <input v-model="editProfileForm.firstname" required class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Last Name</label>
+                    <input v-model="editProfileForm.lastname" required class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Middle Name (Optional)</label>
+                  <input v-model="editProfileForm.middlename" placeholder="Middle Name" class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Mobile Number</label>
+                    <input v-model="editProfileForm.mobile" placeholder="09xxxxxxxxx" class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Email Address</label>
+                    <input v-model="editProfileForm.email" type="email" required class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Birthdate (YYYY-MM-DD)</label>
+                    <input v-model="editProfileForm.birthdate" type="date" class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                  <div>
+                    <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Website / Portfolio</label>
+                    <input v-model="editProfileForm.website" placeholder="https://github.com/username" class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Talk Focus / Bio Line</label>
+                  <input v-model="editProfileForm.speaker_topic" placeholder="e.g. Full-Stack Developer & Community Mentor" class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white" />
+                </div>
+
+                <div>
+                  <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Profile Picture (Optional)</label>
+                  <input ref="editProfileFileInput" type="file" accept="image/*" class="w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 py-2 text-xs font-semibold text-violet-900 file:mr-3 file:rounded-lg file:border-0 file:bg-violet-600 file:px-3 file:py-1.5 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:text-white hover:file:bg-violet-700" />
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-violet-50">
+                  <button type="button" @click="closeEditProfileModal" class="flex-1 px-5 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition-colors">
+                    Cancel
+                  </button>
+                  <button type="submit" :disabled="savingProfile" class="flex-1 px-5 py-3 bg-violet-600 text-white rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-violet-700 shadow-md shadow-violet-600/20 transition-all disabled:opacity-50">
+                    {{ savingProfile ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+
     </template>
     <template v-else>
       <CreateContent @close="showAllContent = false" />
@@ -1303,6 +1399,88 @@ const hover = reactive({
   birthdate: false,
 })
 
+// ── Profile Edit Modal States & Handlers ───────────────────────
+const showEditProfileModal = ref(false)
+const savingProfile = ref(false)
+const profileSaveError = ref('')
+const profileSaveSuccess = ref(false)
+const editProfileFileInput = ref<HTMLInputElement | null>(null)
+const editProfileForm = ref({
+  firstname: '',
+  middlename: '',
+  lastname: '',
+  mobile: '',
+  email: '',
+  website: '',
+  birthdate: '',
+  speaker_topic: '',
+})
+
+function openEditProfileModal () {
+  if (!member.value) return
+  editProfileForm.value = {
+    firstname: member.value.firstname || '',
+    middlename: member.value.middlename || '',
+    lastname: member.value.lastname || '',
+    mobile: member.value.mobile || '',
+    email: member.value.email || '',
+    website: member.value.website || '',
+    birthdate: member.value.birthdate || '',
+    speaker_topic: member.value.speaker_topic || '',
+  }
+  profileSaveError.value = ''
+  profileSaveSuccess.value = false
+  showEditProfileModal.value = true
+}
+
+function closeEditProfileModal () {
+  showEditProfileModal.value = false
+  savingProfile.value = false
+  profileSaveError.value = ''
+  profileSaveSuccess.value = false
+}
+
+async function saveProfileDetails () {
+  if (!member.value?.id) return
+  savingProfile.value = true
+  profileSaveError.value = ''
+  profileSaveSuccess.value = false
+
+  try {
+    const config = useRuntimeConfig()
+    const apiBase = String(config.public.apiBase || '').replace(/\/$/, '')
+    const formData = new FormData()
+
+    for (const [key, val] of Object.entries(editProfileForm.value)) {
+      formData.append(key, String(val || ''))
+    }
+
+    const files = editProfileFileInput.value?.files
+    if (files && files[0]) {
+      formData.append('profilePicture', files[0])
+    }
+
+    const updated = await $fetch<any>(`${apiBase}/member/${member.value.id}/update/`, {
+      method: 'PATCH',
+      body: formData,
+      headers: { Accept: 'application/json' },
+    })
+
+    if (updated) {
+      member.value = { ...member.value, ...updated }
+    }
+    profileSaveSuccess.value = true
+    setTimeout(() => {
+      closeEditProfileModal()
+    }, 900)
+  } catch (err: any) {
+    console.error('Failed to update profile details', err)
+    profileSaveError.value = err?.data?.detail || err?.message || 'Failed to update profile'
+  } finally {
+    savingProfile.value = false
+  }
+}
+
 const techSavvyLogo = ref(
   "https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/logo/TechSavvyLogo.png",
 )
@@ -1352,6 +1530,17 @@ const userInitials = computed(() => {
   return parts.length >= 2
     ? (parts[0]![0]! + parts[1]![0]!).toUpperCase()
     : name.substring(0, 2).toUpperCase()
+})
+
+const displayProfileImage = computed(() => {
+  if (member.value?.profilePicture) {
+    return cleanImageUrl(member.value.profilePicture)
+  }
+  const authPic = user.value?.image || user.value?.picture
+  if (authPic) {
+    return authPic
+  }
+  return ''
 })
 
 const updateTime = () => {
