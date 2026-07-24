@@ -257,6 +257,7 @@ export function useMemberDirectory (isAdmin: MaybeRefOrGetter<boolean>) {
     submitAddMember,
     promoteParticipant,
     syncField,
+    updateField,
     getRoleColor,
     triggerFileUpload,
     handleProfilePictureUpload,

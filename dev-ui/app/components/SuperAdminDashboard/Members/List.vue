@@ -43,10 +43,9 @@
     <!-- Member registry: stacked cards (small screens) + table (md+) — no horizontal scroll -->
     <div class="w-full border-2 border-violet-50 overflow-hidden bg-white shadow-sm">
       <div class="md:hidden divide-y divide-violet-50">
-        <button
+        <div
           v-for="member in filteredMembers"
           :key="`card-${member.id}`"
-          type="button"
           class="flex w-full min-w-0 flex-col gap-3 p-4 text-left transition-colors hover:bg-violet-50/50"
           :class="{ 'cursor-pointer': isAdmin }"
           @click="isAdmin ? openDetails(member) : null"
@@ -65,21 +64,25 @@
                 {{ member.idNumber || '—' }}
               </p>
             </div>
-            <div class="shrink-0 flex flex-col items-end gap-1.5">
+            <div class="shrink-0 flex flex-col items-end gap-1.5" @click.stop>
+              <select
+                v-if="isAdmin"
+                :value="member.role || 'Member'"
+                class="rounded-lg border px-2 py-1 text-[8px] font-black uppercase tracking-widest outline-none cursor-pointer"
+                :class="getRoleColor(member.role)"
+                @change="onRoleSelectChange(member, $event)"
+              >
+                <option v-for="optRole in MEMBER_ROLE_OPTIONS" :key="optRole" :value="optRole" class="bg-white text-slate-800 font-bold">
+                  {{ optRole }}
+                </option>
+              </select>
               <span
+                v-else
                 class="rounded-lg border px-2 py-1 text-[8px] font-black uppercase tracking-widest"
                 :class="getRoleColor(member.role)"
               >
                 {{ member.role || 'Member' }}
               </span>
-              <button
-                v-if="isAdmin && isParticipantRole(member.role)"
-                type="button"
-                class="rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-600 hover:text-white"
-                @click.stop="promoteParticipant(member)"
-              >
-                Make Member
-              </button>
             </div>
           </div>
           <div class="space-y-1 pl-[3.75rem] text-xs">
@@ -92,7 +95,7 @@
               {{ member.mobile || '—' }}
             </p>
           </div>
-        </button>
+        </div>
       </div>
 
       <div class="hidden overflow-x-hidden md:block">
@@ -135,20 +138,25 @@
                   <p class="break-all text-[10px] font-bold uppercase tracking-widest text-violet-400">
                     {{ member.idNumber || '—' }}
                   </p>
+                  <div v-if="isAdmin" @click.stop class="inline-block">
+                    <select
+                      :value="member.role || 'Member'"
+                      class="inline-block rounded-lg border px-2 py-1 text-[9px] font-black uppercase tracking-widest outline-none cursor-pointer"
+                      :class="getRoleColor(member.role)"
+                      @change="onRoleSelectChange(member, $event)"
+                    >
+                      <option v-for="optRole in MEMBER_ROLE_OPTIONS" :key="optRole" :value="optRole" class="bg-white text-slate-800 font-bold">
+                        {{ optRole }}
+                      </option>
+                    </select>
+                  </div>
                   <span
+                    v-else
                     class="inline-block rounded-lg border px-2 py-0.5 text-[8px] font-black uppercase tracking-widest"
                     :class="getRoleColor(member.role)"
                   >
                     {{ member.role || 'Member' }}
                   </span>
-                  <button
-                    v-if="isAdmin && isParticipantRole(member.role)"
-                    type="button"
-                    class="mt-2 inline-flex rounded-lg border border-violet-200 bg-violet-50 px-2 py-1 text-[8px] font-black uppercase tracking-widest text-violet-700 transition-colors hover:bg-violet-600 hover:text-white"
-                    @click.stop="promoteParticipant(member)"
-                  >
-                    Make Member
-                  </button>
                 </div>
               </td>
               <td class="py-4 pl-2 pr-4 align-top lg:pr-6">
@@ -216,10 +224,23 @@
                                <label class="text-[9px] font-black text-violet-300 uppercase block">Email Address</label>
                                <input v-model="selectedMember.email" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('email')" />
                             </div>
-                            <div class="space-y-1.5">
-                               <label class="text-[9px] font-black text-violet-300 uppercase block">Birthdate (YYYY-MM-DD)</label>
-                               <input v-model="selectedMember.birthdate" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('birthdate')" />
-                            </div>
+                             <div class="space-y-1.5">
+                                <label class="text-[9px] font-black text-violet-300 uppercase block">Birthdate (YYYY-MM-DD)</label>
+                                <input v-model="selectedMember.birthdate" class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none" @blur="syncField('birthdate')" />
+                             </div>
+                             <div class="space-y-1.5">
+                                <label class="text-[9px] font-black text-violet-300 uppercase block">Community Role</label>
+                                <select
+                                   v-model="selectedMember.role"
+                                   class="w-full bg-violet-50/30 border border-transparent focus:border-violet-200 rounded-xl px-4 py-2.5 text-sm font-bold text-[#1a0533] outline-none cursor-pointer"
+                                   :disabled="!isAdmin"
+                                   @change="syncField('role')"
+                                >
+                                   <option v-for="optRole in MEMBER_ROLE_OPTIONS" :key="optRole" :value="optRole">
+                                      {{ optRole }}
+                                   </option>
+                                </select>
+                             </div>
                          </div>
                       </div>
 
@@ -565,7 +586,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { MEMBER_ROLE_OPTIONS } from '~/composables/useMemberFormUtils'
 
@@ -600,11 +621,24 @@ const {
   submitAddMember,
   promoteParticipant,
   syncField,
+  updateField,
   getRoleColor,
   triggerFileUpload,
   handleProfilePictureUpload,
   adjustPoints,
 } = useMemberDirectory(toRef(props, 'isAdmin'))
+
+const updateMemberRoleInline = async (memberItem: any, newRole: string) => {
+  memberItem.role = newRole
+  await updateField(memberItem.id, 'role', newRole)
+}
+
+const onRoleSelectChange = (memberItem: any, event: Event) => {
+  const target = event.target as HTMLSelectElement | null
+  if (target) {
+    updateMemberRoleInline(memberItem, target.value)
+  }
+}
 
 const showAdjustPointsModal = ref(false)
 const adjustPointsForm = ref({

@@ -88,12 +88,145 @@
           </div>
 
           <div class="flex shrink-0 items-center gap-1 sm:gap-2 lg:ml-4 lg:gap-3">
-            <button type="button" class="flex h-9 w-9 items-center justify-center rounded-xl text-violet-600 transition-all hover:bg-violet-50 hover:text-violet-800 sm:h-10 sm:w-10 lg:h-12 lg:w-12" aria-label="Notifications">
-              <i class="far fa-bell text-base sm:text-lg" />
-            </button>
-            <button type="button" class="hidden h-9 w-9 items-center justify-center rounded-xl text-violet-600 transition-all hover:bg-violet-50 hover:text-violet-800 sm:flex sm:h-10 sm:w-10 lg:h-12 lg:w-12" aria-label="Settings">
-              <i class="fas fa-cog text-base sm:text-lg" />
-            </button>
+            <div class="relative">
+              <button
+                type="button"
+                class="relative flex h-9 w-9 items-center justify-center rounded-xl text-violet-600 transition-all hover:bg-violet-50 hover:text-violet-800 sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+                aria-label="Notifications"
+                @click.stop="toggleNotificationsDropdown"
+              >
+                <i class="far fa-bell text-base sm:text-lg" />
+                <span
+                  v-if="unreadCount > 0"
+                  class="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white ring-2 ring-white"
+                >
+                  {{ unreadCount }}
+                </span>
+              </button>
+
+              <!-- Notifications Dropdown Popover -->
+              <Transition
+                enter-active-class="transition-all duration-200 ease-out"
+                enter-from-class="opacity-0 scale-95 -translate-y-2"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition-all duration-150 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 -translate-y-2"
+              >
+                <div
+                  v-if="showNotificationsDropdown"
+                  class="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-violet-100 bg-white p-4 shadow-2xl ring-1 ring-violet-50"
+                  @click.stop
+                >
+                  <div class="flex items-center justify-between border-b border-violet-50 pb-3 mb-3">
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-xs font-black uppercase tracking-wider text-[#1a0533]">Notifications</h4>
+                      <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[9px] font-black text-violet-700">{{ unreadCount }} New</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="text-[10px] font-bold text-violet-600 hover:text-violet-900 transition-colors uppercase tracking-wider"
+                      @click="markAllNotificationsAsRead"
+                    >
+                      Mark all read
+                    </button>
+                  </div>
+
+                  <div class="max-h-72 overflow-y-auto space-y-2 custom-scrollbar">
+                    <div
+                      v-for="notif in notificationsList"
+                      :key="notif.id"
+                      class="flex items-start gap-3 p-3 rounded-xl transition-colors cursor-pointer"
+                      :class="notif.read ? 'bg-slate-50/50 hover:bg-slate-50' : 'bg-violet-50/60 border border-violet-100/60 hover:bg-violet-50'"
+                      @click="markNotificationRead(notif)"
+                    >
+                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" :class="notif.bgClass">
+                        <i :class="[notif.iconClass, 'text-xs']" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-1">
+                          <p class="text-[11px] font-bold text-[#1a0533] leading-snug truncate">{{ notif.title }}</p>
+                          <span class="text-[8px] font-bold text-slate-400 whitespace-nowrap">{{ notif.time }}</span>
+                        </div>
+                        <p class="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-2">{{ notif.message }}</p>
+                      </div>
+                    </div>
+                    <div v-if="notificationsList.length === 0" class="py-8 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      No notifications
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+            <div class="relative">
+              <button
+                type="button"
+                class="hidden h-9 w-9 items-center justify-center rounded-xl text-violet-600 transition-all hover:bg-violet-50 hover:text-violet-800 sm:flex sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+                aria-label="Settings"
+                @click.stop="toggleSettingsDropdown"
+              >
+                <i class="fas fa-cog text-base sm:text-lg" :class="{ 'animate-spin-slow': showSettingsDropdown }" />
+              </button>
+
+              <!-- Settings Dropdown Popover -->
+              <Transition
+                enter-active-class="transition-all duration-200 ease-out"
+                enter-from-class="opacity-0 scale-95 -translate-y-2"
+                enter-to-class="opacity-100 scale-100 translate-y-0"
+                leave-active-class="transition-all duration-150 ease-in"
+                leave-from-class="opacity-100 scale-100 translate-y-0"
+                leave-to-class="opacity-0 scale-95 -translate-y-2"
+              >
+                <div
+                  v-if="showSettingsDropdown"
+                  class="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-violet-100 bg-white p-4 shadow-2xl ring-1 ring-violet-50"
+                  @click.stop
+                >
+                  <div class="flex items-center justify-between border-b border-violet-50 pb-3 mb-3">
+                    <div class="flex items-center gap-2">
+                      <h4 class="text-xs font-black uppercase tracking-wider text-[#1a0533]">Platform Settings</h4>
+                      <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700">Online</span>
+                    </div>
+                    <button
+                      type="button"
+                      class="text-violet-400 hover:text-violet-700 transition-colors"
+                      @click="showSettingsDropdown = false"
+                    >
+                      <i class="fas fa-times text-xs" />
+                    </button>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="space-y-1.5">
+                      <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 px-1">Quick Actions</span>
+                      <button
+                        type="button"
+                        class="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-violet-50 text-left transition-colors text-xs font-bold text-[#1a0533] group"
+                        @click="activeView = 'Profile'; showSettingsDropdown = false"
+                      >
+                        <span class="flex items-center gap-2">
+                          <i class="fas fa-user-edit text-violet-600 group-hover:scale-110 transition-transform" />
+                          Edit Account Profile
+                        </span>
+                        <i class="fas fa-chevron-right text-[10px] text-slate-400" />
+                      </button>
+
+                      <button
+                        type="button"
+                        class="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-violet-50 text-left transition-colors text-xs font-bold text-[#1a0533] group"
+                        @click="refreshDashboardData"
+                      >
+                        <span class="flex items-center gap-2">
+                          <i class="fas fa-sync-alt text-violet-600 group-hover:rotate-180 transition-transform duration-500" :class="{ 'animate-spin': isRefreshingData }" />
+                          Refresh Vault Records
+                        </span>
+                        <span class="text-[9px] font-bold text-violet-600">{{ isRefreshingData ? 'Syncing...' : 'Sync' }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
             <button type="button" class="flex h-9 w-9 items-center justify-center rounded-xl text-violet-600 transition-all hover:bg-violet-50 hover:text-violet-800 sm:h-10 sm:w-10 lg:h-12 lg:w-12" aria-label="Log out" @click="handleLogout">
               <i class="fas fa-sign-out-alt text-base sm:text-lg" />
             </button>
@@ -273,7 +406,7 @@
                              <i class="fas fa-calendar-alt text-sm w-4 text-center"></i>
                              <div class="flex flex-col text-left">
                                <span class="text-[8px] font-black uppercase tracking-widest leading-none opacity-80 mb-0.5">Member Since</span>
-                               <span class="text-[14px] font-black leading-tight">YYYY</span>
+                               <span class="text-[14px] font-black leading-tight">{{ memberSinceYear }}</span>
                              </div>
                           </div>
                        </div>
@@ -1399,6 +1532,106 @@ const hover = reactive({
   birthdate: false,
 })
 
+// ── Notifications Center State & Methods ──────────────────────────
+const showNotificationsDropdown = ref(false)
+const notificationsList = ref([
+  {
+    id: 1,
+    title: 'Community Vault Sync',
+    message: 'Community records are synced live with the Django backend.',
+    time: 'Just now',
+    read: false,
+    bgClass: 'bg-violet-100 text-violet-600',
+    iconClass: 'fas fa-shield-alt',
+  },
+  {
+    id: 2,
+    title: 'PayMongo Gateway Connected',
+    message: 'Active payment verification is enabled for merchandise orders.',
+    time: '5m ago',
+    read: false,
+    bgClass: 'bg-emerald-100 text-emerald-600',
+    iconClass: 'fas fa-credit-card',
+  },
+  {
+    id: 3,
+    title: 'Google OAuth SSO Active',
+    message: 'Single Sign-On domain verification is active.',
+    time: '1h ago',
+    read: true,
+    bgClass: 'bg-sky-100 text-sky-600',
+    iconClass: 'fab fa-google',
+  },
+])
+
+const unreadCount = computed(() => notificationsList.value.filter(n => !n.read).length)
+
+function toggleNotificationsDropdown () {
+  showNotificationsDropdown.value = !showNotificationsDropdown.value
+}
+
+function markNotificationRead (notif: { id: number; read: boolean }) {
+  notif.read = true
+}
+
+function markAllNotificationsAsRead () {
+  notificationsList.value.forEach(n => { n.read = true })
+}
+
+// ── Settings Center State & Methods ──────────────────────────────
+const showSettingsDropdown = ref(false)
+const isRefreshingData = ref(false)
+
+const publicApiBase = computed(() => {
+  const config = useRuntimeConfig()
+  return String(config.public.apiBase || 'http://localhost:8000/api/techsavvy/')
+})
+
+function toggleSettingsDropdown () {
+  showSettingsDropdown.value = !showSettingsDropdown.value
+  if (showSettingsDropdown.value) {
+    showNotificationsDropdown.value = false
+  }
+}
+
+async function refreshDashboardData () {
+  isRefreshingData.value = true
+  try {
+    await Promise.all([
+      fetchMembersCount(),
+      fetchItems(),
+      fetchDriveData(),
+    ])
+  } catch (e) {
+    console.error('Error refreshing dashboard data', e)
+  } finally {
+    setTimeout(() => {
+      isRefreshingData.value = false
+    }, 600)
+  }
+}
+
+const closeDropdownsOnOutsideClick = () => {
+  if (showNotificationsDropdown.value) {
+    showNotificationsDropdown.value = false
+  }
+  if (showSettingsDropdown.value) {
+    showSettingsDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  if (process.client) {
+    window.addEventListener('click', closeDropdownsOnOutsideClick)
+  }
+})
+
+onUnmounted(() => {
+  if (process.client) {
+    window.removeEventListener('click', closeDropdownsOnOutsideClick)
+  }
+})
+
 // ── Profile Edit Modal States & Handlers ───────────────────────
 const showEditProfileModal = ref(false)
 const savingProfile = ref(false)
@@ -1541,6 +1774,18 @@ const displayProfileImage = computed(() => {
     return authPic
   }
   return ''
+})
+
+const memberSinceYear = computed(() => {
+  if (member.value?.created_at) {
+    const year = new Date(member.value.created_at).getFullYear()
+    if (!isNaN(year)) return String(year)
+  }
+  if (member.value?.idNumber) {
+    const match = String(member.value.idNumber).match(/^(\d{4})/)
+    if (match && match[1]) return match[1]
+  }
+  return new Date().getFullYear().toString()
 })
 
 const updateTime = () => {
