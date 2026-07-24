@@ -199,6 +199,26 @@
                   </p>
                </div>
 
+               <!-- Participant Role Signed In (Restricted from Super Admin Dashboard) -->
+               <div v-else-if="isParticipantAccessDenied" class="flex min-h-[40vh] flex-col items-center justify-center gap-4 rounded-2xl border border-sky-100 bg-sky-50 p-8 text-center sm:min-h-[50vh] sm:rounded-[3rem] sm:p-12 lg:rounded-[3.5rem] lg:p-16">
+                  <div class="flex h-16 w-16 items-center justify-center rounded-2xl border border-sky-200 bg-white text-sky-600 shadow-sm mb-2">
+                    <i class="fas fa-user-shield text-3xl"></i>
+                  </div>
+                  <h3 class="text-[13px] font-black uppercase text-sky-900 tracking-wider">Participant Account Notice</h3>
+                  <p class="max-w-md text-xs font-medium text-sky-900/80 leading-relaxed">
+                    <span class="font-bold">{{ user?.email }}</span> is registered with the <span class="font-black text-sky-900">Participant</span> role.<br>
+                    Administrative controls on the Super Admin Dashboard are restricted to Core Members, Mentors, and Administrators.
+                  </p>
+                  <div class="mt-2 flex flex-wrap items-center justify-center gap-3">
+                    <NuxtLink to="/" class="inline-flex h-10 items-center justify-center rounded-xl bg-sky-600 px-5 text-xs font-black uppercase tracking-wider text-white shadow-sm hover:bg-sky-700 transition-all">
+                      Back to Main Site
+                    </NuxtLink>
+                    <button type="button" @click="confirmLogout" class="inline-flex h-10 items-center justify-center rounded-xl border border-sky-200 bg-white px-5 text-xs font-black uppercase tracking-wider text-sky-700 hover:bg-sky-100/50 transition-all">
+                      Sign Out
+                    </button>
+                  </div>
+               </div>
+
                <!-- PROFILE CONTENT -->
                <div v-else-if="member" class="space-y-8">
                  
@@ -1255,6 +1275,8 @@ const memberError = ref(false)
 const memberErrorMessage = ref('')
 /** Logged in (JWT) but email not returned from member/list — do not force logout */
 const memberDirectoryMiss = ref(false)
+/** True if member is registered with Participant role — show restricted notice without forcing logout */
+const isParticipantAccessDenied = ref(false)
 /** True while signing out / navigating away so we don’t flash “unavailable” before login */
 const profileRedirectPending = ref(false)
 const member = ref<any>(null)
@@ -1704,6 +1726,7 @@ const fetchMembersCount = async () => {
   memberError.value = false
   memberErrorMessage.value = ''
   memberDirectoryMiss.value = false
+  isParticipantAccessDenied.value = false
   try {
     const config = useRuntimeConfig()
     const apiBase = String(config.public.apiBase || '').replace(/\/$/, '')
@@ -1735,8 +1758,8 @@ const fetchMembersCount = async () => {
     }
 
     if (isParticipantRole(currentMember.role)) {
-      profileRedirectPending.value = true
-      logout()
+      member.value = currentMember
+      isParticipantAccessDenied.value = true
       return
     }
 

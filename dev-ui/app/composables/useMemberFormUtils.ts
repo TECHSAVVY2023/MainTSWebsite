@@ -15,6 +15,8 @@ export interface MemberFormState {
   numberOfProjects: number
 }
 
+export const MEMBER_ROLE_OPTIONS = ['Admin', 'Mentor', 'Member', 'Participant', 'Sponsor'] as const
+
 export function createEmptyMemberForm (): MemberFormState {
   return {
     firstname: '',

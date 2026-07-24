@@ -407,11 +407,14 @@
 
                 <div>
                   <label class="mb-1 block text-[10px] font-black uppercase tracking-widest text-violet-500">Role</label>
-                  <input
+                  <select
                     v-model="addForm.role"
-                    placeholder="Participant"
                     class="h-11 w-full rounded-xl border border-violet-100 bg-violet-50/40 px-3 text-sm font-semibold text-[#1a0533] outline-none transition-colors focus:border-violet-300 focus:bg-white"
                   >
+                    <option v-for="optRole in MEMBER_ROLE_OPTIONS" :key="optRole" :value="optRole">
+                      {{ optRole }}
+                    </option>
+                  </select>
                 </div>
 
                 <div>
@@ -554,6 +557,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { MEMBER_ROLE_OPTIONS } from '~/composables/useMemberFormUtils'
 
 const props = defineProps({
   isAdmin: { type: Boolean, default: false }
