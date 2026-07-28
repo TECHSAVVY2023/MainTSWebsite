@@ -134,7 +134,7 @@
 
                   <div class="max-h-72 overflow-y-auto space-y-2 custom-scrollbar">
                     <div
-                      v-for="notif in notificationsList"
+                      v-for="notif in dynamicNotifications"
                       :key="notif.id"
                       class="flex items-start gap-3 p-3 rounded-xl transition-colors cursor-pointer"
                       :class="notif.read ? 'bg-slate-50/50 hover:bg-slate-50' : 'bg-violet-50/60 border border-violet-100/60 hover:bg-violet-50'"
@@ -151,7 +151,7 @@
                         <p class="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-2">{{ notif.message }}</p>
                       </div>
                     </div>
-                    <div v-if="notificationsList.length === 0" class="py-8 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    <div v-if="dynamicNotifications.length === 0" class="py-8 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                       No notifications
                     </div>
                   </div>
@@ -504,89 +504,137 @@
                    <h1 class="text-2xl font-black uppercase leading-tight tracking-tighter text-[#1a0533] sm:text-3xl md:text-4xl">
                      Library <span class="text-violet-600">feed</span>
                    </h1>
-                   <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">Your highlights for the community — create, edit, or remove posts you authored.</p>
+                   <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">Your community highlights — create, edit, approve, or remove published library posts.</p>
                  </div>
-                 <button type="button" @click="handleNewContent" class="w-full shrink-0 rounded-xl border border-violet-200 bg-violet-50 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-violet-800 transition-colors hover:border-violet-300 hover:bg-violet-100 sm:w-auto sm:px-4 sm:py-2.5">+ New Highlight</button>
+                 <button type="button" @click="handleNewContent" class="w-full shrink-0 rounded-xl border border-violet-200 bg-violet-600 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-white shadow-md shadow-violet-600/20 transition-all hover:bg-violet-700 sm:w-auto sm:px-4 sm:py-2.5">+ New Highlight</button>
               </div>
               <div class="overflow-hidden rounded-2xl border border-violet-100 bg-white sm:rounded-3xl lg:rounded-[3rem]">
-                <!-- Narrow screens: stacked cards (no horizontal scroll) -->
-                <ul class="divide-y divide-violet-50 md:hidden" role="list">
-                  <li
-                    v-for="item in recentContentItems"
-                    :key="'m-' + item.id"
-                    class="p-4"
+                <!-- Empty State -->
+                <div v-if="recentContentItems.length === 0" class="py-16 text-center px-4">
+                  <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50 text-violet-600 ring-8 ring-violet-50/50 mb-4">
+                    <i class="fas fa-newspaper text-2xl" />
+                  </div>
+                  <h3 class="text-sm font-black uppercase tracking-wider text-[#1a0533]">No Library Highlights Found</h3>
+                  <p class="mt-1 text-xs font-bold text-slate-500 max-w-sm mx-auto">
+                    {{ contentSearch ? 'No library posts match your search query.' : 'There are no highlights available in the library feed yet.' }}
+                  </p>
+                  <button
+                    type="button"
+                    class="mt-5 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-violet-600/20 hover:bg-violet-700 transition-all"
+                    @click="handleNewContent"
                   >
-                    <div class="flex items-start justify-between gap-3">
-                      <div class="min-w-0 flex-1">
-                        <p class="break-words text-xs font-black uppercase leading-snug text-[#1a0533]">
-                          {{ item.title }}
-                        </p>
-                        <p class="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-500">
-                          {{ formatItemDate(item.created_at) }}
-                        </p>
-                      </div>
-                      <div class="flex shrink-0 items-center gap-1">
-                        <button
-                          type="button"
-                          class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-violet-100 hover:text-violet-900 active:bg-violet-100"
-                          aria-label="Edit"
-                          @click="handleEdit(item)"
-                        >
-                          <i class="fas fa-edit" />
-                        </button>
-                        <button
-                          type="button"
-                          class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-red-50 hover:text-red-600 active:bg-red-50"
-                          aria-label="Delete"
-                          @click="handleDelete(item.id)"
-                        >
-                          <i class="fas fa-trash-alt" />
-                        </button>
-                      </div>
-                    </div>
-                    <p class="mt-3 break-words text-[10px] font-black uppercase leading-snug text-violet-900">
-                      <span class="mr-2 text-[9px] font-bold text-violet-600/80">Category</span>
-                      <span class="inline-block rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1">{{ getPrimaryCategory(item.filters) }}</span>
-                    </p>
-                  </li>
-                </ul>
-
-                <!-- md+: table fits width (fixed layout + wrapping; scroll only if viewport extremely tight) -->
-                <div class="hidden md:block">
-                  <table class="w-full table-fixed border-collapse text-left">
-                    <colgroup>
-                      <col class="w-[32%]">
-                      <col class="w-[26%]">
-                      <col class="w-[24%]">
-                      <col class="w-[18%]">
-                    </colgroup>
-                    <thead class="border-b border-violet-200 bg-violet-100">
-                      <tr>
-                        <th class="px-4 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-8 lg:py-5">Topic</th>
-                        <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-6">Category</th>
-                        <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-6">Modified</th>
-                        <th class="px-3 py-4 pr-6 text-right text-[10px] font-black uppercase tracking-widest text-violet-900 lg:pr-10">Manage</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-violet-50">
-                      <tr v-for="item in recentContentItems" :key="item.id" class="group transition-colors hover:bg-violet-50/50">
-                        <td class="px-4 py-4 align-top lg:px-8 lg:py-5">
-                          <span class="block break-words text-sm font-black uppercase text-[#1a0533] transition-colors group-hover:text-violet-600">{{ item.title }}</span>
-                        </td>
-                        <td class="px-3 py-4 align-top lg:px-6 lg:py-5">
-                          <span class="inline-block break-words rounded-xl border border-violet-200 bg-violet-50 px-2 py-1 text-[10px] font-black uppercase leading-snug text-violet-900">{{ getPrimaryCategory(item.filters) }}</span>
-                        </td>
-                        <td class="break-words px-3 py-4 align-top text-[10px] font-bold uppercase leading-snug text-slate-600 lg:px-6 lg:py-5 lg:text-[11px]">
-                          {{ formatItemDate(item.created_at) }}
-                        </td>
-                        <td class="whitespace-nowrap px-3 py-4 pr-6 text-right align-middle lg:pr-10">
-                          <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-violet-100 hover:text-violet-900" aria-label="Edit" @click="handleEdit(item)"><i class="fas fa-edit" /></button>
-                          <button type="button" class="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-red-50 hover:text-red-600 lg:ml-2" aria-label="Delete" @click="handleDelete(item.id)"><i class="fas fa-trash-alt" /></button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                    <i class="fas fa-plus" />
+                    Create First Highlight
+                  </button>
                 </div>
+
+                <template v-else>
+                  <!-- Narrow screens: stacked cards (no horizontal scroll) -->
+                  <ul class="divide-y divide-violet-50 md:hidden" role="list">
+                    <li
+                      v-for="item in recentContentItems"
+                      :key="'m-' + item.id"
+                      class="p-4"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                          <p class="break-words text-xs font-black uppercase leading-snug text-[#1a0533]">
+                            {{ item.title }}
+                          </p>
+                          <p v-if="item.authors" class="text-[10px] font-bold text-slate-400 mt-0.5 truncate">
+                            By {{ item.authors }}
+                          </p>
+                          <p class="mt-1 text-[9px] font-bold uppercase tracking-wide text-slate-500">
+                            {{ formatItemDate(item.created_at) }}
+                          </p>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-1">
+                          <button
+                            type="button"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-violet-100 hover:text-violet-900 active:bg-violet-100"
+                            aria-label="Edit"
+                            @click="handleEdit(item)"
+                          >
+                            <i class="fas fa-edit" />
+                          </button>
+                          <button
+                            type="button"
+                            class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-red-50 hover:text-red-600 active:bg-red-50"
+                            aria-label="Delete"
+                            @click="handleDelete(item.id)"
+                          >
+                            <i class="fas fa-trash-alt" />
+                          </button>
+                        </div>
+                      </div>
+                      <div class="mt-3 flex items-center gap-2">
+                        <span class="inline-block rounded-lg border border-violet-200 bg-violet-50 px-2 py-0.5 text-[9px] font-black uppercase text-violet-900">{{ getPrimaryCategory(item.filters) }}</span>
+                        <span
+                          class="inline-block rounded-lg px-2 py-0.5 text-[9px] font-black uppercase"
+                          :class="{
+                            'bg-emerald-100 text-emerald-700 border border-emerald-200': (item.approval_status || 'approved').toLowerCase() === 'approved',
+                            'bg-amber-100 text-amber-700 border border-amber-200': (item.approval_status || '').toLowerCase() === 'pending',
+                            'bg-rose-100 text-rose-700 border border-rose-200': (item.approval_status || '').toLowerCase() === 'rejected'
+                          }"
+                        >
+                          {{ item.approval_status || 'Approved' }}
+                        </span>
+                      </div>
+                    </li>
+                  </ul>
+
+                  <!-- md+: table fits width -->
+                  <div class="hidden md:block">
+                    <table class="w-full table-fixed border-collapse text-left">
+                      <colgroup>
+                        <col class="w-[30%]">
+                        <col class="w-[20%]">
+                        <col class="w-[18%]">
+                        <col class="w-[18%]">
+                        <col class="w-[14%]">
+                      </colgroup>
+                      <thead class="border-b border-violet-200 bg-violet-100">
+                        <tr>
+                          <th class="px-4 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-8 lg:py-5">Topic</th>
+                          <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-6">Category</th>
+                          <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-6">Status</th>
+                          <th class="px-3 py-4 text-left text-[10px] font-black uppercase tracking-widest text-violet-900 lg:px-6">Modified</th>
+                          <th class="px-3 py-4 pr-6 text-right text-[10px] font-black uppercase tracking-widest text-violet-900 lg:pr-10">Manage</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-violet-50">
+                        <tr v-for="item in recentContentItems" :key="item.id" class="group transition-colors hover:bg-violet-50/50">
+                          <td class="px-4 py-4 align-top lg:px-8 lg:py-5">
+                            <span class="block break-words text-sm font-black uppercase text-[#1a0533] transition-colors group-hover:text-violet-600">{{ item.title }}</span>
+                            <span v-if="item.authors" class="block text-[10px] font-bold text-slate-400 mt-0.5 truncate">By {{ item.authors }}</span>
+                          </td>
+                          <td class="px-3 py-4 align-top lg:px-6 lg:py-5">
+                            <span class="inline-block break-words rounded-xl border border-violet-200 bg-violet-50 px-2 py-1 text-[10px] font-black uppercase leading-snug text-violet-900">{{ getPrimaryCategory(item.filters) }}</span>
+                          </td>
+                          <td class="px-3 py-4 align-top lg:px-6 lg:py-5">
+                            <span
+                              class="inline-block break-words rounded-xl px-2 py-1 text-[10px] font-black uppercase leading-snug"
+                              :class="{
+                                'bg-emerald-100 text-emerald-700 border border-emerald-200': (item.approval_status || 'approved').toLowerCase() === 'approved',
+                                'bg-amber-100 text-amber-700 border border-amber-200': (item.approval_status || '').toLowerCase() === 'pending',
+                                'bg-rose-100 text-rose-700 border border-rose-200': (item.approval_status || '').toLowerCase() === 'rejected'
+                              }"
+                            >
+                              {{ item.approval_status || 'Approved' }}
+                            </span>
+                          </td>
+                          <td class="break-words px-3 py-4 align-top text-[10px] font-bold uppercase leading-snug text-slate-600 lg:px-6 lg:py-5 lg:text-[11px]">
+                            {{ formatItemDate(item.created_at) }}
+                          </td>
+                          <td class="whitespace-nowrap px-3 py-4 pr-6 text-right align-middle lg:pr-10">
+                            <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-violet-100 hover:text-violet-900" aria-label="Edit" @click="handleEdit(item)"><i class="fas fa-edit" /></button>
+                            <button type="button" class="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-lg text-violet-600 transition-colors hover:bg-red-50 hover:text-red-600 lg:ml-2" aria-label="Delete" @click="handleDelete(item.id)"><i class="fas fa-trash-alt" /></button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
               </div>
             </div>
           </template>
@@ -953,27 +1001,150 @@
           </template>
 
           <template v-else-if="activeView === 'Stats'">
-            <div class="space-y-6 sm:space-y-10">
-              <div class="px-0 sm:px-2">
-                <h1 class="text-2xl font-black uppercase leading-tight tracking-tighter text-[#1a0533] sm:text-3xl md:text-4xl">
-                  Community <span class="text-violet-600">Stats</span>
-                </h1>
-                <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">Same overview metrics as the hub — optimized for smaller screens.</p>
-              </div>
-              <div class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-4 lg:gap-8">
-                <div
-                  v-for="stat in statCards"
-                  :key="'stats-' + stat.label"
-                  class="group relative min-w-0 cursor-default overflow-hidden rounded-2xl border border-violet-50 bg-white p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8"
-                  :class="stat.borderClass"
+            <div class="space-y-6 sm:space-y-8">
+              <div class="px-0 sm:px-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                <div class="min-w-0">
+                  <h1 class="text-2xl font-black uppercase leading-tight tracking-tighter text-[#1a0533] sm:text-3xl md:text-4xl">
+                    Community <span class="text-violet-600">Stats & Analytics</span>
+                  </h1>
+                  <p class="mt-2 max-w-xl text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                    Live performance overview, role distributions, content metrics, and platform health.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-widest text-violet-800 transition-colors hover:bg-violet-100 shrink-0"
+                  @click="refreshDashboardData"
                 >
-                  <div class="mb-4 flex items-center justify-between sm:mb-10">
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border transition-transform sm:h-12 sm:w-12 sm:rounded-2xl" :class="[stat.iconBg, stat.iconText, stat.iconBorder]">
-                      <i :class="stat.icon" class="text-base sm:text-lg" />
+                  <i class="fas fa-sync-alt text-xs" :class="{ 'animate-spin': isRefreshingData }" />
+                  Refresh Analytics
+                </button>
+              </div>
+
+              <!-- 4 Key Top Metric Cards -->
+              <div class="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-4 lg:gap-8">
+                <div class="group relative min-w-0 cursor-default overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8 hover:border-emerald-200 transition-all shadow-xs">
+                  <div class="mb-4 flex items-center justify-between sm:mb-8">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-600 transition-transform sm:h-12 sm:w-12 sm:rounded-2xl">
+                      <i class="fas fa-users text-base sm:text-lg" />
+                    </div>
+                    <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-black text-emerald-700 uppercase">Active</span>
+                  </div>
+                  <h3 class="mb-1 text-xl font-black uppercase leading-none tracking-tight text-[#1a0533] sm:mb-2 sm:text-2xl lg:text-3xl">{{ totalMembersCount }}</h3>
+                  <p class="break-words text-[8px] font-black uppercase leading-snug tracking-[0.2em] text-emerald-600 sm:text-[9px] sm:tracking-[0.25em] lg:text-[10px]">Total Members</p>
+                </div>
+
+                <div class="group relative min-w-0 cursor-default overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8 hover:border-violet-200 transition-all shadow-xs">
+                  <div class="mb-4 flex items-center justify-between sm:mb-8">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-violet-100 bg-violet-50 text-violet-600 transition-transform sm:h-12 sm:w-12 sm:rounded-2xl">
+                      <i class="fas fa-newspaper text-base sm:text-lg" />
+                    </div>
+                    <span class="rounded-full bg-violet-100 px-2 py-0.5 text-[9px] font-black text-violet-700 uppercase">{{ allItems.length }} Posts</span>
+                  </div>
+                  <h3 class="mb-1 text-xl font-black uppercase leading-none tracking-tight text-[#1a0533] sm:mb-2 sm:text-2xl lg:text-3xl">{{ approvedCmsCount }}</h3>
+                  <p class="break-words text-[8px] font-black uppercase leading-snug tracking-[0.2em] text-violet-600 sm:text-[9px] sm:tracking-[0.25em] lg:text-[10px]">Approved Highlights</p>
+                </div>
+
+                <div class="group relative min-w-0 cursor-default overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8 hover:border-amber-200 transition-all shadow-xs">
+                  <div class="mb-4 flex items-center justify-between sm:mb-8">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-100 bg-amber-50 text-amber-600 transition-transform sm:h-12 sm:w-12 sm:rounded-2xl">
+                      <i class="fas fa-clock text-base sm:text-lg" />
+                    </div>
+                    <span v-if="pendingCmsCount > 0" class="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-black text-white uppercase animate-pulse">Review Required</span>
+                    <span v-else class="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black text-slate-500 uppercase">Clear</span>
+                  </div>
+                  <h3 class="mb-1 text-xl font-black uppercase leading-none tracking-tight text-[#1a0533] sm:mb-2 sm:text-2xl lg:text-3xl">{{ pendingCmsCount }}</h3>
+                  <p class="break-words text-[8px] font-black uppercase leading-snug tracking-[0.2em] text-amber-600 sm:text-[9px] sm:tracking-[0.25em] lg:text-[10px]">Pending Reviews</p>
+                </div>
+
+                <div class="group relative min-w-0 cursor-default overflow-hidden rounded-2xl border border-violet-100 bg-white p-4 sm:rounded-3xl sm:p-6 lg:rounded-[2.5rem] lg:p-8 hover:border-sky-200 transition-all shadow-xs">
+                  <div class="mb-4 flex items-center justify-between sm:mb-8">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-100 bg-sky-50 text-sky-600 transition-transform sm:h-12 sm:w-12 sm:rounded-2xl">
+                      <i class="fas fa-folder text-base sm:text-lg" />
+                    </div>
+                    <span class="rounded-full bg-sky-100 px-2 py-0.5 text-[9px] font-black text-sky-700 uppercase">Drive</span>
+                  </div>
+                  <h3 class="mb-1 text-xl font-black uppercase leading-none tracking-tight text-[#1a0533] sm:mb-2 sm:text-2xl lg:text-3xl">{{ driveFiles.length }}</h3>
+                  <p class="break-words text-[8px] font-black uppercase leading-snug tracking-[0.2em] text-sky-600 sm:text-[9px] sm:tracking-[0.25em] lg:text-[10px]">Vault Cloud Files</p>
+                </div>
+              </div>
+
+              <!-- Analytics Breakdown Grid (Community Roles + Library Categories) -->
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+                <!-- Member Roles Distribution -->
+                <div class="rounded-2xl border border-violet-100 bg-white p-5 sm:rounded-3xl sm:p-8 lg:rounded-[3rem] lg:p-10 shadow-xs space-y-6">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[#1a0533] sm:text-sm">
+                        <i class="fas fa-users-cog text-violet-600" /> Community Role Distribution
+                      </h4>
+                      <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Breakdown of roles in the community</p>
+                    </div>
+                    <span class="rounded-full bg-violet-100 px-2.5 py-1 text-[10px] font-black text-violet-700">{{ totalMembersCount }} Total</span>
+                  </div>
+
+                  <div class="space-y-4">
+                    <div v-for="roleStat in memberRoleStats" :key="roleStat.role" class="space-y-1.5">
+                      <div class="flex items-center justify-between text-xs font-bold text-[#1a0533]">
+                        <span class="flex items-center gap-2">
+                          <span class="h-2.5 w-2.5 rounded-full" :class="roleStat.dotColor" />
+                          {{ roleStat.role }}s
+                        </span>
+                        <span class="font-mono text-[11px] text-slate-600">{{ roleStat.count }} ({{ roleStat.percent }}%)</span>
+                      </div>
+                      <div class="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden">
+                        <div class="h-full rounded-full transition-all duration-700" :class="roleStat.barColor" :style="{ width: `${roleStat.percent}%` }" />
+                      </div>
                     </div>
                   </div>
-                  <h3 class="mb-1 text-xl font-black uppercase leading-none tracking-tight text-[#1a0533] sm:mb-2 sm:text-2xl lg:text-3xl">{{ stat.value }}</h3>
-                  <p class="break-words text-[8px] font-black uppercase leading-snug tracking-[0.2em] sm:text-[9px] sm:tracking-[0.25em] lg:text-[10px] lg:tracking-[0.3em]" :class="stat.labelText">{{ stat.label }}</p>
+                </div>
+
+                <!-- Library Content & Category Overview -->
+                <div class="rounded-2xl border border-violet-100 bg-white p-5 sm:rounded-3xl sm:p-8 lg:rounded-[3rem] lg:p-10 shadow-xs space-y-6">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[#1a0533] sm:text-sm">
+                        <i class="fas fa-shapes text-violet-600" /> Library Category Ratios
+                      </h4>
+                      <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Published content across library classifications</p>
+                    </div>
+                    <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700">{{ allItems.length }} Items</span>
+                  </div>
+
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="p-4 rounded-2xl bg-violet-50/60 border border-violet-100 text-center space-y-1">
+                      <i class="fas fa-newspaper text-violet-600 text-lg mb-1" />
+                      <p class="text-xl font-black text-[#1a0533] leading-none">{{ newsCount }}</p>
+                      <p class="text-[9px] font-black uppercase tracking-wider text-violet-600">News & Events</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-amber-50/60 border border-amber-100 text-center space-y-1">
+                      <i class="fas fa-graduation-cap text-amber-600 text-lg mb-1" />
+                      <p class="text-xl font-black text-[#1a0533] leading-none">{{ coursesCount }}</p>
+                      <p class="text-[9px] font-black uppercase tracking-wider text-amber-600">Courses</p>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-sky-50/60 border border-sky-100 text-center space-y-1">
+                      <i class="fas fa-project-diagram text-sky-600 text-lg mb-1" />
+                      <p class="text-xl font-black text-[#1a0533] leading-none">{{ projectsCount }}</p>
+                      <p class="text-[9px] font-black uppercase tracking-wider text-sky-600">Projects</p>
+                    </div>
+                  </div>
+
+                  <div class="p-4 rounded-2xl bg-violet-50/40 border border-violet-100/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                        <i class="fas fa-check-circle text-sm" />
+                      </div>
+                      <div>
+                        <p class="text-xs font-bold text-[#1a0533]">Publication Approval Ratio</p>
+                        <p class="text-[10px] text-slate-500 font-bold">{{ approvedCmsCount }} Approved • {{ pendingCmsCount }} Pending Review</p>
+                      </div>
+                    </div>
+                    <span class="rounded-full bg-violet-600 px-3 py-1 text-[10px] font-black text-white uppercase tracking-wider">
+                      {{ Math.round((approvedCmsCount / (allItems.length || 1)) * 100) }}% Live
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1494,6 +1665,80 @@ function onCmsFormMeta (payload: { mode: string; title?: string }) {
   cmsModalSubtitle.value = 'Create a new highlight for the library feed'
 }
 const coreMembersCount = ref(0)
+const rawMembersList = ref<any[]>([])
+
+const totalMembersCount = computed(() => rawMembersList.value.length || coreMembersCount.value)
+
+const memberRoleStats = computed(() => {
+  const total = rawMembersList.value.length || 1
+  const counts: Record<string, number> = {
+    Admin: 0,
+    Mentor: 0,
+    Member: 0,
+    Participant: 0,
+    Sponsor: 0,
+  }
+
+  for (const m of rawMembersList.value) {
+    const role = String(m?.role || 'Member').trim()
+    if (role.toLowerCase().includes('admin') || role.toLowerCase().includes('founder')) {
+      counts.Admin = (counts.Admin || 0) + 1
+    } else if (role.toLowerCase().includes('mentor')) {
+      counts.Mentor = (counts.Mentor || 0) + 1
+    } else if (role.toLowerCase().includes('parti')) {
+      counts.Participant = (counts.Participant || 0) + 1
+    } else if (role.toLowerCase().includes('sponsor')) {
+      counts.Sponsor = (counts.Sponsor || 0) + 1
+    } else {
+      counts.Member = (counts.Member || 0) + 1
+    }
+  }
+
+  return [
+    {
+      role: 'Admin',
+      count: counts.Admin || 0,
+      percent: Math.round(((counts.Admin || 0) / total) * 100),
+      barColor: 'bg-violet-600',
+      dotColor: 'bg-violet-600',
+    },
+    {
+      role: 'Mentor',
+      count: counts.Mentor || 0,
+      percent: Math.round(((counts.Mentor || 0) / total) * 100),
+      barColor: 'bg-sky-500',
+      dotColor: 'bg-sky-500',
+    },
+    {
+      role: 'Member',
+      count: counts.Member || 0,
+      percent: Math.round(((counts.Member || 0) / total) * 100),
+      barColor: 'bg-emerald-500',
+      dotColor: 'bg-emerald-500',
+    },
+    {
+      role: 'Participant',
+      count: counts.Participant || 0,
+      percent: Math.round(((counts.Participant || 0) / total) * 100),
+      barColor: 'bg-amber-500',
+      dotColor: 'bg-amber-500',
+    },
+    {
+      role: 'Sponsor',
+      count: counts.Sponsor || 0,
+      percent: Math.round(((counts.Sponsor || 0) / total) * 100),
+      barColor: 'bg-rose-500',
+      dotColor: 'bg-rose-500',
+    },
+  ]
+})
+
+const approvedCmsCount = computed(() =>
+  allItems.value.filter(i => (i.approval_status || 'approved').toLowerCase() === 'approved').length
+)
+const pendingCmsCount = computed(() =>
+  allItems.value.filter(i => (i.approval_status || '').toLowerCase() === 'pending').length
+)
 
 const vibrantColorClasses = ['bg-emerald-500', 'bg-amber-500', 'bg-sky-500', 'bg-rose-500', 'bg-violet-600']
 
@@ -1533,49 +1778,106 @@ const hover = reactive({
 })
 
 // ── Notifications Center State & Methods ──────────────────────────
-const showNotificationsDropdown = ref(false)
-const notificationsList = ref([
-  {
-    id: 1,
-    title: 'Community Vault Sync',
-    message: 'Community records are synced live with the Django backend.',
-    time: 'Just now',
-    read: false,
-    bgClass: 'bg-violet-100 text-violet-600',
-    iconClass: 'fas fa-shield-alt',
-  },
-  {
-    id: 2,
-    title: 'PayMongo Gateway Connected',
-    message: 'Active payment verification is enabled for merchandise orders.',
-    time: '5m ago',
-    read: false,
-    bgClass: 'bg-emerald-100 text-emerald-600',
-    iconClass: 'fas fa-credit-card',
-  },
-  {
-    id: 3,
-    title: 'Google OAuth SSO Active',
-    message: 'Single Sign-On domain verification is active.',
-    time: '1h ago',
-    read: true,
-    bgClass: 'bg-sky-100 text-sky-600',
-    iconClass: 'fab fa-google',
-  },
-])
+interface DashboardNotification {
+  id: string
+  title: string
+  message: string
+  time: string
+  read: boolean
+  bgClass: string
+  iconClass: string
+  action?: () => void
+}
 
-const unreadCount = computed(() => notificationsList.value.filter(n => !n.read).length)
+const showNotificationsDropdown = ref(false)
+const readNotificationIds = ref<Set<string>>(new Set())
+
+const dynamicNotifications = computed<DashboardNotification[]>(() => {
+  const list: DashboardNotification[] = []
+
+  // 1. Pending Submission Reviews (Actionable for SuperAdmin / Admin)
+  if (pendingMemberSubmissions.value.length > 0) {
+    const id = `pending-reviews-${pendingMemberSubmissions.value.length}`
+    list.push({
+      id,
+      title: `${pendingMemberSubmissions.value.length} Pending Highlight${pendingMemberSubmissions.value.length > 1 ? 's' : ''}`,
+      message: 'New member highlight submissions are awaiting review and approval.',
+      time: 'Requires Action',
+      read: readNotificationIds.value.has(id),
+      bgClass: 'bg-amber-100 text-amber-700',
+      iconClass: 'fas fa-clock',
+      action: () => { activeView.value = 'Reviews' }
+    })
+  }
+
+  // 2. Recent Approved Highlights
+  const recentApproved = allItems.value
+    .filter(i => (i.approval_status || 'approved').toLowerCase() === 'approved')
+    .slice(0, 3)
+
+  for (const item of recentApproved) {
+    const id = `approved-item-${item.id}`
+    list.push({
+      id,
+      title: item.title ? `Approved: ${item.title}` : 'Highlight Approved',
+      message: item.authors ? `Authored by ${item.authors} — published in Library Feed.` : 'Highlight is approved and published in the community feed.',
+      time: item.created_at ? formatItemDate(item.created_at) : 'Recent',
+      read: readNotificationIds.value.has(id),
+      bgClass: 'bg-emerald-100 text-emerald-700',
+      iconClass: 'fas fa-check-circle',
+      action: () => { activeView.value = 'Library' }
+    })
+  }
+
+  // 3. User Profile & Role Info
+  if (member.value) {
+    const id = `user-role-${member.value.id || member.value.idNumber}`
+    list.push({
+      id,
+      title: `Role: ${member.value.role || 'Member'}`,
+      message: `Community ID: ${member.value.idNumber || 'N/A'}. Self-service profile updates enabled.`,
+      time: 'Active',
+      read: readNotificationIds.value.has(id),
+      bgClass: 'bg-violet-100 text-violet-700',
+      iconClass: 'fas fa-user-shield',
+      action: () => { activeView.value = 'Profile' }
+    })
+  }
+
+  // 4. PayMongo Gateway Status
+  const paymongoId = 'paymongo-gateway-active'
+  list.push({
+    id: paymongoId,
+    title: 'PayMongo Gateway Connected',
+    message: 'Active payment verification enabled for merchandise orders.',
+    time: 'Online',
+    read: readNotificationIds.value.has(paymongoId),
+    bgClass: 'bg-sky-100 text-sky-700',
+    iconClass: 'fas fa-credit-card'
+  })
+
+  return list
+})
+
+const unreadCount = computed(() => dynamicNotifications.value.filter(n => !n.read).length)
 
 function toggleNotificationsDropdown () {
   showNotificationsDropdown.value = !showNotificationsDropdown.value
+  if (showNotificationsDropdown.value) {
+    showSettingsDropdown.value = false
+  }
 }
 
-function markNotificationRead (notif: { id: number; read: boolean }) {
-  notif.read = true
+function markNotificationRead (notif: DashboardNotification) {
+  readNotificationIds.value.add(notif.id)
+  if (notif.action) {
+    notif.action()
+    showNotificationsDropdown.value = false
+  }
 }
 
 function markAllNotificationsAsRead () {
-  notificationsList.value.forEach(n => { n.read = true })
+  dynamicNotifications.value.forEach(n => readNotificationIds.value.add(n.id))
 }
 
 // ── Settings Center State & Methods ──────────────────────────────
@@ -1998,10 +2300,15 @@ async function deleteDriveFile (fileId: number) {
   }
 }
 
-// Library feed: only CMS rows that list the signed-in user in `authors` (comma-separated).
-const myLibraryItems = computed(() =>
-  allItems.value.filter(i => cmsItemHasAuthorEmail(i, user.value?.email))
-)
+// Library feed: show all CMS rows if user is SuperAdmin, or filter by author / approved status for regular users
+const myLibraryItems = computed(() => {
+  if (isSuperAdmin(user.value?.email)) {
+    return allItems.value
+  }
+  return allItems.value.filter(i =>
+    cmsItemHasAuthorEmail(i, user.value?.email) || (i.approval_status || '').toLowerCase() === 'approved'
+  )
+})
 
 const filteredContentItems = computed(() => {
   const q = contentSearch.value.trim().toLowerCase()
@@ -2172,6 +2479,7 @@ const fetchMembersCount = async () => {
 
     const raw = await $fetch<unknown>(`${apiBase}/member/list/`)
     const membersList = normalizeMembersList(raw)
+    rawMembersList.value = membersList
     coreMembersCount.value = membersList.filter((m: { role?: string }) => !isParticipantRole(m?.role)).length
 
     const email = (user.value?.email || '').trim().toLowerCase()

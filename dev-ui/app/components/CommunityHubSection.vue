@@ -123,7 +123,7 @@
                     Community Members & Speakers
                   </h2>
                   <p class="text-sm leading-relaxed text-dark/60 sm:text-base">
-                    Community members breakdown with a modern speaker showcase.
+                    Community members
                   </p>
                 </div>
               </SectionWireShield>
@@ -154,7 +154,7 @@
             class="mb-6 text-sm text-dark/65"
             role="status"
           >
-            No members are listed as speakers yet. Switch to &ldquo;Members&rdquo; or add speaker roles in the directory.
+            No members are listed as speakers yet.
           </p>
           <SpeakersSection v-if="displayedPeople.length > 0" :speakers="displayedPeople" />
         </div>
