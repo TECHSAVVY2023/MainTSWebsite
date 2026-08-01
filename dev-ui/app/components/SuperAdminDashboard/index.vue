@@ -25,24 +25,54 @@
         <nav class="custom-scrollbar flex-1 space-y-1.5 overflow-y-auto pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[5px] [&::-webkit-scrollbar]:w-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-slate-100 hover:[&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-track]:bg-transparent">
           <p class="text-[11px] font-black text-[#1a0533]/50 uppercase tracking-[0.25em] px-4 mb-5">Community Center</p>
           <template v-for="item in navItems" :key="item.label">
-            <button
-              @click="item.action ? item.action() : null"
-              class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl transition-all duration-300 group relative"
-              :class="item.active ? 'bg-violet-600 text-white shadow-xl' : 'text-[#1a0533]/60 hover:bg-violet-50 hover:text-violet-600'"
-            >
-              <div class="flex min-w-0 flex-1 items-center gap-3.5">
-                <i :class="[item.icon, item.active ? 'text-white' : 'text-violet-600 group-hover:text-violet-700']" class="shrink-0 text-sm transition-colors" />
-                <span class="min-w-0 truncate text-left text-[13px] font-bold uppercase tracking-wider transition-colors">{{ item.label }}</span>
-                <span
-                  v-if="item.badge != null && item.badge > 0"
-                  class="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black tabular-nums"
-                  :class="item.active ? 'bg-white/25 text-white' : 'bg-amber-500 text-white'"
+            <template v-if="item.isCollapsible">
+              <div class="space-y-1">
+                <button
+                  @click="item.action ? item.action() : null"
+                  class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl transition-all duration-300 group relative"
+                  :class="item.active ? 'bg-violet-600 text-white shadow-xl' : 'text-[#1a0533]/60 hover:bg-violet-50 hover:text-violet-600'"
                 >
-                  {{ item.badge }}
-                </span>
+                  <div class="flex min-w-0 flex-1 items-center gap-3.5">
+                    <i :class="[item.icon, item.active ? 'text-white' : 'text-violet-600 group-hover:text-violet-700']" class="shrink-0 text-sm transition-colors" />
+                    <span class="min-w-0 truncate text-left text-[13px] font-bold uppercase tracking-wider transition-colors">{{ item.label }}</span>
+                  </div>
+                  <i class="fas text-xs transition-transform duration-200" :class="[item.isExpanded ? 'fa-chevron-down' : 'fa-chevron-right', item.active ? 'text-white' : 'text-slate-400']" />
+                </button>
+
+                <div v-if="item.isExpanded" class="pl-4 space-y-1">
+                  <button
+                    v-for="subItem in item.subItems"
+                    :key="subItem.tab"
+                    @click="subItem.action()"
+                    class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                    :class="subItem.active ? 'bg-violet-100 text-violet-800 font-extrabold shadow-sm' : 'text-[#1a0533]/65 hover:bg-violet-50 hover:text-violet-700'"
+                  >
+                    <i :class="subItem.icon" class="text-xs text-violet-600 shrink-0" />
+                    <span class="truncate">{{ subItem.label }}</span>
+                  </button>
+                </div>
               </div>
-              <div v-if="item.active" class="absolute right-2 w-1.5 h-6 rounded-full bg-violet-600" />
-            </button>
+            </template>
+            <template v-else>
+              <button
+                @click="item.action ? item.action() : null"
+                class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl transition-all duration-300 group relative"
+                :class="item.active ? 'bg-violet-600 text-white shadow-xl' : 'text-[#1a0533]/60 hover:bg-violet-50 hover:text-violet-600'"
+              >
+                <div class="flex min-w-0 flex-1 items-center gap-3.5">
+                  <i :class="[item.icon, item.active ? 'text-white' : 'text-violet-600 group-hover:text-violet-700']" class="shrink-0 text-sm transition-colors" />
+                  <span class="min-w-0 truncate text-left text-[13px] font-bold uppercase tracking-wider transition-colors">{{ item.label }}</span>
+                  <span
+                    v-if="item.badge != null && item.badge > 0"
+                    class="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black tabular-nums"
+                    :class="item.active ? 'bg-white/25 text-white' : 'bg-amber-500 text-white'"
+                  >
+                    {{ item.badge }}
+                  </span>
+                </div>
+                <div v-if="item.active" class="absolute right-2 w-1.5 h-6 rounded-full bg-violet-600" />
+              </button>
+            </template>
           </template>
         </nav>
 
@@ -1004,6 +1034,7 @@
             <SuperAdminDashboardMainPageCmsManager
               :user-role="member?.role || 'Member'"
               :is-super-admin="isSuperAdmin(user?.email)"
+              :initial-tab="mainPageCmsTab"
             />
           </template>
 
@@ -2345,6 +2376,9 @@ const pendingMemberSubmissions = computed(() =>
   allItems.value.filter(isPendingMemberSubmission),
 )
 
+const mainPageCmsTab = ref<'projects' | 'events' | 'sponsors'>('projects')
+const cmsMenuExpanded = ref(true)
+
 // ── Navigation (after CMS list — uses pendingMemberSubmissions badge) ──
 const navItems = computed(() => {
   const items: {
@@ -2353,10 +2387,46 @@ const navItems = computed(() => {
     active: boolean
     action: () => void
     badge?: number
+    isCollapsible?: boolean
+    isExpanded?: boolean
+    subItems?: { label: string; icon: string; tab: 'projects' | 'events' | 'sponsors'; active: boolean; action: () => void }[]
   }[] = [
     { label: 'My Profile', icon: 'fas fa-user-circle', active: activeView.value === 'Profile', action: () => { activeView.value = 'Profile'; drawerOpen.value = false } },
     { label: 'Library Feed', icon: 'fas fa-newspaper', active: activeView.value === 'Library', action: () => { activeView.value = 'Library'; drawerOpen.value = false } },
-    { label: 'Main Page CMS', icon: 'fas fa-sliders-h', active: activeView.value === 'MainPageCMS', action: () => { activeView.value = 'MainPageCMS'; drawerOpen.value = false } },
+    {
+      label: 'Main Page CMS',
+      icon: 'fas fa-sliders-h',
+      active: activeView.value === 'MainPageCMS',
+      isCollapsible: true,
+      isExpanded: cmsMenuExpanded.value,
+      action: () => {
+        activeView.value = 'MainPageCMS'
+        cmsMenuExpanded.value = !cmsMenuExpanded.value
+      },
+      subItems: [
+        {
+          label: 'Featured Projects',
+          icon: 'fas fa-rocket',
+          tab: 'projects',
+          active: activeView.value === 'MainPageCMS' && mainPageCmsTab.value === 'projects',
+          action: () => { activeView.value = 'MainPageCMS'; mainPageCmsTab.value = 'projects'; drawerOpen.value = false }
+        },
+        {
+          label: 'Event Reminders',
+          icon: 'fas fa-calendar-alt',
+          tab: 'events',
+          active: activeView.value === 'MainPageCMS' && mainPageCmsTab.value === 'events',
+          action: () => { activeView.value = 'MainPageCMS'; mainPageCmsTab.value = 'events'; drawerOpen.value = false }
+        },
+        {
+          label: 'Sponsors & Partners',
+          icon: 'fas fa-handshake',
+          tab: 'sponsors',
+          active: activeView.value === 'MainPageCMS' && mainPageCmsTab.value === 'sponsors',
+          action: () => { activeView.value = 'MainPageCMS'; mainPageCmsTab.value = 'sponsors'; drawerOpen.value = false }
+        }
+      ]
+    },
     { label: 'Community Stats', icon: 'fas fa-th-large', active: activeView.value === 'Stats', action: () => { activeView.value = 'Stats'; drawerOpen.value = false } },
     { label: 'Members', icon: 'fas fa-users', active: activeView.value === 'Directory', action: () => { activeView.value = 'Directory'; drawerOpen.value = false } },
   ]

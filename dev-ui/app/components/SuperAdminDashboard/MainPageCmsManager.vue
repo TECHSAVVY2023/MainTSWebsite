@@ -19,39 +19,6 @@
             Control content dynamically displayed on the main landing page sections: Featured Projects, Event Reminders, and Sponsors & Partners.
           </p>
         </div>
-
-        <!-- Section Navigation Tabs -->
-        <div class="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            @click="activeTab = 'projects'"
-            class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
-            :class="activeTab === 'projects' ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-          >
-            <i class="fas fa-rocket text-xs" />
-            Projects ({{ projects.length }})
-          </button>
-
-          <button
-            type="button"
-            @click="activeTab = 'events'"
-            class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
-            :class="activeTab === 'events' ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-          >
-            <i class="fas fa-calendar-alt text-xs" />
-            Events ({{ eventReminders.length }})
-          </button>
-
-          <button
-            type="button"
-            @click="activeTab = 'sponsors'"
-            class="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
-            :class="activeTab === 'sponsors' ? 'bg-violet-600 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-          >
-            <i class="fas fa-handshake text-xs" />
-            Sponsors & Partners ({{ sponsors.length + partners.length }})
-          </button>
-        </div>
       </div>
     </div>
 
@@ -351,7 +318,7 @@
               v-model="projectForm.title"
               type="text"
               required
-              placeholder="e.g. Fabrics Plus Curtains"
+              placeholder="Name of the project"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -362,7 +329,7 @@
               <input
                 v-model="projectForm.domain"
                 type="text"
-                placeholder="e.g. www.fabricspluscurtains.com"
+                placeholder="Domain name"
                 class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
               />
             </div>
@@ -371,7 +338,7 @@
               <input
                 v-model="projectForm.developer"
                 type="text"
-                placeholder="e.g. Tech Savvy Team"
+                placeholder="Developer name"
                 class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
               />
             </div>
@@ -383,7 +350,7 @@
               v-model="projectForm.url"
               type="url"
               required
-              placeholder="https://www.fabricspluscurtains.com"
+              placeholder="Website URL"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -394,7 +361,7 @@
               <input
                 v-model="projectForm.image"
                 type="text"
-                placeholder="https://..."
+                placeholder="Project image URL"
                 class="flex-1 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
               />
               <label class="cursor-pointer rounded-xl bg-violet-100 px-3 py-2 font-bold text-violet-700 hover:bg-violet-200 flex items-center">
@@ -443,7 +410,7 @@
               v-model="eventForm.title"
               type="text"
               required
-              placeholder="e.g. Web Development Bootcamp"
+              placeholder="Event name"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -463,7 +430,7 @@
               <input
                 v-model="eventForm.time"
                 type="text"
-                placeholder="09:00 AM"
+                placeholder="Event time"
                 class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
               />
             </div>
@@ -485,7 +452,7 @@
             <input
               v-model="eventForm.link"
               type="url"
-              placeholder="https://..."
+              placeholder="Event link"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -495,7 +462,7 @@
             <textarea
               v-model="eventForm.description"
               rows="3"
-              placeholder="Short overview of the event..."
+              placeholder="Event description"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -539,7 +506,7 @@
               v-model="sponsorForm.name"
               type="text"
               required
-              placeholder="e.g. GraphixMind"
+              placeholder="Name of the sponsor/partner"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -561,7 +528,7 @@
               v-model="sponsorForm.websiteUrl"
               type="url"
               required
-              placeholder="https://..."
+              placeholder="Website URL"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
             />
           </div>
@@ -572,7 +539,7 @@
               <input
                 v-model="sponsorForm.logoUrl"
                 type="text"
-                placeholder="https://..."
+                placeholder="Logo URL"
                 class="flex-1 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-violet-500"
               />
               <label class="cursor-pointer rounded-xl bg-violet-100 px-3 py-2 font-bold text-violet-700 hover:bg-violet-200 flex items-center">
@@ -638,14 +605,23 @@ const props = withDefaults(
   defineProps<{
     userRole?: string
     isSuperAdmin?: boolean
+    initialTab?: 'projects' | 'events' | 'sponsors'
   }>(),
   {
     userRole: 'Member',
-    isSuperAdmin: false
+    isSuperAdmin: false,
+    initialTab: 'projects'
   }
 )
 
-const activeTab = ref<'projects' | 'events' | 'sponsors'>('projects')
+const activeTab = ref<'projects' | 'events' | 'sponsors'>(props.initialTab || 'projects')
+
+watch(() => props.initialTab, (newTab) => {
+  if (newTab) {
+    activeTab.value = newTab
+  }
+})
+
 const defaultProjectImage = DEFAULT_PROJECT_IMAGE
 const defaultSponsorLogo = 'https://lsu-media-styles.sgp1.digitaloceanspaces.com/test/img/sponsors/graphixMind.jpg'
 
