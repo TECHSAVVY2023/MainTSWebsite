@@ -1,9 +1,10 @@
 /**
- * Projects page composable: data loading, search filter.
+ * Projects page composable: data loading from Django CMS, search filter.
  */
 export type ProjectItem = {
   title: string
   domain: string
+  developer?: string
   url: string
   image?: string
   alt?: string
@@ -13,15 +14,28 @@ export function useProjects () {
   const route = useRoute()
   const projectSearchInput = ref('')
 
-  const { data: projectsFromApi } = useAsyncData(
+  const { data: projectsFromApi, refresh: refreshProjects } = useAsyncData(
     'projects-page-cms',
     async () => {
       try {
+        const { refreshMainPageContent, projects: mainProjects } = useMainPageCms()
+        await refreshMainPageContent()
+        if (Array.isArray(mainProjects.value) && mainProjects.value.length > 0) {
+          return mainProjects.value.map((p) => ({
+            title: p.title,
+            domain: p.domain,
+            developer: p.developer || 'Tech Savvy Community',
+            url: p.url,
+            image: p.image,
+            alt: p.title
+          }))
+        }
         const { fetchCmsProjects } = useCmsNews()
         const proj = await fetchCmsProjects()
         return proj.map((p) => ({
           title: p.title,
           domain: p.domain,
+          developer: p.developer || 'Tech Savvy Community',
           url: p.url,
           image: p.image,
           alt: p.alt
@@ -47,7 +61,8 @@ export function useProjects () {
     return list.filter(
       (p) =>
         (p.title || '').toLowerCase().includes(q) ||
-        (p.domain || '').toLowerCase().includes(q)
+        (p.domain || '').toLowerCase().includes(q) ||
+        (p.developer || '').toLowerCase().includes(q)
     )
   })
 
@@ -56,6 +71,7 @@ export function useProjects () {
     if (typeof q === 'string' && q.trim()) {
       projectSearchInput.value = q.trim()
     }
+    refreshProjects()
   }
 
   return {

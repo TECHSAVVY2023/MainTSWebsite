@@ -529,6 +529,10 @@ export function useLanding () {
   }
 
   function buildSponsorsAndPartners (cmsApproved: LandingNewsItem[]) {
+    if (sponsors.value.length > 0 || partners.value.length > 0) {
+      return
+    }
+
     const sponsorRows: LandingSponsor[] = []
     const partnerRows: LandingSponsor[] = []
 
@@ -548,38 +552,7 @@ export function useLanding () {
     if (sponsorRows.length > 0 || partnerRows.length > 0) {
       sponsors.value = sponsorRows.slice(0, LANDING_SPONSORS_PARTNERS_MAX)
       partners.value = partnerRows.slice(0, LANDING_SPONSORS_PARTNERS_MAX)
-      return
     }
-
-    sponsors.value = [
-      {
-        name: 'Tech Savvy Community Partners',
-        tier: 'Community Sponsor',
-        description: 'Helping fund educational programs and developer activities.',
-        logo: SAMPLE_BRAND_LOGOS.codebev
-      },
-      {
-        name: 'CloudStack Asia',
-        tier: 'Infrastructure Sponsor',
-        description: 'Credits and tooling for learning environments.',
-        logo: SAMPLE_BRAND_LOGOS.cloud
-      }
-    ]
-    partners.value = [
-      {
-        name: 'Workflow Co-Working Space',
-        tier: 'Venue Partner',
-        description: 'Host venue supporting workshops, talks, and build sessions.',
-        link: 'https://www.techsavvies.space',
-        logo: SAMPLE_BRAND_LOGOS.venue
-      },
-      {
-        name: 'Misamis Digital Guild',
-        tier: 'Education Partner',
-        description: 'Scholarships and learning resources for cohort members.',
-        logo: SAMPLE_BRAND_LOGOS.education
-      }
-    ]
   }
 
   async function loadData () {

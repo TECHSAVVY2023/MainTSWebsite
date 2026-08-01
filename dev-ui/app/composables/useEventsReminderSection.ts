@@ -1,4 +1,4 @@
-export type EventsReminderTabId = 'task' | 'event' | 'reminder' | 'appointment'
+export type EventsReminderTabId = 'all' | 'task' | 'event' | 'reminder' | 'appointment'
 
 export type EventReminderItem = {
   title?: string
@@ -14,7 +14,7 @@ type Ymd = { y: number; m: number; d: number }
 type CalendarCell = { day: number; isToday: boolean; inMonth: boolean }
 
 export function useEventsReminderSection (reminders: Ref<EventReminderItem[]>) {
-  const activeTab = ref<EventsReminderTabId>('task')
+  const activeTab = ref<EventsReminderTabId>('all')
   const viewYear = ref(new Date().getFullYear())
   const viewMonth = ref(new Date().getMonth())
   const today = new Date()
@@ -30,6 +30,7 @@ export function useEventsReminderSection (reminders: Ref<EventReminderItem[]>) {
   const showTaskKind = ref(true)
 
   const tabs: { id: EventsReminderTabId; label: string }[] = [
+    { id: 'all', label: 'All' },
     { id: 'task', label: 'Task' },
     { id: 'event', label: 'Event' },
     { id: 'reminder', label: 'Reminders' },
@@ -87,7 +88,7 @@ export function useEventsReminderSection (reminders: Ref<EventReminderItem[]>) {
 
   const filteredReminders = computed(() => {
     return reminders.value.filter((e) => {
-      if (kindOf(e) !== activeTab.value) return false
+      if (activeTab.value !== 'all' && kindOf(e) !== activeTab.value) return false
       if (isHolidayTitle(e) && !showHoliday.value) return false
       if (kindOf(e) === 'reminder' && !showRemindersKind.value) return false
       if (kindOf(e) === 'task' && !showTaskKind.value) return false
