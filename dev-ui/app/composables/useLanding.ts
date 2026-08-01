@@ -608,8 +608,52 @@ export function useLanding () {
     }
 
     try {
+      const { refreshMainPageContent, projects: cmsProjects, eventReminders: cmsEvents, sponsors: cmsSponsors, partners: cmsPartners } = useMainPageCms()
+      await refreshMainPageContent()
+
+      if (hasMemberAccess && cmsProjects.value.length > 0) {
+        projects.value = cmsProjects.value.slice(0, LANDING_SECTION_MAX_CARDS).map((p) => ({
+          title: p.title,
+          domain: p.domain,
+          developer: p.developer,
+          url: p.url,
+          image: p.image,
+          alt: p.title
+        }))
+      }
+
+      if (hasMemberAccess && cmsEvents.value.length > 0) {
+        calendarEvents.value = cmsEvents.value.map((e) => ({
+          date: e.date,
+          time: e.time,
+          endTime: e.endTime || '',
+          title: e.title,
+          description: e.description || '',
+          link: e.link || '',
+          kind: mapDashboardCalKind(e.kind)
+        })).sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+        eventReminders.value = calendarEvents.value
+      }
+
+      if (cmsSponsors.value.length > 0 || cmsPartners.value.length > 0) {
+        sponsors.value = cmsSponsors.value.map((s) => ({
+          name: s.name,
+          tier: 'Sponsor',
+          description: 'Official Community Sponsor',
+          link: s.websiteUrl,
+          logo: s.logoUrl
+        }))
+        partners.value = cmsPartners.value.map((p) => ({
+          name: p.name,
+          tier: 'Partner',
+          description: 'Community Partner',
+          link: p.websiteUrl,
+          logo: p.logoUrl
+        }))
+      }
+
       const { fetchCmsProjects, fetchCmsCourses } = useCmsNews()
-      if (hasMemberAccess) {
+      if (hasMemberAccess && projects.value.length === 0) {
         const proj = await fetchCmsProjects()
         if (Array.isArray(proj) && proj.length > 0) {
           projects.value = proj
@@ -709,21 +753,6 @@ export function useLanding () {
     } catch { /* keep fallback values */ }
 
     buildSponsorsAndPartners(resolvedNewsItems.value)
-    if (resolvedNewsItems.value.length === 0) {
-      newsItems.value = [...FALLBACK_NEWS_ITEMS].slice(0, LANDING_SECTION_MAX_CARDS)
-    }
-    if (hasMemberAccess && projects.value.length === 0) {
-      projects.value = [...FALLBACK_PROJECTS].slice(0, LANDING_SECTION_MAX_CARDS)
-    }
-    if (hasMemberAccess && coursesPreview.value.length === 0) {
-      coursesPreview.value = [...FALLBACK_COURSES].slice(0, LANDING_SECTION_MAX_CARDS)
-    }
-    if (hasMemberAccess && calendarEvents.value.length === 0) {
-      calendarEvents.value = [...FALLBACK_REMINDERS]
-    }
-    if (hasMemberAccess && eventReminders.value.length === 0) {
-      eventReminders.value = [...FALLBACK_REMINDERS]
-    }
     if (communityRoleStats.value.length === 0) {
       communityRoleStats.value = [{ role: 'Member', count: 1, percent: 100 }]
     }

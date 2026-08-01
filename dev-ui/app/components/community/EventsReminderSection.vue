@@ -130,11 +130,10 @@
           </button>
         </div>
 
-        <div v-if="filteredReminders.length === 0" class="rounded-xl border border-dashed border-zinc-300 bg-zinc-50/80 py-14 text-center">
-          <i class="fas fa-calendar-alt mb-3 text-3xl text-violet-400" aria-hidden="true" />
-          <p class="text-sm text-zinc-600">
-            No items for this filter. Try another tab, another date, or adjust Scheduled checkboxes.
-          </p>
+        <div v-if="filteredReminders.length === 0" class="rounded-xl border border-dashed border-violet-200 bg-white/90 py-10 px-4 text-center">
+          <pre class="font-mono text-[11px] sm:text-xs text-violet-600 whitespace-pre leading-relaxed inline-block text-left mx-auto mb-3 select-none">{{ asciiMsg }}</pre>
+          <p class="text-xs font-bold uppercase tracking-wider text-dark">No Events Scheduled Yet</p>
+          <p class="text-[11px] text-dark/60 mt-0.5">Check another tab or add events via the Community Dashboard.</p>
         </div>
 
         <ul v-else class="space-y-2">
@@ -182,6 +181,10 @@
 
 <script setup lang="ts">
 import type { EventReminderItem } from '~/composables/useEventsReminderSection'
+import { useEventsReminderSection } from '~/composables/useEventsReminderSection'
+import { getRandomAsciiMessage } from '~/constants/asciiMessages'
+
+const asciiMsg = computed(() => getRandomAsciiMessage())
 
 const props = defineProps<{
   reminders: EventReminderItem[]

@@ -1000,6 +1000,13 @@
             </div>
           </template>
 
+          <template v-else-if="activeView === 'MainPageCMS'">
+            <SuperAdminDashboardMainPageCmsManager
+              :user-role="member?.role || 'Member'"
+              :is-super-admin="isSuperAdmin(user?.email)"
+            />
+          </template>
+
           <template v-else-if="activeView === 'Stats'">
             <div class="space-y-6 sm:space-y-8">
               <div class="px-0 sm:px-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -2349,6 +2356,7 @@ const navItems = computed(() => {
   }[] = [
     { label: 'My Profile', icon: 'fas fa-user-circle', active: activeView.value === 'Profile', action: () => { activeView.value = 'Profile'; drawerOpen.value = false } },
     { label: 'Library Feed', icon: 'fas fa-newspaper', active: activeView.value === 'Library', action: () => { activeView.value = 'Library'; drawerOpen.value = false } },
+    { label: 'Main Page CMS', icon: 'fas fa-sliders-h', active: activeView.value === 'MainPageCMS', action: () => { activeView.value = 'MainPageCMS'; drawerOpen.value = false } },
     { label: 'Community Stats', icon: 'fas fa-th-large', active: activeView.value === 'Stats', action: () => { activeView.value = 'Stats'; drawerOpen.value = false } },
     { label: 'Members', icon: 'fas fa-users', active: activeView.value === 'Directory', action: () => { activeView.value = 'Directory'; drawerOpen.value = false } },
   ]

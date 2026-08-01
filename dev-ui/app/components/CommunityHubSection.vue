@@ -306,11 +306,12 @@ function mergeNamedUnique<T extends { name?: string }>(primary: T[], filler: T[]
   return out.length > 0 ? out : filler.slice(0, minCount)
 }
 
-const safeReminders = computed(() =>
-  Array.isArray(props.reminders) && props.reminders.length > 0
-    ? props.reminders
-    : FALLBACK_REMINDERS_LOCAL
-)
+const safeReminders = computed(() => {
+  if (Array.isArray(props.reminders) && props.reminders.length > 0) {
+    return props.reminders
+  }
+  return []
+})
 
 const membersFromApiOrEmpty = computed(() => {
   const raw = props.speakers
@@ -320,11 +321,7 @@ const membersFromApiOrEmpty = computed(() => {
 })
 
 const membersSourceList = computed((): SpeakerItem[] => {
-  const primary = membersFromApiOrEmpty.value
-  if (primary.length > 0) {
-    return primary
-  }
-  return mergeNamedUnique([], FALLBACK_SPEAKERS, COMMUNITY_SPEAKERS_MAX).slice(0, COMMUNITY_SPEAKERS_MAX)
+  return membersFromApiOrEmpty.value
 })
 
 const displayedPeople = computed((): SpeakerItem[] => {
@@ -337,18 +334,16 @@ const displayedPeople = computed((): SpeakerItem[] => {
 
 const safeSponsors = computed(() => {
   const raw = props.sponsors
-  const primary = Array.isArray(raw)
-    ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string')
+  return Array.isArray(raw)
+    ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string').slice(0, COMMUNITY_SPONSORS_MAX)
     : []
-  return mergeNamedUnique(primary, FALLBACK_SPONSORS_ONLY, COMMUNITY_SPONSORS_MAX).slice(0, COMMUNITY_SPONSORS_MAX)
 })
 
 const safePartners = computed(() => {
   const raw = props.partners
-  const primary = Array.isArray(raw)
-    ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string')
+  return Array.isArray(raw)
+    ? raw.filter((s): s is SponsorItem => s != null && typeof s === 'object' && typeof (s as SponsorItem).name === 'string').slice(0, COMMUNITY_PARTNERS_MAX)
     : []
-  return mergeNamedUnique(primary, FALLBACK_PARTNERS_ONLY, COMMUNITY_PARTNERS_MAX).slice(0, COMMUNITY_PARTNERS_MAX)
 })
 
 </script>

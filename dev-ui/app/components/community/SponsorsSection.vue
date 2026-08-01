@@ -62,10 +62,11 @@
 
     <div
       v-if="sponsors.length === 0 && partners.length === 0"
-      class="rounded-2xl border border-neutral-border bg-gradient-to-br from-[#f8f7fb] to-[#eceff4] p-6 text-center text-sm text-dark/65 shadow-inner"
+      class="rounded-2xl border border-dashed border-violet-200 bg-white/90 p-8 text-center shadow-sm"
     >
-      <p class="font-medium text-dark/75">Sponsors and partners will be announced soon.</p>
-      <p class="mt-1 text-xs text-dark/50">Check back as we grow the community.</p>
+      <pre class="font-mono text-[11px] sm:text-xs text-violet-600 whitespace-pre leading-relaxed inline-block text-left mx-auto mb-3 select-none">{{ asciiMsg }}</pre>
+      <p class="text-xs font-bold uppercase tracking-wider text-dark">No Sponsors or Partners Listed Yet</p>
+      <p class="mt-1 text-[11px] text-dark/60">Community sponsors can be managed via the Dashboard.</p>
     </div>
   </div>
 </template>
@@ -74,6 +75,9 @@
 import SponsorFlipCard from '~/components/community/SponsorFlipCard.vue'
 import type { SponsorFlipItem } from '~/composables/useSponsorFlipCard'
 import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
+import { getRandomAsciiMessage } from '~/constants/asciiMessages'
+
+const asciiMsg = computed(() => getRandomAsciiMessage())
 
 withDefaults(
   defineProps<{
