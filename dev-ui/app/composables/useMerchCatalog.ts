@@ -15,81 +15,8 @@ export type MerchItem = {
   href?: string
 }
 
-/** Initial / offline catalog (also used when API returns no merch rows). */
-export const MERCH_CATALOG_STATIC: MerchItem[] = [
-  {
-    id: 'season-4-tee',
-    name: 'Season 4 community tee',
-    priceLabel: 'From ₱549',
-    unitAmountPhp: 549,
-    subtitle: 'Think smart. Code smart. Official Code Camp Season 4 print.',
-    image: SAMPLE_MERCH.tee,
-    alt: 'Code Camp Season 4 community t-shirt'
-  },
-  {
-    id: 'tech-savvy-hoodie',
-    name: 'Tech Savvy hoodie',
-    priceLabel: 'From ₱1,090',
-    unitAmountPhp: 1090,
-    subtitle: 'Mid-weight fleece, embroidered mark — for meetups and late builds.',
-    image: SAMPLE_MERCH.hoodie,
-    alt: 'Tech Savvy hoodie'
-  },
-  {
-    id: 'sticker-pin-set',
-    name: 'Sticker & pin set',
-    priceLabel: 'From ₱180',
-    unitAmountPhp: 180,
-    subtitle: 'Vinyl stickers and enamel pin — bundle for laptops and lanyards.',
-    image: SAMPLE_MERCH.stickers,
-    alt: 'Tech Savvy stickers and pin set'
-  },
-  {
-    id: 'community-beanie',
-    name: 'Community knit beanie',
-    priceLabel: 'From ₱420',
-    unitAmountPhp: 420,
-    subtitle: 'Soft acrylic knit with woven label — for cool venues and night builds.',
-    image: SAMPLE_MERCH.beanie,
-    alt: 'Tech Savvy community beanie'
-  },
-  {
-    id: 'canvas-tote',
-    name: 'Canvas cohort tote',
-    priceLabel: 'From ₱380',
-    unitAmountPhp: 380,
-    subtitle: 'Heavy cotton canvas, long handles — laptops, hoodies, and event swag.',
-    image: SAMPLE_MERCH.tote,
-    alt: 'Code Camp canvas tote bag'
-  },
-  {
-    id: 'camp-mug',
-    name: 'Ceramic camp mug',
-    priceLabel: 'From ₱290',
-    unitAmountPhp: 290,
-    subtitle: 'Matte glaze with debossed mark — desk companion for stand-ups.',
-    image: SAMPLE_MERCH.mug,
-    alt: 'Code Camp ceramic mug'
-  },
-  {
-    id: 'insulated-bottle',
-    name: 'Insulated water bottle',
-    priceLabel: 'From ₱650',
-    unitAmountPhp: 650,
-    subtitle: 'Double-wall steel, powder coat — keeps drinks cold through long sessions.',
-    image: SAMPLE_MERCH.bottle,
-    alt: 'Tech Savvy insulated water bottle'
-  },
-  {
-    id: 'field-notebook',
-    name: 'Field notes journal',
-    priceLabel: 'From ₱220',
-    unitAmountPhp: 220,
-    subtitle: 'Dot grid, lay-flat binding — sketches, stand-up notes, and API doodles.',
-    image: SAMPLE_MERCH.notebook,
-    alt: 'Tech Savvy notebook journal'
-  }
-]
+/** Initial / empty catalog. */
+export const MERCH_CATALOG_STATIC: MerchItem[] = []
 
 /** @deprecated Use MERCH_CATALOG_STATIC */
 export const MERCH_CATALOG = MERCH_CATALOG_STATIC
@@ -189,7 +116,7 @@ function mapCmsItemToMerch (cms: CmsRaw, apiBase: string): MerchItem | null {
 
 export function useMerchCatalog () {
   const config = useRuntimeConfig()
-  const apiBase = (config.public?.apiBase as string) || ''
+  const apiBase = (config.public?.apiBase as string || '').replace(/\/$/, '')
   const catalogState = useState<MerchItem[]>(MERCH_CATALOG_STATE_KEY, () => [...MERCH_CATALOG_STATIC])
 
   useAsyncData(
@@ -197,8 +124,37 @@ export function useMerchCatalog () {
     async () => {
       if (!apiBase) return []
       try {
-        const url = `${apiBase.replace(/\/$/, '')}/cms/list/`
-        const data = await $fetch<unknown>(url)
+        // 1. Try fetching from dedicated MerchandiseItem endpoint
+        const merchRes = await $fetch<any[]>(`${apiBase}/merchandise/?active_only=true`).catch(() => null)
+        if (Array.isArray(merchRes) && merchRes.length > 0) {
+          const mapped: MerchItem[] = merchRes
+            .filter((m: any) => m.is_active !== false && (m.approval_status || 'approved').toLowerCase() === 'approved')
+            .map((m: any) => {
+              const unitAmount = Number(m.unit_amount_php) || 0
+              const priceLabel = m.price_label?.trim() || `₱${Math.round(unitAmount).toLocaleString()}`
+              const id = (m.item_id || `merch-${m.id}`)
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^a-z0-9-_]/gi, '')
+              return {
+                id,
+                name: m.name || 'Product',
+                priceLabel,
+                unitAmountPhp: unitAmount,
+                subtitle: m.subtitle || '',
+                image: m.image || undefined,
+                alt: m.alt || m.name || 'Product'
+              }
+            })
+          if (mapped.length > 0) {
+            catalogState.value = mapped
+            return mapped
+          }
+        }
+
+        // 2. Fallback to generic CMS newsfeed items if any
+        const url = `${apiBase}/cms/list/`
+        const data = await $fetch<unknown>(url).catch(() => [])
         const list = normalizeCmsList(data) as CmsRaw[]
         const mapped = list
           .map((item) => mapCmsItemToMerch(item, apiBase))

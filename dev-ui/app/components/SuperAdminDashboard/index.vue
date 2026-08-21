@@ -1038,6 +1038,10 @@
             />
           </template>
 
+          <template v-else-if="activeView === 'MerchCMS'">
+            <SuperAdminDashboardMerchCmsManager />
+          </template>
+
           <template v-else-if="activeView === 'Stats'">
             <div class="space-y-6 sm:space-y-8">
               <div class="px-0 sm:px-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -2431,6 +2435,12 @@ const navItems = computed(() => {
     { label: 'Members', icon: 'fas fa-users', active: activeView.value === 'Directory', action: () => { activeView.value = 'Directory'; drawerOpen.value = false } },
   ]
   if (isSuperAdmin(user.value?.email)) {
+    items.push({
+      label: 'Merchandise CMS',
+      icon: 'fas fa-tshirt',
+      active: activeView.value === 'MerchCMS',
+      action: () => { activeView.value = 'MerchCMS'; drawerOpen.value = false },
+    })
     const n = pendingMemberSubmissions.value.length
     items.push({
       label: 'Review Uploads',

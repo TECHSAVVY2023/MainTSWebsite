@@ -31,6 +31,7 @@
         </div>
 
         <div
+          v-if="displayItems.length > 0"
           class="mx-auto grid w-full max-w-[72rem] grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-6 items-stretch"
         >
           <article
@@ -116,6 +117,15 @@
             </div>
           </article>
         </div>
+
+        <div
+          v-else
+          class="mx-auto max-w-[72rem] rounded-2xl border border-dashed border-violet-200 bg-white/90 p-8 text-center shadow-sm"
+        >
+          <pre class="font-mono text-[11px] sm:text-xs text-violet-600 whitespace-pre leading-relaxed inline-block text-left mx-auto mb-3 select-none">{{ asciiMsg }}</pre>
+          <p class="text-xs font-bold uppercase tracking-wider text-dark">No Merchandise Available Yet</p>
+          <p class="mt-1 text-[11px] text-dark/60">Community merchandise can be added by Super Admins via the Dashboard.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -124,6 +134,9 @@
 <script setup lang="ts">
 import type { MerchItem } from '~/composables/useMerchCatalog'
 import { DEFAULT_MEDIA_FALLBACK } from '~/constants/sampleMedia'
+import { getRandomAsciiMessage } from '~/constants/asciiMessages'
+
+const asciiMsg = computed(() => getRandomAsciiMessage())
 
 const props = withDefaults(
   defineProps<{

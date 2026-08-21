@@ -44,7 +44,10 @@
       </p>
     </div>
 
-    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12">
+    <div
+      v-if="catalogItems.length > 0"
+      class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12"
+    >
       <article
         v-for="(item, idx) in catalogItems"
         :key="item.id || item.name + idx"
@@ -129,6 +132,15 @@
       </article>
     </div>
 
+    <div
+      v-else
+      class="my-8 rounded-2xl border border-dashed border-violet-200 bg-white p-12 text-center shadow-sm"
+    >
+      <pre class="font-mono text-[11px] sm:text-xs text-violet-600 whitespace-pre leading-relaxed inline-block text-left mx-auto mb-4 select-none">{{ asciiMsg }}</pre>
+      <p class="text-sm font-bold uppercase tracking-wider text-dark">No Merchandise Available Yet</p>
+      <p class="mt-1 text-xs text-dark/60">Official community merchandise can be added by Super Admins via the Dashboard.</p>
+    </div>
+
     <div class="mt-14 border-t border-neutral-border pt-10 sm:mt-16">
       <SectionWireShield variant="gray">
         <div class="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
@@ -160,6 +172,9 @@
 <script setup lang="ts">
 import type { MaybeRef } from 'vue'
 import type { MerchItem } from '../../composables/useMerchCatalog'
+import { getRandomAsciiMessage } from '~/constants/asciiMessages'
+
+const asciiMsg = computed(() => getRandomAsciiMessage())
 
 const props = defineProps<{
   items: MaybeRef<MerchItem[]>
