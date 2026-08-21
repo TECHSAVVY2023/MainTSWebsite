@@ -9,6 +9,10 @@ export type MerchItem = {
   name: string
   priceLabel: string
   unitAmountPhp: number
+  originalPricePhp?: number | null
+  discountPercentage?: number
+  badgeLabel?: string
+  stock?: number
   subtitle?: string
   image?: string
   alt?: string
@@ -108,6 +112,7 @@ function mapCmsItemToMerch (cms: CmsRaw, apiBase: string): MerchItem | null {
     name: cms.title || 'Product',
     priceLabel,
     unitAmountPhp,
+    stock: 100,
     subtitle: (cms.descriptions || '').trim().slice(0, 280) || String(filters.tagline || ''),
     image: fileUrl || undefined,
     alt: cms.title || 'Product'
@@ -141,6 +146,10 @@ export function useMerchCatalog () {
                 name: m.name || 'Product',
                 priceLabel,
                 unitAmountPhp: unitAmount,
+                originalPricePhp: m.original_price_php != null ? Number(m.original_price_php) : null,
+                discountPercentage: Number(m.discount_percentage) || 0,
+                badgeLabel: m.badge_label || 'Official',
+                stock: m.stock !== undefined && m.stock !== null ? Number(m.stock) : 100,
                 subtitle: m.subtitle || '',
                 image: m.image || undefined,
                 alt: m.alt || m.name || 'Product'

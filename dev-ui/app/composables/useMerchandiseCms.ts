@@ -7,6 +7,9 @@ export interface MerchandiseCmsItem {
   name: string
   price_label?: string
   unit_amount_php: number
+  original_price_php?: number | null
+  discount_percentage?: number
+  badge_label?: string
   subtitle?: string
   image?: string
   alt?: string
@@ -45,6 +48,9 @@ export function useMerchandiseCms () {
           name: m.name || '',
           price_label: m.price_label || `₱${Math.round(Number(m.unit_amount_php) || 0)}`,
           unit_amount_php: Number(m.unit_amount_php) || 0,
+          original_price_php: m.original_price_php != null ? Number(m.original_price_php) : null,
+          discount_percentage: Number(m.discount_percentage) || 0,
+          badge_label: m.badge_label || 'Official',
           subtitle: m.subtitle || '',
           image: m.image || '',
           alt: m.alt || m.name || '',
@@ -81,6 +87,9 @@ export function useMerchandiseCms () {
       name: item.name,
       price_label: priceLabel,
       unit_amount_php: unitPrice,
+      original_price_php: item.original_price_php != null ? Number(item.original_price_php) : null,
+      discount_percentage: Number(item.discount_percentage) || 0,
+      badge_label: item.badge_label || 'Official',
       subtitle: item.subtitle || '',
       image: item.image || '',
       alt: item.alt || item.name || '',

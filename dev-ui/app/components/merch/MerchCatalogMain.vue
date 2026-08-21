@@ -46,88 +46,127 @@
 
     <div
       v-if="catalogItems.length > 0"
-      class="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12"
+      class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
       <article
         v-for="(item, idx) in catalogItems"
         :key="item.id || item.name + idx"
-        class="group flex flex-col overflow-hidden rounded-2xl border border-neutral-border bg-white shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-shadow duration-300 hover:shadow-[0_16px_48px_rgba(97,38,177,0.12)]"
+        class="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-violet-100/80 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-violet-200 hover:shadow-xl hover:shadow-violet-900/5"
       >
-        <a
-          v-if="item.href"
-          :href="item.href"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="relative block aspect-square overflow-hidden bg-[#e8eaef] no-underline"
-        >
-          <img
-            :src="item.image || defaultImage"
-            :alt="item.alt || item.name"
-            class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
-            loading="lazy"
-            decoding="async"
-            @error="onImgError"
-          >
-        </a>
-        <div
-          v-else
-          class="relative aspect-square overflow-hidden bg-[#e8eaef]"
-        >
-          <img
-            :src="item.image || defaultImage"
-            :alt="item.alt || item.name"
-            class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
-            loading="lazy"
-            decoding="async"
-            @error="onImgError"
-          >
-        </div>
-        <div class="flex flex-1 flex-col p-5 sm:p-6">
-          <SectionWireShield variant="white">
-            <h2 class="text-lg font-semibold leading-snug tracking-tight text-dark sm:text-xl">
+        <div>
+          <!-- ── Product Image Container with Shopee-Style Badges ── -->
+          <div class="relative aspect-square w-full overflow-hidden rounded-xl bg-[#f5f6f9]">
+            <img
+              :src="item.image || defaultImage"
+              :alt="item.alt || item.name"
+              class="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+              :class="{ 'blur-[2.5px] opacity-70 grayscale-[40%]': item.stock !== undefined && item.stock <= 0 }"
+              loading="lazy"
+              decoding="async"
+              @error="onImgError"
+            />
+
+            <!-- Top Right Shopee-Style Discount Tag -->
+            <div
+              v-if="item.discountPercentage && item.discountPercentage > 0"
+              class="absolute right-0 top-0 z-10 rounded-bl-xl bg-gradient-to-r from-amber-500 via-rose-500 to-[#EE4D2D] px-3 py-1 text-xs font-black uppercase tracking-tight text-white shadow-md"
+            >
+              -{{ item.discountPercentage }}%
+            </div>
+
+            <!-- Bottom Image Banner Strip -->
+            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-r from-[#2E1368]/95 to-violet-900/90 px-2.5 py-1 flex items-center justify-between text-[10px] font-extrabold uppercase tracking-wider text-amber-300">
+              <span class="truncate">{{ item.badgeLabel || 'TechSavvy Official' }}</span>
+              <i class="fas fa-certificate text-[9px] text-amber-300 ml-1" />
+            </div>
+
+            <!-- Sold Out Center Blur Overlay -->
+            <div
+              v-if="item.stock !== undefined && item.stock <= 0"
+              class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/45 p-3 backdrop-blur-[2px]"
+            >
+              <span class="rounded-xl border border-white/40 bg-black/85 px-4 py-2 text-center text-sm font-black uppercase tracking-widest text-white shadow-xl">
+                SOLD OUT
+              </span>
+            </div>
+          </div>
+
+          <!-- ── Product Info ── -->
+          <div class="mt-3.5 space-y-2 text-left">
+            <!-- Title with Preferred / Tag Badge -->
+            <h2 class="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-snug text-[#1a0533] sm:text-[15px]">
+              <span
+                class="mr-1.5 inline-flex items-center rounded bg-[#EE4D2D] px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white"
+              >
+                {{ item.badgeLabel || 'Preferred' }}
+              </span>
               {{ item.name }}
             </h2>
-            <p
-              v-if="item.subtitle"
-              class="mt-2 text-sm leading-relaxed text-dark/70"
-            >
+
+            <!-- Subtitle / Spec Note if any -->
+            <p v-if="item.subtitle" class="line-clamp-2 text-xs leading-relaxed text-slate-500">
               {{ item.subtitle }}
             </p>
-            <p class="mt-4 text-lg font-semibold tabular-nums text-secondary sm:text-xl">
-              {{ item.priceLabel }}
-            </p>
-          </SectionWireShield>
-          <div class="mt-5 grid w-full grid-cols-2 gap-2.5">
-            <template v-if="!item.href">
-              <button
-                type="button"
-                class="inline-flex min-h-[2.75rem] w-full min-w-0 items-center justify-center gap-1.5 rounded-full bg-[#2E1368] px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#6126B1] sm:gap-2 sm:px-4 sm:py-2.5"
-                @click="addToCart(item)"
+
+            <!-- Price Row with Strikethrough & Stock -->
+            <div class="pt-1.5 flex items-baseline justify-between gap-1 flex-wrap">
+              <div class="flex items-baseline gap-2">
+                <span class="text-base font-black text-[#EE4D2D] sm:text-lg">
+                  ₱{{ Math.round(item.unitAmountPhp).toLocaleString() }}
+                </span>
+                <span
+                  v-if="item.originalPricePhp && item.originalPricePhp > item.unitAmountPhp"
+                  class="text-xs text-slate-400 line-through font-medium"
+                >
+                  ₱{{ Math.round(item.originalPricePhp).toLocaleString() }}
+                </span>
+              </div>
+
+              <!-- Stock Count Display -->
+              <div
+                class="text-xs font-bold"
+                :class="item.stock !== undefined && item.stock <= 0 ? 'text-red-500' : item.stock !== undefined && item.stock < 10 ? 'text-amber-600' : 'text-slate-500'"
               >
-                <i class="fas fa-cart-plus shrink-0 text-[11px] sm:text-xs" aria-hidden="true" />
-                <span class="truncate">Add to cart</span>
-              </button>
-              <button
-                type="button"
-                class="inline-flex min-h-[2.75rem] w-full min-w-0 items-center justify-center gap-1.5 rounded-full border border-accent-purple/40 bg-violet-border px-3 py-2 text-sm font-semibold text-accent-purple shadow-sm transition-colors hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] sm:gap-2 sm:px-4 sm:py-2.5"
-                aria-label="Add to cart and open cart to checkout"
-                title="Review cart and continue to checkout"
-                @click="addToCartAndGoToCart(item)"
-              >
-                <i class="fas fa-shopping-bag shrink-0 text-[11px] sm:text-xs" aria-hidden="true" />
-                <span class="truncate">Checkout</span>
-              </button>
-            </template>
-            <a
-              v-else
-              :href="item.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="col-span-2 inline-flex min-h-[2.75rem] w-full items-center justify-center rounded-full border border-neutral-border px-4 py-2.5 text-sm font-medium text-dark no-underline hover:border-accent-purple"
-            >
-              View link
-            </a>
+                <span v-if="item.stock !== undefined && item.stock <= 0">Out of Stock</span>
+                <span v-else-if="item.stock !== undefined && item.stock < 10">{{ item.stock }} left</span>
+                <span v-else>{{ item.stock ?? 100 }} in stock</span>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- ── Retained Action Buttons ── -->
+        <div class="mt-4 grid w-full shrink-0 grid-cols-2 gap-2.5 pt-3 border-t border-violet-50">
+          <template v-if="!item.href">
+            <button
+              type="button"
+              :disabled="item.stock !== undefined && item.stock <= 0"
+              class="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-1.5 rounded-xl bg-[#2E1368] px-3 py-2 text-xs font-bold text-white shadow-sm transition-all hover:bg-[#6126B1] disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 sm:text-sm"
+              @click="addToCart(item)"
+            >
+              <i class="fas fa-cart-plus shrink-0 text-xs" aria-hidden="true" />
+              <span class="truncate">{{ item.stock !== undefined && item.stock <= 0 ? 'Sold Out' : 'Add to cart' }}</span>
+            </button>
+            <button
+              type="button"
+              :disabled="item.stock !== undefined && item.stock <= 0"
+              class="inline-flex min-h-[2.5rem] w-full min-w-0 items-center justify-center gap-1.5 rounded-xl border border-accent-purple/40 bg-violet-50 px-3 py-2 text-xs font-bold text-accent-purple shadow-sm transition-all hover:border-[#9575CD] hover:bg-[#D9CCFA] hover:text-[#283593] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 sm:text-sm"
+              aria-label="Add to cart and open cart to checkout"
+              @click="addToCartAndGoToCart(item)"
+            >
+              <i class="fas fa-shopping-bag shrink-0 text-xs" aria-hidden="true" />
+              <span class="truncate">Checkout</span>
+            </button>
+          </template>
+          <a
+            v-else
+            :href="item.href"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="col-span-2 inline-flex min-h-[2.5rem] w-full items-center justify-center rounded-xl border border-neutral-border px-4 py-2 text-sm font-bold text-dark no-underline hover:border-accent-purple"
+          >
+            View link
+          </a>
         </div>
       </article>
     </div>

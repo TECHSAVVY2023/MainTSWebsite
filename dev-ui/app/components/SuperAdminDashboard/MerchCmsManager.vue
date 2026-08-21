@@ -134,24 +134,50 @@
               :src="item.image || defaultProductImage"
               :alt="item.alt || item.name"
               class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              :class="{ 'blur-[2px] opacity-75 grayscale-[30%]': item.stock <= 0 }"
               @error="(e: any) => { e.target.src = defaultProductImage }"
             />
+
+            <!-- Top Left Status & Badge -->
             <div class="absolute left-2 top-2 flex flex-wrap gap-1">
+              <span
+                v-if="item.badge_label"
+                class="rounded-md bg-violet-700/90 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm backdrop-blur-sm"
+              >
+                {{ item.badge_label }}
+              </span>
               <span
                 class="rounded-md px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm"
                 :class="item.is_active ? 'bg-emerald-600' : 'bg-slate-500'"
               >
                 {{ item.is_active ? 'Active' : 'Draft' }}
               </span>
-              <span
-                v-if="item.stock <= 0"
-                class="rounded-md bg-red-600 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-sm"
-              >
-                Out of Stock
+            </div>
+
+            <!-- Top Right Shopee-Style Discount Badge -->
+            <div
+              v-if="item.discount_percentage && item.discount_percentage > 0"
+              class="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow-md"
+            >
+              -{{ item.discount_percentage }}%
+            </div>
+
+            <!-- Sold Out Center Overlay -->
+            <div
+              v-if="item.stock <= 0"
+              class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[1px]"
+            >
+              <span class="rounded-xl border border-white/30 bg-black/80 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-white shadow-lg">
+                SOLD OUT
               </span>
             </div>
-            <div class="absolute right-2 bottom-2 rounded-lg bg-black/75 px-2.5 py-1 text-xs font-black text-white backdrop-blur-sm">
-              ₱{{ Math.round(item.unit_amount_php).toLocaleString() }}
+
+            <!-- Bottom Price Tag -->
+            <div class="absolute right-2 bottom-2 flex items-center gap-1.5 rounded-lg bg-black/75 px-2.5 py-1 text-xs font-black text-white backdrop-blur-sm">
+              <span v-if="item.original_price_php && item.original_price_php > item.unit_amount_php" class="text-[10px] text-slate-400 line-through">
+                ₱{{ Math.round(item.original_price_php).toLocaleString() }}
+              </span>
+              <span>₱{{ Math.round(item.unit_amount_php).toLocaleString() }}</span>
             </div>
           </div>
 
@@ -270,7 +296,7 @@
 
               <div>
                 <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                  Unit Price (PHP ₱) <span class="text-red-500">*</span>
+                  Sale Price (PHP ₱) <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
                   <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">₱</span>
@@ -284,6 +310,54 @@
                     class="w-full rounded-xl border border-violet-100 bg-slate-50/50 py-3 pl-8 pr-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
                   />
                 </div>
+              </div>
+            </div>
+
+            <!-- Discount Options & Original Price -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                  Discount (%)
+                </label>
+                <div class="relative">
+                  <input
+                    v-model.number="form.discount_percentage"
+                    type="number"
+                    min="0"
+                    max="99"
+                    placeholder="e.g. 20"
+                    class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
+                  />
+                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                  Original Price (₱)
+                </label>
+                <div class="relative">
+                  <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">₱</span>
+                  <input
+                    v-model.number="form.original_price_php"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 650"
+                    class="w-full rounded-xl border border-violet-100 bg-slate-50/50 py-3 pl-8 pr-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                  Badge Tag
+                </label>
+                <input
+                  v-model="form.badge_label"
+                  type="text"
+                  placeholder="Official, Preferred, Sulit..."
+                  class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
+                />
               </div>
             </div>
 
@@ -508,6 +582,9 @@ const form = ref<Partial<MerchandiseCmsItem>>({
   item_id: '',
   price_label: '',
   unit_amount_php: 549,
+  original_price_php: null,
+  discount_percentage: 0,
+  badge_label: 'Official',
   subtitle: '',
   image: '',
   alt: '',
@@ -522,6 +599,9 @@ function openAddModal () {
     item_id: '',
     price_label: '',
     unit_amount_php: 500,
+    original_price_php: null,
+    discount_percentage: 0,
+    badge_label: 'Official',
     subtitle: '',
     image: '',
     alt: '',
