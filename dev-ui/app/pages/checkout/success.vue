@@ -85,6 +85,8 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+
 const route = useRoute()
 const config = useRuntimeConfig()
 const { clearCart } = useCart()
@@ -108,15 +110,15 @@ const totalLabel = computed(() => {
 })
 
 async function checkOnce () {
-  const ref = refParam.value
-  if (!ref) return
+  const orderRef = refParam.value
+  if (!orderRef) return
   const apiBase = (config.public.apiBase as string || '').replace(/\/$/, '')
   try {
     const res = await $fetch<{
       reference_number: string
       status: string
       total_centavos?: number
-    }>(`${apiBase}/merch/order/${encodeURIComponent(ref)}/`)
+    }>(`${apiBase}/merch/order/${encodeURIComponent(orderRef)}/`)
     totalCentavos.value = typeof res.total_centavos === 'number' ? res.total_centavos : null
     if (res.status === 'paid') {
       status.value = 'paid'

@@ -8,16 +8,16 @@
             <h2 class="text-xl font-black uppercase tracking-tight text-[#1a0533]">
               Merchandise CMS
             </h2>
-            <span
+            <!-- <span
               class="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700"
             >
               <i class="fas fa-crown text-[10px]" />
               Super Admin Only
-            </span>
+            </span> -->
           </div>
-          <p class="mt-1 text-xs font-medium text-slate-500">
+          <!-- <p class="mt-1 text-xs font-medium text-slate-500">
             Create, update, and manage official community merchandise items displayed on the public store and PayMongo checkout.
-          </p>
+          </p> -->
         </div>
 
         <button
@@ -275,46 +275,45 @@
                 v-model="form.name"
                 type="text"
                 required
-                placeholder="e.g. Season 4 Community Tee"
+                placeholder="Enter Merchandise name"
                 class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
               />
             </div>
 
-            <!-- Item ID / Slug & Price in PHP -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                  Item Slug / ID
-                </label>
-                <input
-                  v-model="form.item_id"
-                  type="text"
-                  placeholder="e.g. season-4-tee (auto-generated if blank)"
-                  class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
-                />
-              </div>
+            <!-- Item ID / Slug -->
+            <div>
+              <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                Item Slug / ID
+              </label>
+              <input
+                v-model="form.item_id"
+                type="text"
+                placeholder="Enter Merchandise unique identifier"
+                class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
+              />
+            </div>
 
+            <!-- Pricing: Price, Discount (%), Final Price -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                  Sale Price (PHP ₱) <span class="text-red-500">*</span>
+                  Price (₱) <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
                   <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">₱</span>
                   <input
-                    v-model.number="form.unit_amount_php"
+                    v-model.number="form.original_price_php"
+                    @input="onPriceChange"
                     type="number"
                     min="0"
                     step="1"
                     required
-                    placeholder="549"
+                    placeholder="e.g. 500"
                     class="w-full rounded-xl border border-violet-100 bg-slate-50/50 py-3 pl-8 pr-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
                   />
                 </div>
               </div>
-            </div>
 
-            <!-- Discount Options & Original Price -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
                   Discount (%)
@@ -322,32 +321,42 @@
                 <div class="relative">
                   <input
                     v-model.number="form.discount_percentage"
+                    @input="onDiscountChange"
                     type="number"
                     min="0"
                     max="99"
-                    placeholder="e.g. 20"
+                    placeholder="0"
                     class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
                   />
                   <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">%</span>
+                </div>
+                <div v-if="discountCalculationHint" class="mt-1 text-[10px] font-bold text-emerald-600">
+                  {{ discountCalculationHint }}
                 </div>
               </div>
 
               <div>
                 <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                  Original Price (₱)
+                  Final Price (₱) <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
                   <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">₱</span>
                   <input
-                    v-model.number="form.original_price_php"
+                    v-model.number="form.unit_amount_php"
+                    @input="onFinalPriceChange"
                     type="number"
                     min="0"
-                    placeholder="e.g. 650"
+                    step="1"
+                    required
+                    placeholder="e.g. 400"
                     class="w-full rounded-xl border border-violet-100 bg-slate-50/50 py-3 pl-8 pr-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
                   />
                 </div>
               </div>
+            </div>
 
+            <!-- Badge Tag & Stock Count -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
                   Badge Tag
@@ -356,21 +365,6 @@
                   v-model="form.badge_label"
                   type="text"
                   placeholder="Official, Preferred, Sulit..."
-                  class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <!-- Price Label & Stock Count -->
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="block text-[11px] font-black uppercase tracking-wider text-slate-500 mb-1">
-                  Price Label (Optional Display Override)
-                </label>
-                <input
-                  v-model="form.price_label"
-                  type="text"
-                  placeholder="e.g. From ₱549 (defaults to ₱Price)"
                   class="w-full rounded-xl border border-violet-100 bg-slate-50/50 p-3 text-xs font-bold text-[#1a0533] outline-none focus:border-violet-500 focus:bg-white"
                 />
               </div>
@@ -581,9 +575,9 @@ const form = ref<Partial<MerchandiseCmsItem>>({
   name: '',
   item_id: '',
   price_label: '',
-  unit_amount_php: 549,
-  original_price_php: null,
+  original_price_php: 500,
   discount_percentage: 0,
+  unit_amount_php: 500,
   badge_label: 'Official',
   subtitle: '',
   image: '',
@@ -592,15 +586,66 @@ const form = ref<Partial<MerchandiseCmsItem>>({
   is_active: true
 })
 
+function onPriceChange () {
+  const price = Number(form.value.original_price_php) || 0
+  const disc = Number(form.value.discount_percentage) || 0
+
+  if (price > 0) {
+    if (disc > 0) {
+      form.value.unit_amount_php = Math.max(0, Math.round(price * (1 - disc / 100)))
+    } else {
+      form.value.unit_amount_php = price
+    }
+  }
+}
+
+function onDiscountChange () {
+  const price = Number(form.value.original_price_php) || 0
+  const disc = Number(form.value.discount_percentage) || 0
+  const finalPrice = Number(form.value.unit_amount_php) || 0
+
+  if (disc >= 0 && disc < 100) {
+    if (price > 0) {
+      form.value.unit_amount_php = Math.max(0, Math.round(price * (1 - disc / 100)))
+    } else if (finalPrice > 0) {
+      form.value.original_price_php = Math.round(finalPrice / (1 - disc / 100))
+    }
+  }
+}
+
+function onFinalPriceChange () {
+  const price = Number(form.value.original_price_php) || 0
+  const finalPrice = Number(form.value.unit_amount_php) || 0
+
+  if (price > 0 && price > finalPrice) {
+    form.value.discount_percentage = Math.max(0, Math.round(((price - finalPrice) / price) * 100))
+  } else if (finalPrice > 0 && (!price || finalPrice >= price)) {
+    form.value.original_price_php = finalPrice
+    form.value.discount_percentage = 0
+  }
+}
+
+const discountCalculationHint = computed(() => {
+  const price = Number(form.value.original_price_php) || 0
+  const finalPrice = Number(form.value.unit_amount_php) || 0
+  const disc = Number(form.value.discount_percentage) || 0
+
+  if (price > 0 && price > finalPrice && disc > 0) {
+    const savings = price - finalPrice
+    return `Save ₱${savings.toLocaleString()}`
+  }
+  return null
+})
+
 function openAddModal () {
   editingItem.value = null
   form.value = {
     name: '',
     item_id: '',
     price_label: '',
-    unit_amount_php: 500,
-    original_price_php: null,
+    original_price_php: 500,
     discount_percentage: 0,
+    unit_amount_php: 500,
     badge_label: 'Official',
     subtitle: '',
     image: '',
@@ -614,6 +659,14 @@ function openAddModal () {
 function openEditModal (item: MerchandiseCmsItem) {
   editingItem.value = item
   form.value = { ...item }
+  if (!form.value.original_price_php && form.value.unit_amount_php) {
+    form.value.original_price_php = form.value.unit_amount_php
+  }
+  const price = Number(form.value.original_price_php) || 0
+  const finalPrice = Number(form.value.unit_amount_php) || 0
+  if (price > 0 && price > finalPrice && !form.value.discount_percentage) {
+    form.value.discount_percentage = Math.max(0, Math.round(((price - finalPrice) / price) * 100))
+  }
   showModal.value = true
 }
 

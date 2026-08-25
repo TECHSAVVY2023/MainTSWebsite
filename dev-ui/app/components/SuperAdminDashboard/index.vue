@@ -1042,6 +1042,10 @@
             <SuperAdminDashboardMerchCmsManager />
           </template>
 
+          <template v-else-if="activeView === 'MerchOrders'">
+            <SuperAdminDashboardMerchOrdersManager />
+          </template>
+
           <template v-else-if="activeView === 'Stats'">
             <div class="space-y-6 sm:space-y-8">
               <div class="px-0 sm:px-2 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -2382,6 +2386,7 @@ const pendingMemberSubmissions = computed(() =>
 
 const mainPageCmsTab = ref<'projects' | 'events' | 'sponsors'>('projects')
 const cmsMenuExpanded = ref(true)
+const merchMenuExpanded = ref(true)
 
 // ── Navigation (after CMS list — uses pendingMemberSubmissions badge) ──
 const navItems = computed(() => {
@@ -2393,7 +2398,7 @@ const navItems = computed(() => {
     badge?: number
     isCollapsible?: boolean
     isExpanded?: boolean
-    subItems?: { label: string; icon: string; tab: 'projects' | 'events' | 'sponsors'; active: boolean; action: () => void }[]
+    subItems?: { label: string; icon: string; tab?: string; active: boolean; action: () => void }[]
   }[] = [
     { label: 'My Profile', icon: 'fas fa-user-circle', active: activeView.value === 'Profile', action: () => { activeView.value = 'Profile'; drawerOpen.value = false } },
     { label: 'Library Feed', icon: 'fas fa-newspaper', active: activeView.value === 'Library', action: () => { activeView.value = 'Library'; drawerOpen.value = false } },
@@ -2436,10 +2441,33 @@ const navItems = computed(() => {
   ]
   if (isSuperAdmin(user.value?.email)) {
     items.push({
-      label: 'Merchandise CMS',
+      label: 'Merchandise',
       icon: 'fas fa-tshirt',
-      active: activeView.value === 'MerchCMS',
-      action: () => { activeView.value = 'MerchCMS'; drawerOpen.value = false },
+      active: activeView.value === 'MerchCMS' || activeView.value === 'MerchOrders',
+      isCollapsible: true,
+      isExpanded: merchMenuExpanded.value,
+      action: () => {
+        if (activeView.value !== 'MerchCMS' && activeView.value !== 'MerchOrders') {
+          activeView.value = 'MerchCMS'
+        }
+        merchMenuExpanded.value = !merchMenuExpanded.value
+      },
+      subItems: [
+        {
+          label: 'Products & Inventory',
+          icon: 'fas fa-box-open',
+          tab: 'products',
+          active: activeView.value === 'MerchCMS',
+          action: () => { activeView.value = 'MerchCMS'; drawerOpen.value = false }
+        },
+        {
+          label: 'Purchases & Orders',
+          icon: 'fas fa-receipt',
+          tab: 'orders',
+          active: activeView.value === 'MerchOrders',
+          action: () => { activeView.value = 'MerchOrders'; drawerOpen.value = false }
+        }
+      ]
     })
     const n = pendingMemberSubmissions.value.length
     items.push({
