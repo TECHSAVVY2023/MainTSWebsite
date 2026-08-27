@@ -141,37 +141,53 @@
           <span class="text-[10px] font-mono text-slate-500">{{ courses.length }} total</span>
         </div>
 
-        <div v-if="courses.length > 0" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div v-if="courses.length > 0" class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           <div
             v-for="course in courses"
             :key="course.id"
-            class="group flex flex-col rounded-2xl border border-slate-800 bg-slate-900/60 p-5 transition-all hover:border-violet-500/40 hover:bg-slate-900"
+            class="group flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 shadow-lg transition-all hover:border-violet-500/40 hover:bg-slate-900"
           >
-            <div class="flex items-start justify-between gap-2 mb-3">
-              <span class="rounded bg-violet-950/80 border border-violet-800/40 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-violet-300">
-                {{ course.category }}
-              </span>
-              <span class="text-[10px] font-mono text-slate-500">{{ course.estimated_hours }}h</span>
+            <!-- Course Banner on Top of Card & Title -->
+            <div class="relative h-36 w-full overflow-hidden bg-slate-950 border-b border-slate-800">
+              <img
+                :src="course.thumbnail || '/img/The-division-shd-logo.png'"
+                :alt="course.title"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
+              <div class="absolute top-2.5 left-2.5">
+                <span class="rounded bg-violet-950/90 backdrop-blur-md border border-violet-800/60 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-violet-300">
+                  {{ course.category }}
+                </span>
+              </div>
+              <div class="absolute top-2.5 right-2.5">
+                <span class="text-[10px] font-mono text-slate-300 bg-slate-900/80 backdrop-blur-md px-2 py-0.5 rounded border border-slate-800">
+                  {{ course.estimated_hours }}h
+                </span>
+              </div>
             </div>
 
-            <h3 class="text-sm font-black uppercase text-white group-hover:text-violet-300 transition-colors line-clamp-1">
-              {{ course.title }}
-            </h3>
+            <div class="flex flex-1 flex-col p-5">
+              <h3 class="text-sm font-black uppercase text-white group-hover:text-violet-300 transition-colors line-clamp-1">
+                {{ course.title }}
+              </h3>
 
-            <p class="mt-2 line-clamp-2 text-xs text-slate-400 leading-relaxed flex-1">
-              {{ course.description || 'Hands-on curriculum covering core concepts and interactive quizzes.' }}
-            </p>
+              <p class="mt-2 line-clamp-2 text-xs text-slate-400 leading-relaxed flex-1">
+                {{ course.description || 'Hands-on curriculum covering core concepts and interactive quizzes.' }}
+              </p>
 
-            <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
-              <span class="text-[10px] font-bold text-slate-500 font-mono">{{ course.modules_count ?? 0 }} Modules</span>
+              <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+                <span class="text-[10px] font-bold text-slate-500 font-mono">{{ course.modules_count ?? 0 }} Modules</span>
 
-              <NuxtLink
-                :to="`/academy/${course.slug}`"
-                class="flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white hover:bg-violet-500 transition-colors"
-              >
-                <span>View Course</span>
-                <i class="fas fa-chevron-right text-[9px]" />
-              </NuxtLink>
+                <NuxtLink
+                  :to="`/academy/${course.slug}`"
+                  class="flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white hover:bg-violet-500 transition-colors"
+                >
+                  <span>View Course</span>
+                  <i class="fas fa-chevron-right text-[9px]" />
+                </NuxtLink>
+              </div>
             </div>
           </div>
         </div>

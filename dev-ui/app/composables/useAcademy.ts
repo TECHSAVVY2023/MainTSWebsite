@@ -1,11 +1,25 @@
 import { useAuth } from '~/composables/useAuth'
 
+export interface MiniQuizOption {
+  id: string
+  text: string
+  is_correct?: boolean
+}
+
+export interface MiniQuizData {
+  prompt?: string
+  points?: number
+  explanation?: string
+  options?: MiniQuizOption[]
+}
+
 export interface AcademyLessonOutline {
   id: number
   title: string
   slug: string
   estimated_minutes: number
   order: number
+  mini_quiz_enabled?: boolean
 }
 
 export interface AcademyAssessmentOutline {
@@ -60,6 +74,8 @@ export interface AcademyLessonDetail {
   video_url?: string
   estimated_minutes: number
   order: number
+  mini_quiz_enabled?: boolean
+  mini_quiz_data?: MiniQuizData
   module: number
   module_title: string
   course_slug: string
@@ -98,6 +114,13 @@ export interface AcademyEnrollment {
   progress_percentage: number
   completed_lessons: number[]
   total_lessons: number
+  total_points?: number
+  mini_quiz_progress?: Record<string, {
+    completed: boolean
+    mini_quiz_answered: boolean
+    mini_quiz_is_correct: boolean
+    points_earned: number
+  }>
   enrolled_at: string
   completed_at?: string | null
 }
@@ -229,6 +252,34 @@ export function useAcademy () {
     }
   }
 
+  async function submitMiniQuiz (lessonId: number | string, selectedOptionId: string, email?: string) {
+    if (!apiBase || !lessonId) return null
+    const studentEmail = email || user.value?.email || 'student@techsavvy.ph'
+    try {
+      const res = await $fetch<{
+        lesson_id: number
+        is_correct: boolean
+        selected_option_id: string
+        correct_option_id: string | null
+        points_earned: number
+        total_points: number
+        explanation: string
+      }>(`${apiBase}/academy/progress/submit-mini-quiz/`, {
+        method: 'POST',
+        body: {
+          email: studentEmail,
+          lesson_id: lessonId,
+          selected_option_id: selectedOptionId
+        }
+      })
+      await fetchMyEnrollments(studentEmail)
+      return res
+    } catch (e: any) {
+      console.error('Failed to submit mini quiz:', e)
+      throw e
+    }
+  }
+
   async function enrollCourse (courseId?: number, courseSlug?: string, email?: string, name?: string) {
     if (!apiBase) return null
     const studentEmail = email || user.value?.email || 'student@techsavvy.ph'
@@ -344,6 +395,8 @@ export function useAcademy () {
     video_url?: string
     estimated_minutes?: number
     order?: number
+    mini_quiz_enabled?: boolean
+    mini_quiz_data?: MiniQuizData
   }) {
     if (!apiBase) return null
     if (payload.id) {
@@ -364,6 +417,11 @@ export function useAcademy () {
     return await $fetch<any>(`${apiBase}/academy/admin/lessons/${lessonId}/`, {
       method: 'DELETE'
     })
+  }
+
+  async function adminFetchAssessment (assessmentId: number) {
+    if (!apiBase || !assessmentId) return null
+    return await $fetch<AcademyAssessmentOutline & { questions: AcademyQuestion[] }>(`${apiBase}/academy/admin/assessments/${assessmentId}/`)
   }
 
   async function adminSaveAssessment (payload: {
@@ -440,6 +498,7 @@ export function useAcademy () {
     fetchLesson,
     fetchAssessmentQuestions,
     submitQuiz,
+    submitMiniQuiz,
     enrollCourse,
     fetchMyEnrollments,
     markLessonProgress,
@@ -451,6 +510,7 @@ export function useAcademy () {
     adminDeleteModule,
     adminSaveLesson,
     adminDeleteLesson,
+    adminFetchAssessment,
     adminSaveAssessment,
     adminDeleteAssessment,
     adminSaveQuestion,

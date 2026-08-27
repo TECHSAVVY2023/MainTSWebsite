@@ -32,6 +32,13 @@
 
       <!-- Course Progress & Actions -->
       <div class="flex items-center gap-4">
+        <!-- Live Points Badge -->
+        <div class="flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-300">
+          <i class="fas fa-star text-[10px] text-amber-400" />
+          <span class="font-mono font-bold">{{ studentTotalPoints }}</span>
+          <span class="text-[9px] uppercase tracking-wider text-amber-400/80">Pts</span>
+        </div>
+
         <div class="hidden sm:flex items-center gap-3">
           <div class="text-right">
             <span class="block text-[9px] font-black uppercase tracking-wider text-slate-400">Progress</span>
@@ -106,7 +113,7 @@
                 class="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all"
                 :class="activeMode === 'lesson' && activeLessonId === les.id ? 'bg-violet-600 text-white font-bold shadow-md shadow-violet-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'"
               >
-                <div class="flex items-center gap-2.5 min-w-0">
+                <div class="flex items-center gap-2 min-w-0">
                   <i
                     v-if="completedLessonIds.includes(les.id)"
                     class="fas fa-check-circle text-xs text-emerald-400 shrink-0"
@@ -120,7 +127,18 @@
                     {{ modIdx + 1 }}.{{ lesIdx + 1 }} {{ les.title }}
                   </span>
                 </div>
-                <span class="text-[9px] opacity-75 shrink-0 font-mono ml-2">{{ les.estimated_minutes }}m</span>
+
+                <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                  <span
+                    v-if="les.mini_quiz_enabled"
+                    class="rounded px-1 py-0.2 text-[8px] font-black uppercase font-mono"
+                    :class="enrollment?.mini_quiz_progress?.[String(les.id)]?.mini_quiz_is_correct ? 'bg-amber-400/20 text-amber-300 border border-amber-400/40' : 'bg-slate-800 text-slate-400'"
+                    title="Includes Mini Quiz Bonus Points"
+                  >
+                    ⚡
+                  </span>
+                  <span class="text-[9px] opacity-75 font-mono">{{ les.estimated_minutes }}m</span>
+                </div>
               </button>
 
               <!-- Module Quizzes & Tests -->
@@ -183,9 +201,103 @@
 
           <!-- Rendered Markdown Body -->
           <div
+            ref="lessonContentContainer"
             class="academy-markdown bg-slate-950/60 p-6 sm:p-10 rounded-3xl border border-slate-800/80 shadow-xl"
             v-html="renderedMarkdownContent"
           />
+
+          <!-- ⚡ Mini Knowledge Check Quiz Card -->
+          <div
+            v-if="activeLesson?.mini_quiz_enabled && activeLesson?.mini_quiz_data?.options?.length"
+            class="mt-8 rounded-3xl border border-amber-500/30 bg-slate-950/80 p-6 sm:p-8 shadow-2xl backdrop-blur-sm"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4 mb-6">
+              <div class="flex items-center gap-2.5">
+                <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <i class="fas fa-bolt text-sm" />
+                </div>
+                <div>
+                  <span class="block text-[10px] font-black uppercase tracking-widest text-amber-400">Interactive Check</span>
+                  <h3 class="text-sm sm:text-base font-black uppercase tracking-tight text-white">Lesson Mini Quiz</h3>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span
+                  v-if="currentLessonMiniQuizStatus?.mini_quiz_is_correct"
+                  class="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-3 py-1 text-[10px] font-black uppercase text-emerald-300 flex items-center gap-1"
+                >
+                  <i class="fas fa-check text-emerald-400" /> Solved (+{{ currentLessonMiniQuizStatus.points_earned }} pts)
+                </span>
+                <span v-else class="rounded-full bg-amber-500/20 border border-amber-500/40 px-3 py-1 text-[10px] font-black uppercase font-mono text-amber-300">
+                  +{{ activeLesson.mini_quiz_data.points || 10 }} Bonus Pts
+                </span>
+              </div>
+            </div>
+
+            <!-- Question Prompt -->
+            <p class="text-sm font-bold text-slate-100 mb-5 leading-relaxed">
+              {{ activeLesson.mini_quiz_data.prompt }}
+            </p>
+
+            <!-- Multiple Choice Radios -->
+            <div class="space-y-2.5 mb-6">
+              <button
+                type="button"
+                v-for="opt in activeLesson.mini_quiz_data.options"
+                :key="opt.id"
+                @click="miniQuizSelectedOptionId = String(opt.id)"
+                :disabled="submittingMiniQuiz"
+                class="w-full flex items-center gap-3.5 rounded-2xl border p-4 text-left text-xs sm:text-sm font-medium transition-all"
+                :class="[
+                  miniQuizSelectedOptionId === String(opt.id)
+                    ? 'border-amber-400 bg-amber-500/10 text-white font-bold shadow-md shadow-amber-500/10'
+                    : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:bg-slate-900'
+                ]"
+              >
+                <span
+                  class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-all"
+                  :class="miniQuizSelectedOptionId === String(opt.id) ? 'border-amber-400 bg-amber-500 text-slate-950 font-black' : 'border-slate-700 bg-slate-900 text-slate-400'"
+                >
+                  <i v-if="miniQuizSelectedOptionId === String(opt.id)" class="fas fa-check text-[9px]" />
+                </span>
+                <span class="flex-1">{{ opt.text }}</span>
+              </button>
+            </div>
+
+            <!-- Submit & Feedback Row -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+              <div v-if="miniQuizFeedback" class="flex-1 w-full">
+                <div
+                  class="rounded-2xl p-4 text-xs font-bold flex items-start gap-3"
+                  :class="miniQuizFeedback.is_correct ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300' : 'bg-red-950/40 border border-red-500/40 text-red-300'"
+                >
+                  <i class="fas text-base shrink-0 mt-0.5" :class="miniQuizFeedback.is_correct ? 'fa-award text-emerald-400' : 'fa-times-circle text-red-400'" />
+                  <div>
+                    <span class="block font-black uppercase tracking-wider text-[11px]">
+                      {{ miniQuizFeedback.is_correct ? `Awesome! +${miniQuizFeedback.points_earned} Points Earned!` : 'Not quite right, try again!' }}
+                    </span>
+                    <p v-if="miniQuizFeedback.explanation" class="mt-1 text-[11px] font-normal text-slate-300 leading-relaxed">
+                      {{ miniQuizFeedback.explanation }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0 ml-auto">
+                <button
+                  type="button"
+                  :disabled="!miniQuizSelectedOptionId || submittingMiniQuiz"
+                  @click="handleMiniQuizSubmit"
+                  class="flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-xs font-black uppercase tracking-wider text-slate-950 shadow-lg shadow-amber-500/20 hover:bg-amber-400 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
+                >
+                  <i v-if="submittingMiniQuiz" class="fas fa-spinner fa-spin text-xs" />
+                  <i v-else class="fas fa-bolt text-xs" />
+                  <span>{{ miniQuizFeedback?.is_correct ? 'Answered ✓' : 'Check Answer & Claim Points' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           <!-- Lesson Navigation Footer -->
           <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800">
@@ -399,21 +511,32 @@ const {
   fetchLesson,
   fetchAssessmentQuestions,
   submitQuiz,
+  submitMiniQuiz,
   enrollCourse,
   markLessonProgress,
   fetchMyEnrollments
 } = useAcademy()
 
-const { renderMarkdown } = useMarkdownRenderer()
+const { renderMarkdown, renderMermaidInElement } = useMarkdownRenderer()
 const { user } = useAuth()
 
+const lessonContentContainer = ref<HTMLElement | null>(null)
 const sidebarOpen = ref(false)
 const openModules = ref<number[]>([])
 const activeMode = ref<'lesson' | 'quiz'>('lesson')
 const activeLessonId = ref<number | null>(null)
 const activeAssessment = ref<AcademyAssessmentOutline | null>(null)
 
-// Quiz state
+// Lesson Mini Quiz state
+const miniQuizSelectedOptionId = ref<string>('')
+const submittingMiniQuiz = ref(false)
+const miniQuizFeedback = ref<{
+  is_correct: boolean
+  points_earned: number
+  explanation: string
+} | null>(null)
+
+// Chapter Quiz state
 const quizQuestions = ref<AcademyQuestion[]>([])
 const userAnswers = ref<Record<string, string[]>>({})
 const submittingQuiz = ref(false)
@@ -423,9 +546,23 @@ const renderedMarkdownContent = computed(() => {
   return renderMarkdown(activeLesson.value?.content_markdown || '')
 })
 
+watch(() => renderedMarkdownContent.value, () => {
+  nextTick(async () => {
+    if (lessonContentContainer.value) {
+      await renderMermaidInElement(lessonContentContainer.value)
+    }
+  })
+}, { immediate: true })
+
 const enrollment = computed(() => myEnrollments.value.find(e => e.course_slug === courseSlug.value))
 const completedLessonIds = computed(() => enrollment.value?.completed_lessons || [])
 const courseProgress = computed(() => enrollment.value?.progress_percentage || 0)
+const studentTotalPoints = computed(() => enrollment.value?.total_points || 0)
+
+const currentLessonMiniQuizStatus = computed(() => {
+  if (!activeLessonId.value || !enrollment.value?.mini_quiz_progress) return null
+  return enrollment.value.mini_quiz_progress[String(activeLessonId.value)] || null
+})
 
 const isCurrentLessonCompleted = computed(() => {
   if (!activeLessonId.value) return false
@@ -471,6 +608,8 @@ async function selectLesson (id: number) {
   activeLessonId.value = id
   activeAssessment.value = null
   quizResult.value = null
+  miniQuizSelectedOptionId.value = ''
+  miniQuizFeedback.value = null
   sidebarOpen.value = false
   await fetchLesson(id)
 }
@@ -486,6 +625,25 @@ async function selectAssessment (ass: AcademyAssessmentOutline) {
   const res = await fetchAssessmentQuestions(ass.id)
   if (res?.questions) {
     quizQuestions.value = res.questions
+  }
+}
+
+async function handleMiniQuizSubmit () {
+  if (!activeLessonId.value || !miniQuizSelectedOptionId.value) return
+  submittingMiniQuiz.value = true
+  try {
+    const res = await submitMiniQuiz(activeLessonId.value, miniQuizSelectedOptionId.value, user.value?.email)
+    if (res) {
+      miniQuizFeedback.value = {
+        is_correct: res.is_correct,
+        points_earned: res.points_earned,
+        explanation: res.explanation
+      }
+    }
+  } catch (err) {
+    console.error('Failed to submit mini quiz:', err)
+  } finally {
+    submittingMiniQuiz.value = false
   }
 }
 

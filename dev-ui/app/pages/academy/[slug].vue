@@ -31,8 +31,19 @@
 
       <!-- Course Found -->
       <div v-else-if="course" class="space-y-10">
-        <!-- Overview Header -->
+        <!-- Overview Header with Course Banner on Top of Title -->
         <div class="border-b border-slate-850 pb-8">
+          <!-- Course Banner on Top of Title -->
+          <div class="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 mb-6 shadow-xl">
+            <img
+              :src="course.thumbnail || '/img/The-division-shd-logo.png'"
+              :alt="course.title"
+              class="h-full w-full object-cover"
+              @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+          </div>
+
           <div class="flex items-center gap-2 mb-3">
             <span class="rounded bg-violet-950/80 border border-violet-800/40 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-violet-300">
               {{ course.category }}
