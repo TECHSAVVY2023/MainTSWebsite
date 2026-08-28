@@ -180,7 +180,6 @@ svg {
 .academy-markdown td {
   border-bottom: 1px solid #1e293b;
   padding: 0.75rem 1rem;
-  text-align: left;
 }
 
 .academy-markdown th {
@@ -195,6 +194,14 @@ svg {
 .academy-markdown td {
   background-color: rgba(15, 23, 42, 0.4);
   color: #cbd5e1;
+}
+
+.academy-markdown tbody tr:nth-child(even) td {
+  background-color: rgba(15, 23, 42, 0.7);
+}
+
+.academy-markdown tbody tr:hover td {
+  background-color: rgba(30, 41, 59, 0.6);
 }
 
 .academy-markdown blockquote {

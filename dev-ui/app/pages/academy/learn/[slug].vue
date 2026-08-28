@@ -109,19 +109,30 @@
                 type="button"
                 v-for="(les, lesIdx) in mod.lessons"
                 :key="les.id"
-                @click="selectLesson(les.id)"
+                @click="handleItemClick('lesson', les.id)"
                 class="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all"
-                :class="activeMode === 'lesson' && activeLessonId === les.id ? 'bg-violet-600 text-white font-bold shadow-md shadow-violet-600/30' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'"
+                :class="[
+                  activeMode === 'lesson' && activeLessonId === les.id
+                    ? 'bg-violet-600 text-white font-bold shadow-md shadow-violet-600/30'
+                    : isItemUnlocked('lesson', les.id)
+                      ? 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                      : 'opacity-40 text-slate-500 cursor-not-allowed bg-slate-950/30 hover:bg-slate-950/50'
+                ]"
+                :title="!isItemUnlocked('lesson', les.id) ? 'Locked: Complete previous lesson to unlock' : ''"
               >
                 <div class="flex items-center gap-2 min-w-0">
                   <i
-                    v-if="completedLessonIds.includes(les.id)"
+                    v-if="isItemCompleted('lesson', les.id)"
                     class="fas fa-check-circle text-xs text-emerald-400 shrink-0"
+                  />
+                  <i
+                    v-else-if="!isItemUnlocked('lesson', les.id)"
+                    class="fas fa-lock text-[10px] text-slate-500 shrink-0"
                   />
                   <i
                     v-else
                     class="far fa-circle text-xs shrink-0 opacity-60"
-                    :class="activeMode === 'lesson' && activeLessonId === les.id ? 'text-white' : 'text-slate-500'"
+                    :class="activeMode === 'lesson' && activeLessonId === les.id ? 'text-white' : 'text-slate-400'"
                   />
                   <span class="truncate text-[11px]">
                     {{ modIdx + 1 }}.{{ lesIdx + 1 }} {{ les.title }}
@@ -146,12 +157,30 @@
                 type="button"
                 v-for="ass in mod.assessments"
                 :key="ass.id"
-                @click="selectAssessment(ass)"
+                @click="handleItemClick('quiz', ass.id, ass)"
                 class="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left text-xs transition-all"
-                :class="activeMode === 'quiz' && activeAssessment?.id === ass.id ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30' : 'bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/30'"
+                :class="[
+                  activeMode === 'quiz' && activeAssessment?.id === ass.id
+                    ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-600/30'
+                    : isItemUnlocked('quiz', ass.id)
+                      ? 'bg-emerald-950/20 text-emerald-300 hover:bg-emerald-900/30'
+                      : 'opacity-40 text-slate-500 cursor-not-allowed bg-slate-950/30'
+                ]"
+                :title="!isItemUnlocked('quiz', ass.id) ? 'Locked: Complete previous lessons to unlock' : ''"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <i class="fas fa-tasks text-xs shrink-0 text-emerald-400" />
+                  <i
+                    v-if="isItemCompleted('quiz', ass.id)"
+                    class="fas fa-check-circle text-xs shrink-0 text-emerald-400"
+                  />
+                  <i
+                    v-else-if="!isItemUnlocked('quiz', ass.id)"
+                    class="fas fa-lock text-[10px] shrink-0 text-slate-500"
+                  />
+                  <i
+                    v-else
+                    class="fas fa-tasks text-xs shrink-0 text-emerald-400"
+                  />
                   <span class="truncate text-[11px] font-bold">{{ ass.title }}</span>
                 </div>
                 <span class="rounded bg-emerald-950 px-1.5 py-0.5 text-[8px] font-black uppercase text-emerald-300">
@@ -208,8 +237,14 @@
 
           <!-- ⚡ Mini Knowledge Check Quiz Card -->
           <div
+            id="lesson-mini-quiz-card"
             v-if="activeLesson?.mini_quiz_enabled && activeLesson?.mini_quiz_data?.options?.length"
-            class="mt-8 rounded-3xl border border-amber-500/30 bg-slate-950/80 p-6 sm:p-8 shadow-2xl backdrop-blur-sm"
+            class="mt-8 rounded-3xl border bg-slate-950/80 p-6 sm:p-8 shadow-2xl backdrop-blur-sm transition-all duration-300"
+            :class="[
+              miniQuizRequiredWarning
+                ? 'border-amber-400 ring-4 ring-amber-400/40 scale-[1.01]'
+                : 'border-amber-500/30'
+            ]"
           >
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-4 mb-6">
               <div class="flex items-center gap-2.5">
@@ -303,31 +338,59 @@
           <div class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-800">
             <button
               type="button"
-              :disabled="!activeLesson?.prev_lesson"
-              @click="activeLesson?.prev_lesson && selectLesson(activeLesson.prev_lesson.id)"
+              :disabled="!prevSequenceItem"
+              @click="goToPrevItem"
               class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-3 text-xs font-bold uppercase text-slate-300 transition-all hover:bg-slate-750 disabled:opacity-30 disabled:pointer-events-none"
             >
               <i class="fas fa-arrow-left text-xs" />
-              <span>Previous Lesson</span>
+              <span>Previous</span>
             </button>
 
             <button
               type="button"
+              :disabled="isCurrentLessonCompleted || submittingProgress"
               @click="toggleCompleteCurrentLesson"
-              class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg transition-all"
-              :class="isCurrentLessonCompleted ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/30' : 'bg-violet-600 hover:bg-violet-500 shadow-violet-600/30'"
+              class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-xs font-black uppercase tracking-wider transition-all"
+              :class="[
+                isCurrentLessonCompleted
+                  ? 'border border-emerald-500/40 bg-emerald-950/40 text-emerald-300 shadow-md shadow-emerald-950/30 cursor-default pointer-events-none'
+                  : (!isCurrentLessonMiniQuizAnswered && activeLesson?.mini_quiz_enabled)
+                    ? 'bg-amber-600 hover:bg-amber-500 text-white border border-amber-400/40 shadow-lg shadow-amber-600/20 cursor-pointer'
+                    : 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/30 cursor-pointer'
+              ]"
             >
-              <i class="fas" :class="isCurrentLessonCompleted ? 'fa-check-double' : 'fa-check'" />
-              <span>{{ isCurrentLessonCompleted ? 'Completed ✓' : 'Mark as Completed' }}</span>
+              <i v-if="submittingProgress" class="fas fa-spinner fa-spin text-xs" />
+              <i
+                v-else
+                class="fas"
+                :class="isCurrentLessonCompleted ? 'fa-check-double text-emerald-400' : (!isCurrentLessonMiniQuizAnswered && activeLesson?.mini_quiz_enabled) ? 'fa-bolt' : 'fa-check'"
+              />
+              <span>
+                {{
+                  submittingProgress
+                    ? 'Saving…'
+                    : isCurrentLessonCompleted
+                      ? 'Lesson Completed ✓'
+                      : (!isCurrentLessonMiniQuizAnswered && activeLesson?.mini_quiz_enabled)
+                        ? 'Answer Quiz to Complete'
+                        : 'Mark as Completed'
+                }}
+              </span>
             </button>
 
             <button
               type="button"
-              :disabled="!activeLesson?.next_lesson"
-              @click="activeLesson?.next_lesson && selectLesson(activeLesson.next_lesson.id)"
-              class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-5 py-3 text-xs font-bold uppercase text-slate-300 transition-all hover:bg-slate-750 disabled:opacity-30 disabled:pointer-events-none"
+              :disabled="!nextSequenceItem || !isNextItemUnlocked"
+              @click="goToNextItem"
+              class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-xs font-bold uppercase transition-all"
+              :class="[
+                nextSequenceItem && isNextItemUnlocked
+                  ? 'border-violet-500/60 bg-violet-950/40 text-violet-200 hover:bg-violet-900/60 shadow-md shadow-violet-600/20 cursor-pointer'
+                  : 'border-slate-800 bg-slate-900 text-slate-600 opacity-40 cursor-not-allowed pointer-events-none'
+              ]"
             >
-              <span>Next Lesson</span>
+              <i v-if="nextSequenceItem && !isNextItemUnlocked" class="fas fa-lock text-xs mr-1 text-slate-500" />
+              <span>{{ nextSequenceItem?.type === 'quiz' ? 'Next: Quiz' : 'Next Lesson' }}</span>
               <i class="fas fa-arrow-right text-xs" />
             </button>
           </div>
@@ -396,7 +459,7 @@
                 type="button"
                 :disabled="submittingQuiz || quizQuestions.length === 0"
                 @click="handleQuizSubmit"
-                class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-emerald-600/30 transition-all hover:from-emerald-500 hover:to-teal-500 hover:scale-105 disabled:opacity-50"
+                class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-xs font-black uppercase tracking-wider text-white shadow-xl shadow-emerald-600/30 transition-all hover:from-emerald-500 hover:to-teal-500 hover:scale-105 disabled:opacity-50 cursor-pointer"
               >
                 <i class="fas fa-paper-plane text-xs" />
                 <span>{{ submittingQuiz ? 'Grading Answers…' : 'Submit for Grading' }}</span>
@@ -434,6 +497,15 @@
                   class="rounded-xl border border-slate-700 bg-slate-800 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-slate-200 hover:bg-slate-750"
                 >
                   Retake Quiz
+                </button>
+                <button
+                  v-if="quizResult.passed && nextSequenceItem && isNextItemUnlocked"
+                  type="button"
+                  @click="goToNextItem"
+                  class="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-emerald-500 shadow-lg shadow-emerald-600/30 flex items-center gap-2 cursor-pointer"
+                >
+                  <span>Continue to Next Lesson</span>
+                  <i class="fas fa-arrow-right text-xs" />
                 </button>
               </div>
             </div>
@@ -492,6 +564,27 @@
         </div>
       </main>
     </div>
+
+    <!-- ── Floating Locked / Alert Toast ── -->
+    <transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition ease-in duration-200"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="lockedMessage"
+        class="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-amber-500/50 bg-slate-950/95 px-5 py-4 text-xs font-bold text-amber-200 shadow-2xl shadow-amber-500/20 backdrop-blur-md"
+      >
+        <i class="fas fa-lock text-amber-400 text-sm shrink-0" />
+        <span>{{ lockedMessage }}</span>
+        <button type="button" @click="lockedMessage = ''" class="ml-2 text-slate-400 hover:text-white">
+          <i class="fas fa-times text-xs" />
+        </button>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -559,6 +652,111 @@ const completedLessonIds = computed(() => enrollment.value?.completed_lessons ||
 const courseProgress = computed(() => enrollment.value?.progress_percentage || 0)
 const studentTotalPoints = computed(() => enrollment.value?.total_points || 0)
 
+const lockedMessage = ref('')
+const miniQuizRequiredWarning = ref(false)
+const submittingProgress = ref(false)
+
+export interface ClassroomSequenceItem {
+  key: string
+  type: 'lesson' | 'quiz'
+  id: number
+  moduleId: number
+  title: string
+  order: number
+  lesson?: AcademyLessonOutline
+  assessment?: AcademyAssessmentOutline
+}
+
+const courseSequenceItems = computed<ClassroomSequenceItem[]>(() => {
+  if (!course.value?.modules) return []
+  const items: ClassroomSequenceItem[] = []
+  course.value.modules.forEach((mod) => {
+    (mod.lessons || []).forEach((les) => {
+      items.push({
+        key: `lesson-${les.id}`,
+        type: 'lesson',
+        id: les.id,
+        moduleId: mod.id,
+        title: les.title,
+        order: les.order,
+        lesson: les
+      })
+    });
+    (mod.assessments || []).forEach((ass) => {
+      items.push({
+        key: `quiz-${ass.id}`,
+        type: 'quiz',
+        id: ass.id,
+        moduleId: mod.id,
+        title: ass.title,
+        order: ass.order,
+        assessment: ass
+      })
+    })
+  })
+  return items
+})
+
+const passedAssessmentIds = computed(() => {
+  const serverPassed = enrollment.value?.passed_assessments || []
+  if (quizResult.value?.passed && activeAssessment.value?.id) {
+    return Array.from(new Set([...serverPassed, activeAssessment.value.id]))
+  }
+  return serverPassed
+})
+
+function isItemCompleted (type: 'lesson' | 'quiz', id: number): boolean {
+  if (type === 'lesson') {
+    return completedLessonIds.value.includes(id)
+  }
+  return passedAssessmentIds.value.includes(id)
+}
+
+function isItemUnlocked (type: 'lesson' | 'quiz', id: number): boolean {
+  const items = courseSequenceItems.value
+  const idx = items.findIndex(it => it.type === type && it.id === id)
+  if (idx <= 0) return true
+
+  if (isItemCompleted(type, id)) return true
+
+  const prev = items[idx - 1]
+  return isItemCompleted(prev.type, prev.id)
+}
+
+const currentSequenceIndex = computed(() => {
+  const items = courseSequenceItems.value
+  if (activeMode.value === 'lesson' && activeLessonId.value) {
+    return items.findIndex(it => it.type === 'lesson' && it.id === activeLessonId.value)
+  }
+  if (activeMode.value === 'quiz' && activeAssessment.value) {
+    return items.findIndex(it => it.type === 'quiz' && it.id === activeAssessment.value.id)
+  }
+  return 0
+})
+
+const nextSequenceItem = computed(() => {
+  const items = courseSequenceItems.value
+  const idx = currentSequenceIndex.value
+  if (idx >= 0 && idx < items.length - 1) {
+    return items[idx + 1]
+  }
+  return null
+})
+
+const prevSequenceItem = computed(() => {
+  const items = courseSequenceItems.value
+  const idx = currentSequenceIndex.value
+  if (idx > 0) {
+    return items[idx - 1]
+  }
+  return null
+})
+
+const isNextItemUnlocked = computed(() => {
+  if (!nextSequenceItem.value) return false
+  return isItemUnlocked(nextSequenceItem.value.type, nextSequenceItem.value.id)
+})
+
 const currentLessonMiniQuizStatus = computed(() => {
   if (!activeLessonId.value || !enrollment.value?.mini_quiz_progress) return null
   return enrollment.value.mini_quiz_progress[String(activeLessonId.value)] || null
@@ -567,6 +765,17 @@ const currentLessonMiniQuizStatus = computed(() => {
 const isCurrentLessonCompleted = computed(() => {
   if (!activeLessonId.value) return false
   return completedLessonIds.value.includes(activeLessonId.value)
+})
+
+const isCurrentLessonMiniQuizAnswered = computed(() => {
+  if (!activeLesson.value?.mini_quiz_enabled) return true
+  if (currentLessonMiniQuizStatus.value?.mini_quiz_answered || currentLessonMiniQuizStatus.value?.mini_quiz_is_correct) {
+    return true
+  }
+  if (miniQuizFeedback.value !== null) {
+    return true
+  }
+  return false
 })
 
 const totalLessonsCount = computed(() => {
@@ -603,6 +812,21 @@ function toggleModule (id: number) {
   }
 }
 
+function handleItemClick (type: 'lesson' | 'quiz', id: number, ass?: AcademyAssessmentOutline) {
+  if (!isItemUnlocked(type, id)) {
+    lockedMessage.value = '🔒 This lesson is locked. Please complete the previous lesson to unlock it.'
+    setTimeout(() => {
+      lockedMessage.value = ''
+    }, 4000)
+    return
+  }
+  if (type === 'lesson') {
+    selectLesson(id)
+  } else if (ass) {
+    selectAssessment(ass)
+  }
+}
+
 async function selectLesson (id: number) {
   activeMode.value = 'lesson'
   activeLessonId.value = id
@@ -628,6 +852,39 @@ async function selectAssessment (ass: AcademyAssessmentOutline) {
   }
 }
 
+async function goToNextItem () {
+  if (!nextSequenceItem.value || !isNextItemUnlocked.value) return
+  const item = nextSequenceItem.value
+  if (item.type === 'lesson') {
+    await selectLesson(item.id)
+  } else if (item.assessment) {
+    await selectAssessment(item.assessment)
+  }
+}
+
+async function goToPrevItem () {
+  if (!prevSequenceItem.value) return
+  const item = prevSequenceItem.value
+  if (item.type === 'lesson') {
+    await selectLesson(item.id)
+  } else if (item.assessment) {
+    await selectAssessment(item.assessment)
+  }
+}
+
+function scrollToMiniQuiz () {
+  miniQuizRequiredWarning.value = true
+  lockedMessage.value = '💡 Please answer the Mini Quiz below before completing this lesson!'
+  const el = document.getElementById('lesson-mini-quiz-card')
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+  setTimeout(() => {
+    miniQuizRequiredWarning.value = false
+    lockedMessage.value = ''
+  }, 4000)
+}
+
 async function handleMiniQuizSubmit () {
   if (!activeLessonId.value || !miniQuizSelectedOptionId.value) return
   submittingMiniQuiz.value = true
@@ -638,6 +895,9 @@ async function handleMiniQuizSubmit () {
         is_correct: res.is_correct,
         points_earned: res.points_earned,
         explanation: res.explanation
+      }
+      if (user.value?.email) {
+        await fetchMyEnrollments(user.value.email)
       }
     }
   } catch (err) {
@@ -673,6 +933,9 @@ async function handleQuizSubmit () {
   try {
     const res = await submitQuiz(activeAssessment.value.id, userAnswers.value, user.value?.email)
     quizResult.value = res
+    if (user.value?.email) {
+      await fetchMyEnrollments(user.value.email)
+    }
   } catch (e) {
     console.error('Quiz grading error:', e)
   } finally {
@@ -691,8 +954,23 @@ function getOptionExplanation (item: any) {
 }
 
 async function toggleCompleteCurrentLesson () {
-  if (!activeLessonId.value) return
-  const willBeCompleted = !isCurrentLessonCompleted.value
-  await markLessonProgress(activeLessonId.value, willBeCompleted, user.value?.email)
+  if (!activeLessonId.value || isCurrentLessonCompleted.value || submittingProgress.value) return
+
+  if (activeLesson.value?.mini_quiz_enabled && !isCurrentLessonMiniQuizAnswered.value) {
+    scrollToMiniQuiz()
+    return
+  }
+
+  submittingProgress.value = true
+  try {
+    await markLessonProgress(activeLessonId.value, true, user.value?.email)
+    if (user.value?.email) {
+      await fetchMyEnrollments(user.value.email)
+    }
+  } catch (err) {
+    console.error('Failed to mark lesson progress:', err)
+  } finally {
+    submittingProgress.value = false
+  }
 }
 </script>

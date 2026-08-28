@@ -364,21 +364,56 @@
           <form @submit.prevent="saveCourseForm" class="space-y-4 text-xs">
             <!-- Course Banner on Top of Title -->
             <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-3.5">
-              <label class="block font-bold text-slate-300 mb-2">Course Banner</label>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block font-bold text-slate-300">Course Banner</label>
+                <span v-if="!courseForm.thumbnail" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  No image attached (Default SHD will be used)
+                </span>
+                <span v-else class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+                  <i class="fas fa-check-circle text-[10px]" /> Image Attached
+                </span>
+              </div>
               
-              <!-- Live Banner Preview -->
-              <div class="relative h-36 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950 mb-3">
+              <!-- Live Banner Preview (If attached) -->
+              <div
+                v-if="courseForm.thumbnail"
+                class="relative h-36 w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950 mb-3 group"
+              >
                 <img
-                  :src="courseForm.thumbnail || '/img/The-division-shd-logo.png'"
+                  :src="courseForm.thumbnail"
                   alt="Course Banner Preview"
                   class="h-full w-full object-cover"
                   @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
                 />
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent flex items-end p-2.5">
-                  <span class="text-[10px] font-mono text-slate-300 truncate max-w-full">
-                    {{ courseForm.thumbnail ? courseForm.thumbnail : '/img/The-division-shd-logo.png (Default)' }}
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end justify-between p-3">
+                  <span class="text-[10px] font-mono text-slate-300 truncate max-w-[70%]">
+                    {{ courseForm.thumbnail }}
                   </span>
+                  <button
+                    type="button"
+                    @click="courseForm.thumbnail = ''"
+                    class="rounded-lg bg-rose-500/80 hover:bg-rose-500 px-2 py-1 text-[10px] font-bold text-white shadow transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <i class="fas fa-trash-alt text-[9px]" /> Remove
+                  </button>
                 </div>
+              </div>
+
+              <!-- Skeleton Placeholder Upload Box (When empty / not attached) -->
+              <div
+                v-else
+                @click="triggerBannerFileInput"
+                class="relative h-36 w-full rounded-xl border-2 border-dashed border-slate-800 hover:border-violet-500/50 bg-slate-900/30 hover:bg-slate-900/50 flex flex-col items-center justify-center p-4 mb-3 cursor-pointer transition-all group"
+              >
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800/80 border border-slate-700 text-slate-400 group-hover:text-violet-400 group-hover:border-violet-500/40 mb-2 transition-all">
+                  <i class="fas fa-image text-lg" />
+                </div>
+                <p class="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">
+                  Upload or attach course banner
+                </p>
+                <p class="text-[10px] text-slate-500 text-center mt-0.5">
+                  PNG, JPG, or WebP. Defaults to SHD banner if left empty.
+                </p>
               </div>
 
               <!-- Upload & Controls Row -->
@@ -394,7 +429,7 @@
                   type="button"
                   :disabled="uploadingBanner"
                   @click="triggerBannerFileInput"
-                  class="flex items-center gap-1.5 rounded-xl border border-violet-500/40 bg-violet-600/20 px-3 py-2 text-xs font-bold text-violet-300 hover:bg-violet-600 hover:text-white transition-all disabled:opacity-50"
+                  class="flex items-center gap-1.5 rounded-xl border border-violet-500/40 bg-violet-600/20 px-3 py-2 text-xs font-bold text-violet-300 hover:bg-violet-600 hover:text-white transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <i v-if="uploadingBanner" class="fas fa-spinner fa-spin text-xs" />
                   <i v-else class="fas fa-upload text-xs" />
@@ -402,18 +437,29 @@
                 </button>
 
                 <button
+                  v-if="!courseForm.thumbnail"
                   type="button"
                   @click="courseForm.thumbnail = '/img/The-division-shd-logo.png'"
-                  class="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 hover:border-slate-700 hover:text-white transition-colors"
+                  class="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 hover:border-slate-700 hover:text-white transition-colors cursor-pointer"
                 >
                   <i class="fas fa-undo text-[10px] text-slate-400" />
                   <span>Use Default SHD Banner</span>
                 </button>
 
                 <button
+                  v-else
+                  type="button"
+                  @click="courseForm.thumbnail = ''"
+                  class="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-400 hover:border-rose-800 hover:text-rose-300 transition-colors cursor-pointer"
+                >
+                  <i class="fas fa-times text-[10px]" />
+                  <span>Clear Banner</span>
+                </button>
+
+                <button
                   type="button"
                   @click="showCustomUrlInput = !showCustomUrlInput"
-                  class="text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2 ml-auto"
+                  class="text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2 ml-auto cursor-pointer"
                 >
                   {{ showCustomUrlInput ? 'Hide URL input' : 'Paste Image URL' }}
                 </button>
@@ -435,7 +481,7 @@
               <input
                 v-model="courseForm.title"
                 required
-                placeholder="e.g. Modern Full-Stack Engineering with Nuxt 3 & Django"
+                placeholder="course title"
                 class="w-full rounded-xl border border-slate-800 bg-slate-950 p-3 font-bold text-white outline-none focus:border-violet-500"
               />
             </div>
@@ -652,6 +698,17 @@
               <span>Architecture</span>
             </button>
             <span class="text-slate-700">|</span>
+            <!-- Table Button -->
+            <button
+              type="button"
+              @click="insertTableTemplate"
+              class="rounded px-2 py-1 font-bold text-amber-300 hover:bg-slate-800 flex items-center gap-1"
+              title="Insert Markdown Table"
+            >
+              <i class="fas fa-table text-xs" />
+              <span>Table</span>
+            </button>
+            <span class="text-slate-700">|</span>
             <button type="button" @click="insertMd('> [!NOTE]\n> ')" class="rounded px-2 py-1 text-[10px] font-bold text-blue-400 hover:bg-slate-800">[!NOTE]</button>
             <button type="button" @click="insertMd('> [!TIP]\n> ')" class="rounded px-2 py-1 text-[10px] font-bold text-emerald-400 hover:bg-slate-800">[!TIP]</button>
             <button type="button" @click="insertMd('> [!WARNING]\n> ')" class="rounded px-2 py-1 text-[10px] font-bold text-amber-400 hover:bg-slate-800">[!WARNING]</button>
@@ -664,6 +721,7 @@
               <!-- Tab 1: Markdown text area -->
               <div v-if="lessonEditorTab === 'markdown'" class="h-full flex flex-col">
                 <textarea
+                  ref="markdownTextareaRef"
                   v-model="lessonForm.content_markdown"
                   placeholder="Write your Markdown lesson here…"
                   class="custom-scrollbar flex-1 w-full resize-none bg-transparent font-mono text-xs text-slate-200 outline-none leading-relaxed"
@@ -790,7 +848,7 @@
               <div
                 ref="lessonPreviewContainer"
                 class="academy-markdown"
-                v-html="renderMarkdown(lessonForm.content_markdown)"
+                v-html="renderedLessonPreviewHtml"
               />
 
               <!-- Live Mini Quiz Preview Card (Attached at bottom of lesson) -->
@@ -1207,8 +1265,8 @@ useHead({
 
 const {
   courses,
-  fetchCourses,
-  fetchCourseBySlug,
+  adminFetchCourses,
+  adminFetchCourseById,
   fetchLesson,
   adminCreateCourse,
   adminUpdateCourse,
@@ -1226,6 +1284,7 @@ const {
 
 const { renderMarkdown, renderMermaidInElement } = useMarkdownRenderer()
 const lessonPreviewContainer = ref<HTMLElement | null>(null)
+const markdownTextareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const activeTab = ref<'courses' | 'gradebook'>('courses')
 const searchQuery = ref('')
@@ -1238,7 +1297,7 @@ const filteredCourses = computed(() => {
 })
 
 onMounted(async () => {
-  await fetchCourses()
+  await adminFetchCourses()
 })
 
 // ── Course Modal & Banner Upload ──
@@ -1256,7 +1315,7 @@ const courseForm = ref<Partial<AcademyCourse>>({
   level: 'beginner',
   instructor_name: 'TechSavvy Instructor',
   estimated_hours: 10,
-  thumbnail: '/img/The-division-shd-logo.png',
+  thumbnail: '',
   description: '',
   is_published: true
 })
@@ -1313,7 +1372,7 @@ function openCourseModal (c?: AcademyCourse) {
     editingCourse.value = c
     courseForm.value = {
       ...c,
-      thumbnail: c.thumbnail || '/img/The-division-shd-logo.png'
+      thumbnail: c.thumbnail || ''
     }
   } else {
     editingCourse.value = null
@@ -1323,7 +1382,7 @@ function openCourseModal (c?: AcademyCourse) {
       level: 'beginner',
       instructor_name: 'TechSavvy Instructor',
       estimated_hours: 10,
-      thumbnail: '/img/The-division-shd-logo.png',
+      thumbnail: '',
       description: '',
       is_published: true
     }
@@ -1333,13 +1392,17 @@ function openCourseModal (c?: AcademyCourse) {
 
 async function saveCourseForm () {
   try {
+    const payload = {
+      ...courseForm.value,
+      thumbnail: courseForm.value.thumbnail?.trim() || '/img/The-division-shd-logo.png'
+    }
     if (editingCourse.value?.id) {
-      await adminUpdateCourse(editingCourse.value.id, courseForm.value)
+      await adminUpdateCourse(editingCourse.value.id, payload)
     } else {
-      await adminCreateCourse(courseForm.value)
+      await adminCreateCourse(payload)
     }
     showCourseModal.value = false
-    await fetchCourses()
+    await adminFetchCourses()
   } catch (e) {
     console.error('Failed to save course:', e)
   }
@@ -1348,13 +1411,13 @@ async function saveCourseForm () {
 async function handleDeleteCourse (c: AcademyCourse) {
   if (confirm(`Delete course "${c.title}"?`)) {
     await adminDeleteCourse(c.id)
-    await fetchCourses()
+    await adminFetchCourses()
   }
 }
 
 // ── Curriculum Builder ──
 async function openCurriculumBuilder (c: AcademyCourse) {
-  const full = await fetchCourseBySlug(c.slug)
+  const full = await adminFetchCourseById(c.id)
   if (full) {
     selectedCurriculumCourse.value = full
   }
@@ -1376,7 +1439,7 @@ async function createModuleConfirm () {
   await adminCreateModule(selectedCurriculumCourse.value.id, moduleTitle.value.trim(), moduleDesc.value.trim())
   showModuleModal.value = false
   await openCurriculumBuilder(selectedCurriculumCourse.value)
-  await fetchCourses()
+  await adminFetchCourses()
 }
 
 async function handleDeleteModule (modId: number) {
@@ -1384,7 +1447,7 @@ async function handleDeleteModule (modId: number) {
     await adminDeleteModule(modId)
     if (selectedCurriculumCourse.value) {
       await openCurriculumBuilder(selectedCurriculumCourse.value)
-      await fetchCourses()
+      await adminFetchCourses()
     }
   }
 }
@@ -1436,22 +1499,23 @@ const lessonForm = ref<LessonFormState>({
   mini_quiz_data: defaultMiniQuiz()
 })
 
-let mermaidRenderTimer: any = null
-watch(() => lessonForm.value.content_markdown, () => {
-  if (showLessonEditor.value && lessonEditorTab.value === 'markdown') {
-    clearTimeout(mermaidRenderTimer)
-    mermaidRenderTimer = setTimeout(() => {
-      nextTick(async () => {
-        if (lessonPreviewContainer.value) {
-          await renderMermaidInElement(lessonPreviewContainer.value)
-        }
-      })
-    }, 250)
-  }
+const debouncedLessonContent = ref(lessonForm.value.content_markdown)
+
+let previewDebounceTimer: any = null
+watch(() => lessonForm.value.content_markdown, (newVal) => {
+  clearTimeout(previewDebounceTimer)
+  previewDebounceTimer = setTimeout(async () => {
+    debouncedLessonContent.value = newVal
+    await nextTick()
+    if (lessonPreviewContainer.value) {
+      await renderMermaidInElement(lessonPreviewContainer.value)
+    }
+  }, 100)
 })
 
 watch(showLessonEditor, (isOpen) => {
   if (isOpen) {
+    debouncedLessonContent.value = lessonForm.value.content_markdown
     nextTick(async () => {
       if (lessonPreviewContainer.value) {
         await renderMermaidInElement(lessonPreviewContainer.value)
@@ -1462,12 +1526,17 @@ watch(showLessonEditor, (isOpen) => {
 
 watch(lessonEditorTab, (tab) => {
   if (tab === 'markdown') {
+    debouncedLessonContent.value = lessonForm.value.content_markdown
     nextTick(async () => {
       if (lessonPreviewContainer.value) {
         await renderMermaidInElement(lessonPreviewContainer.value)
       }
     })
   }
+})
+
+const renderedLessonPreviewHtml = computed(() => {
+  return renderMarkdown(debouncedLessonContent.value)
 })
 
 function addMiniQuizOption () {
@@ -1497,14 +1566,16 @@ function setCorrectMiniQuizOption (index: number) {
 function openAddLessonModal (modId: number) {
   targetModuleId.value = modId
   lessonEditorTab.value = 'markdown'
+  const initMd = '# Lesson Title\n\nWrite your Markdown content here...\n\n> [!NOTE]\n> Key concept to remember.'
   lessonForm.value = {
     module_id: modId,
     title: '',
-    content_markdown: '# Lesson Title\n\nWrite your Markdown content here...\n\n> [!NOTE]\n> Key concept to remember.',
+    content_markdown: initMd,
     estimated_minutes: 15,
     mini_quiz_enabled: false,
     mini_quiz_data: defaultMiniQuiz()
   }
+  debouncedLessonContent.value = initMd
   showLessonEditor.value = true
 }
 
@@ -1535,6 +1606,7 @@ async function openEditLessonModal (lesId: number) {
         ]
       }
     }
+    debouncedLessonContent.value = les.content_markdown
     showLessonEditor.value = true
   }
 }
@@ -1545,7 +1617,7 @@ async function saveLessonContent () {
     showLessonEditor.value = false
     if (selectedCurriculumCourse.value) {
       await openCurriculumBuilder(selectedCurriculumCourse.value)
-      await fetchCourses()
+      await adminFetchCourses()
     }
   } catch (e) {
     console.error('Failed to save lesson:', e)
@@ -1557,7 +1629,7 @@ async function handleDeleteLesson (lesId: number) {
     await adminDeleteLesson(lesId)
     if (selectedCurriculumCourse.value) {
       await openCurriculumBuilder(selectedCurriculumCourse.value)
-      await fetchCourses()
+      await adminFetchCourses()
     }
   }
 }
@@ -1656,7 +1728,7 @@ async function closeAssessmentStudio () {
   showAssessmentStudio.value = false
   if (selectedCurriculumCourse.value) {
     await openCurriculumBuilder(selectedCurriculumCourse.value)
-    await fetchCourses()
+    await adminFetchCourses()
   }
 }
 
@@ -1819,7 +1891,27 @@ async function handleDeleteAssessment (assId: number) {
 }
 
 function insertMd (before: string, after: string = '') {
-  lessonForm.value.content_markdown += `${before}Content${after}`
+  const textarea = markdownTextareaRef.value
+  const current = lessonForm.value.content_markdown || ''
+
+  if (!textarea) {
+    lessonForm.value.content_markdown += `${before}Content${after}`
+    return
+  }
+
+  const start = textarea.selectionStart ?? current.length
+  const end = textarea.selectionEnd ?? current.length
+  const selectedText = current.substring(start, end)
+  const innerText = selectedText || (after ? 'Content' : '')
+  const replacement = `${before}${innerText}${after}`
+
+  lessonForm.value.content_markdown = current.substring(0, start) + replacement + current.substring(end)
+
+  nextTick(() => {
+    textarea.focus()
+    const newPos = start + replacement.length
+    textarea.setSelectionRange(newPos, newPos)
+  })
 }
 
 function insertMermaidTemplate (kind: 'flowchart' | 'sequence' | 'architecture' = 'flowchart') {
@@ -1827,46 +1919,71 @@ function insertMermaidTemplate (kind: 'flowchart' | 'sequence' | 'architecture' 
   if (kind === 'flowchart') {
     template = `\n\`\`\`mermaid
 graph TD
-    A[Client / Web Browser] -->|HTTP REST API| B[Nuxt 3 Nitro Server]
-    B -->|Async Fetch| C[Django Backend]
-    C -->|SQL Query| D[(PostgreSQL DB)]
-    C -->|Cache| E[(Redis Cache)]
+    A[Node A] --> B[Node B]
+    B --> C[Node C]
 \`\`\`\n`
   } else if (kind === 'sequence') {
     template = `\n\`\`\`mermaid
 sequenceDiagram
     autonumber
-    actor Learner
-    participant Nuxt as Nuxt 3 Frontend
-    participant API as Django API
-    participant DB as PostgreSQL
-
-    Learner->>Nuxt: Click "Complete Lesson"
-    Nuxt->>API: POST /academy/progress/
-    API->>DB: Update AcademyLessonProgress
-    DB-->>API: 200 OK
-    API-->>Nuxt: Updated Progress (100%)
-    Nuxt-->>Learner: Celebration Badge & Points
+    A->>B: Message
+    B-->>A: Response
 \`\`\`\n`
   } else {
     template = `\n\`\`\`mermaid
 graph LR
-    subgraph Frontend
-        A[Vue 3 Components] --> B[Pinia / Composables]
+    subgraph Group A
+        A[Component 1]
     end
-    subgraph Backend
-        C[DRF ViewSet] --> D[Model Serializer]
-        D --> E[PostgreSQL Database]
+    subgraph Group B
+        B[Component 2]
     end
-    B <-->|JSON over HTTPS| C
+    A --> B
 \`\`\`\n`
   }
 
-  lessonForm.value.content_markdown += template
+  const textarea = markdownTextareaRef.value
+  const current = lessonForm.value.content_markdown || ''
+
+  if (!textarea) {
+    lessonForm.value.content_markdown += template
+  } else {
+    const start = textarea.selectionStart ?? current.length
+    const end = textarea.selectionEnd ?? current.length
+    lessonForm.value.content_markdown = current.substring(0, start) + template + current.substring(end)
+
+    nextTick(() => {
+      textarea.focus()
+      const newPos = start + template.length
+      textarea.setSelectionRange(newPos, newPos)
+    })
+  }
+
   nextTick(async () => {
     if (lessonPreviewContainer.value) {
       await renderMermaidInElement(lessonPreviewContainer.value)
     }
   })
+}
+
+function insertTableTemplate () {
+  const tableTemplate = `\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Item 1   | Item 2   | Item 3   |\n| Item 4   | Item 5   | Item 6   |\n\n`
+
+  const textarea = markdownTextareaRef.value
+  const current = lessonForm.value.content_markdown || ''
+
+  if (!textarea) {
+    lessonForm.value.content_markdown += tableTemplate
+  } else {
+    const start = textarea.selectionStart ?? current.length
+    const end = textarea.selectionEnd ?? current.length
+    lessonForm.value.content_markdown = current.substring(0, start) + tableTemplate + current.substring(end)
+
+    nextTick(() => {
+      textarea.focus()
+      const newPos = start + tableTemplate.length
+      textarea.setSelectionRange(newPos, newPos)
+    })
+  }
 }
 </script>

@@ -1,6 +1,7 @@
 import { marked } from 'marked'
 
 let mermaidInstance: any = null
+const mermaidSvgCache = new Map<string, string>()
 
 async function getMermaidInstance () {
   if (!import.meta.client) return null
@@ -41,7 +42,7 @@ async function getMermaidInstance () {
 
 /**
  * Custom Markdown Renderer with Cisco NetAcad & GitHub style callout boxes,
- * Mermaid.js graph diagram support, and clean typography.
+ * cached flicker-free Mermaid.js graph diagram support, and clean typography.
  */
 export function useMarkdownRenderer () {
   function renderMarkdown (mdContent: string = ''): string {
@@ -71,12 +72,33 @@ export function useMarkdownRenderer () {
         return `<div class="academy-callout academy-callout-warning"><div class="callout-title"><i class="fas fa-exclamation-triangle"></i> WARNING</div><div class="callout-body">${parsedBody}</div></div>\n`
       })
 
+    // Check for cached Mermaid diagrams before parsing
+    const mermaidPlaceholders = new Map<string, string>()
+    let placeholderCounter = 0
+
+    processed = processed.replace(/```mermaid\s*\n([\s\S]*?)\n```/gi, (_, code) => {
+      const trimmedCode = code.trim()
+      const token = `%%MERMAID_PLACEHOLDER_${placeholderCounter++}%%`
+      if (mermaidSvgCache.has(trimmedCode)) {
+        mermaidPlaceholders.set(token, `<div class="academy-mermaid-container" data-rendered="true">${mermaidSvgCache.get(trimmedCode)}</div>`)
+      } else {
+        mermaidPlaceholders.set(token, `<div class="academy-mermaid-container academy-mermaid-loading" data-mermaid-source="${encodeURIComponent(trimmedCode)}"><pre class="language-mermaid"><code>${trimmedCode}</code></pre></div>`)
+      }
+      return token
+    })
+
     // Parse Markdown to HTML
     try {
-      const html = marked.parse(processed, {
+      let html = marked.parse(processed, {
         gfm: true,
         breaks: true,
       }) as string
+
+      // Restore Mermaid blocks with cached SVGs or placeholder
+      mermaidPlaceholders.forEach((blockHtml, token) => {
+        html = html.replace(`<p>${token}</p>`, blockHtml).replace(token, blockHtml)
+      })
+
       return html
     } catch (e) {
       console.error('Markdown rendering error:', e)
@@ -87,28 +109,41 @@ export function useMarkdownRenderer () {
   async function renderMermaidInElement (containerEl?: HTMLElement | null) {
     if (!import.meta.client) return
     const el = containerEl || document
-    const mermaidNodes = el.querySelectorAll('pre code.language-mermaid, div.mermaid, pre.mermaid')
+    const mermaidNodes = el.querySelectorAll('.academy-mermaid-loading, pre code.language-mermaid')
     if (!mermaidNodes.length) return
 
     const mer = await getMermaidInstance()
     if (!mer) return
 
     for (let i = 0; i < mermaidNodes.length; i++) {
-      const codeNode = mermaidNodes[i] as HTMLElement
-      const rawCode = codeNode.getAttribute('data-mermaid-source') || codeNode.textContent || ''
-      if (!rawCode.trim()) continue
+      const node = mermaidNodes[i] as HTMLElement
+      let rawCode = ''
+      let container: HTMLElement | null = null
+
+      if (node.classList.contains('academy-mermaid-loading')) {
+        container = node
+        rawCode = decodeURIComponent(node.getAttribute('data-mermaid-source') || '')
+      } else {
+        container = node.closest('.academy-mermaid-container') || node.closest('pre')
+        rawCode = node.textContent || ''
+      }
+
+      if (!rawCode.trim() || !container) continue
+
+      if (mermaidSvgCache.has(rawCode.trim())) {
+        container.innerHTML = mermaidSvgCache.get(rawCode.trim()) || ''
+        container.classList.remove('academy-mermaid-loading')
+        continue
+      }
 
       try {
-        const parent = codeNode.closest('pre') || codeNode
         const uniqueId = `mermaid-svg-${Date.now()}-${i}-${Math.floor(Math.random() * 10000)}`
         const { svg } = await mer.render(uniqueId, rawCode.trim())
-
-        const container = document.createElement('div')
-        container.className = 'academy-mermaid-container'
+        mermaidSvgCache.set(rawCode.trim(), svg)
         container.innerHTML = svg
-        parent.replaceWith(container)
+        container.classList.remove('academy-mermaid-loading')
       } catch (err) {
-        console.warn('Mermaid rendering error for node:', err)
+        // Keep raw text visible if syntax is currently incomplete while typing
       }
     }
   }

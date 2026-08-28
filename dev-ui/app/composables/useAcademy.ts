@@ -121,6 +121,7 @@ export interface AcademyEnrollment {
     mini_quiz_is_correct: boolean
     points_earned: number
   }>
+  passed_assessments?: number[]
   enrolled_at: string
   completed_at?: string | null
 }
@@ -341,6 +342,43 @@ export function useAcademy () {
 
   // ── Admin Management Methods ─────────────────────────────────
 
+  async function adminFetchCourses () {
+    if (!apiBase) return []
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $fetch<AcademyCourse[]>(`${apiBase}/academy/admin/courses/`).catch(() => [])
+      if (Array.isArray(res)) {
+        courses.value = res
+        return res
+      }
+      return []
+    } catch (e: any) {
+      console.error('Failed to fetch admin courses:', e)
+      error.value = e.message || 'Failed to fetch admin courses'
+      return []
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function adminFetchCourseById (id: number | string) {
+    if (!apiBase || !id) return null
+    loading.value = true
+    error.value = null
+    try {
+      const res = await $fetch<AcademyCourse>(`${apiBase}/academy/admin/courses/${id}/`)
+      currentCourse.value = res
+      return res
+    } catch (e: any) {
+      console.error('Failed to fetch admin course by id:', e)
+      error.value = e.message || 'Course not found'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   async function adminCreateCourse (payload: Partial<AcademyCourse>) {
     if (!apiBase) return null
     return await $fetch<AcademyCourse>(`${apiBase}/academy/admin/courses/`, {
@@ -502,6 +540,8 @@ export function useAcademy () {
     enrollCourse,
     fetchMyEnrollments,
     markLessonProgress,
+    adminFetchCourses,
+    adminFetchCourseById,
     adminCreateCourse,
     adminUpdateCourse,
     adminDeleteCourse,
