@@ -15,6 +15,26 @@
           <span class="rounded bg-violet-950/80 border border-violet-800/50 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-violet-300">
             LMS Studio
           </span>
+          <div v-if="userRole" class="hidden sm:flex items-center gap-1.5 ml-1">
+            <span
+              v-if="userRole.is_admin"
+              class="flex items-center gap-1 rounded-full bg-amber-950/80 border border-amber-600/40 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-amber-300 shadow-sm"
+            >
+              <i class="fas fa-crown text-[8px] text-amber-400" /> Admin
+            </span>
+            <span
+              v-else-if="userRole.is_teacher"
+              class="flex items-center gap-1 rounded-full bg-cyan-950/80 border border-cyan-600/40 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-cyan-300 shadow-sm"
+            >
+              <i class="fas fa-chalkboard-teacher text-[8px] text-cyan-400" /> Instructor
+            </span>
+            <span
+              v-else
+              class="flex items-center gap-1 rounded-full bg-slate-800/80 border border-slate-700 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-400"
+            >
+              <i class="fas fa-user-graduate text-[8px] text-slate-400" /> Student
+            </span>
+          </div>
         </div>
 
         <!-- Navigation Tabs & Actions -->
@@ -61,6 +81,26 @@
     </header>
 
     <main class="container mx-auto px-4 py-8 sm:px-6 lg:px-8 max-w-6xl">
+      <!-- ── Student Role Notice (Non-intrusive) ──────────────────── -->
+      <div
+        v-if="userRole && !userRole.is_teacher && !userRole.is_admin"
+        class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-950/20 p-4 text-amber-200"
+      >
+        <div class="flex items-center gap-3">
+          <i class="fas fa-info-circle text-amber-400 text-lg" />
+          <div>
+            <p class="text-xs font-bold text-amber-300">You are currently viewing LMS Studio as a Student</p>
+            <p class="text-[11px] text-amber-400/80">Teacher or Admin permissions are required to publish courses and organize chapters.</p>
+          </div>
+        </div>
+        <NuxtLink
+          to="/academy"
+          class="rounded-xl bg-amber-500/20 border border-amber-500/40 px-3 py-1.5 text-xs font-bold text-amber-300 hover:bg-amber-500/30 transition-colors whitespace-nowrap"
+        >
+          🎓 Go to Student Catalog
+        </NuxtLink>
+      </div>
+
       <!-- ── Tab 1: Courses & Curriculum ───────────────────────────── -->
       <div v-if="activeTab === 'courses'">
         <!-- View 1A: Course Catalog List -->
@@ -147,6 +187,17 @@
                   </button>
 
                   <div class="flex items-center gap-1">
+                    <button
+                      type="button"
+                      @click="openCoTeacherModal(c)"
+                      class="flex h-7 px-2 items-center gap-1 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-cyan-300 text-[10px] font-bold border border-transparent hover:border-slate-700 transition-colors"
+                      title="People & Co-Teachers"
+                    >
+                      <i class="fas fa-user-friends text-xs" />
+                      <span v-if="c.co_teachers && c.co_teachers.length > 0" class="rounded bg-cyan-950 px-1 py-0.5 text-[8px] font-mono text-cyan-400 border border-cyan-800/60">
+                        {{ c.co_teachers.length }}
+                      </span>
+                    </button>
                     <button
                       type="button"
                       @click="openCourseModal(c)"
@@ -323,22 +374,208 @@
         </div>
       </div>
 
-      <!-- ── Tab 2: Minimalist Gradebook ───────────────────────────── -->
+      <!-- ── Tab 2: Minimalist Google Classroom-Style Gradebook ──── -->
       <div v-else-if="activeTab === 'gradebook'" class="space-y-6">
-        <div class="flex items-center justify-between border-b border-slate-850 pb-6">
+        <!-- Gradebook Header & Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-850 pb-6">
           <div>
-            <h1 class="text-xl font-black uppercase tracking-tight text-white">Student Gradebook & Analytics</h1>
-            <p class="text-xs text-slate-400 mt-0.5">Track student enrollments, module completions, and quiz performance.</p>
+            <h1 class="text-xl font-black uppercase tracking-tight text-white">Class Gradebook & Analytics</h1>
+            <p class="text-xs text-slate-400 mt-0.5">Track student progress, mini quiz results, and chapter assessments.</p>
+          </div>
+
+          <!-- Course Selector & Search -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <div class="relative">
+              <select
+                v-model="selectedGradebookCourseId"
+                @change="handleGradebookCourseChange"
+                class="rounded-xl border border-slate-800 bg-slate-900/90 py-1.5 pl-3 pr-8 text-xs font-bold text-white outline-none focus:border-violet-500 cursor-pointer"
+              >
+                <option v-if="courses.length === 0" :value="null">No Courses Available</option>
+                <option v-for="c in courses" :key="c.id" :value="c.id">
+                  {{ c.title }}
+                </option>
+              </select>
+            </div>
+
+            <div class="relative w-full sm:w-56">
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-500" />
+              <input
+                v-model="gradebookSearch"
+                type="text"
+                placeholder="Search student…"
+                class="w-full rounded-xl border border-slate-800 bg-slate-900/90 py-1.5 pl-8 pr-3 text-xs font-medium text-white outline-none focus:border-violet-500"
+              />
+            </div>
+
+            <button
+              type="button"
+              @click="loadGradebook(selectedGradebookCourseId)"
+              class="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700 transition-colors"
+              title="Refresh Gradebook"
+            >
+              <i class="fas fa-sync-alt text-xs" :class="{ 'fa-spin': gradebookLoading }" />
+            </button>
           </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
-          <div class="p-8 text-center">
-            <i class="fas fa-chart-line text-3xl text-slate-600 mb-3" />
-            <h3 class="text-sm font-bold uppercase text-white">Active Student Enrollments</h3>
-            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Student progress is automatically synchronized in real-time as learners advance through Markdown lessons and submit quizzes.
-            </p>
+        <!-- Gradebook Quick Stats Metrics -->
+        <div v-if="gradebookData" class="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Enrolled</span>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span class="text-2xl font-black text-white font-mono">{{ gradebookData.total_enrolled }}</span>
+              <span class="text-[10px] text-slate-500 font-bold">Learners</span>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Class Avg Progress</span>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span class="text-2xl font-black text-violet-400 font-mono">{{ classAverageProgress }}%</span>
+              <span class="text-[10px] text-slate-500 font-bold">Overall</span>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Points Awarded</span>
+            <div class="mt-1 flex items-baseline gap-2">
+              <span class="text-2xl font-black text-amber-400 font-mono">{{ classTotalPoints }}</span>
+              <span class="text-[10px] text-amber-500/80 font-bold">pts</span>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Course Instructor</span>
+            <div class="mt-1 truncate">
+              <span class="text-xs font-bold text-slate-200 truncate block">{{ gradebookData.instructor_name || 'TechSavvy Instructor' }}</span>
+              <span class="text-[10px] font-mono text-slate-500 truncate block">{{ gradebookData.instructor_email || 'instructor@techsavvy' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gradebook Student Roster Table -->
+        <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 shadow-xl">
+          <!-- Loading State -->
+          <div v-if="gradebookLoading" class="py-16 text-center">
+            <i class="fas fa-circle-notch fa-spin text-2xl text-violet-400 mb-2" />
+            <p class="text-xs text-slate-400">Loading student submissions & progress…</p>
+          </div>
+
+          <!-- Empty Course State -->
+          <div v-else-if="!selectedGradebookCourseId" class="py-16 text-center">
+            <i class="fas fa-book-reader text-3xl text-slate-600 mb-3" />
+            <h4 class="text-sm font-bold uppercase text-white">No Course Selected</h4>
+            <p class="text-xs text-slate-500 mt-1">Select a course above to inspect its student roster.</p>
+          </div>
+
+          <!-- Empty Students State -->
+          <div v-else-if="filteredGradebookStudents.length === 0" class="py-16 text-center">
+            <i class="fas fa-user-graduate text-3xl text-slate-600 mb-3" />
+            <h4 class="text-sm font-bold uppercase text-white">No Students Enrolled Yet</h4>
+            <p class="text-xs text-slate-500 mt-1">When students enroll from the public catalog, their progress will appear here in real-time.</p>
+          </div>
+
+          <!-- Roster Table -->
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-800 bg-slate-950/60 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <th class="py-3.5 px-4 sm:px-6">Student</th>
+                  <th class="py-3.5 px-4 text-center">Progress</th>
+                  <th class="py-3.5 px-4 text-center">Lessons</th>
+                  <th class="py-3.5 px-4 text-center">Mini Quizzes</th>
+                  <th class="py-3.5 px-4 text-left">Chapter Assessments</th>
+                  <th class="py-3.5 px-4 text-right">Points</th>
+                  <th class="py-3.5 px-4 text-right">Last Active</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-xs">
+                <tr
+                  v-for="st in filteredGradebookStudents"
+                  :key="st.id"
+                  class="hover:bg-slate-850/50 transition-colors group"
+                >
+                  <!-- Student Info -->
+                  <td class="py-3.5 px-4 sm:px-6">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-950 border border-violet-800/60 text-violet-300 font-black text-xs uppercase shadow-sm">
+                        {{ (st.student_name || st.student_email || 'S')[0] }}
+                      </div>
+                      <div class="min-w-0">
+                        <div class="font-bold text-white truncate">{{ st.student_name || 'Anonymous Student' }}</div>
+                        <div class="text-[11px] font-mono text-slate-400 truncate">{{ st.student_email }}</div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Progress Bar -->
+                  <td class="py-3.5 px-4 text-center">
+                    <div class="flex flex-col items-center gap-1">
+                      <div class="flex items-center justify-between w-24 text-[10px] font-mono font-bold">
+                        <span :class="st.progress_percentage >= 100 ? 'text-emerald-400' : 'text-violet-300'">
+                          {{ st.progress_percentage }}%
+                        </span>
+                        <span v-if="st.progress_percentage >= 100" class="text-[9px] text-emerald-400 font-bold uppercase">Done</span>
+                      </div>
+                      <div class="h-1.5 w-24 overflow-hidden rounded-full bg-slate-800">
+                        <div
+                          class="h-full rounded-full transition-all duration-500"
+                          :class="st.progress_percentage >= 100 ? 'bg-emerald-500' : 'bg-violet-500'"
+                          :style="{ width: `${st.progress_percentage}%` }"
+                        />
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Lessons Count -->
+                  <td class="py-3.5 px-4 text-center font-mono text-slate-300 font-bold">
+                    {{ st.completed_lessons_count }}
+                  </td>
+
+                  <!-- Mini Quizzes Count -->
+                  <td class="py-3.5 px-4 text-center">
+                    <span
+                      class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-mono font-bold"
+                      :class="st.mini_quiz_solved_count > 0 ? 'bg-cyan-950 text-cyan-300 border border-cyan-800/60' : 'text-slate-500'"
+                    >
+                      <i v-if="st.mini_quiz_solved_count > 0" class="fas fa-check text-[8px]" />
+                      {{ st.mini_quiz_solved_count }} solved
+                    </span>
+                  </td>
+
+                  <!-- Chapter Assessments / Tests -->
+                  <td class="py-3.5 px-4">
+                    <div v-if="st.assessment_scores && st.assessment_scores.length > 0" class="flex flex-wrap gap-1.5 max-w-xs">
+                      <span
+                        v-for="att in st.assessment_scores"
+                        :key="att.assessment_id"
+                        class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9px] font-mono font-bold border"
+                        :class="att.passed ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60' : 'bg-rose-950/80 text-rose-300 border-rose-800/60'"
+                        :title="`${att.assessment_title}: ${att.score_percentage}%`"
+                      >
+                        <i :class="att.passed ? 'fas fa-check text-[7px]' : 'fas fa-times text-[7px]'" />
+                        {{ att.assessment_title }}: {{ att.score_percentage }}%
+                      </span>
+                    </div>
+                    <span v-else class="text-[10px] font-mono text-slate-500 italic">No tests taken</span>
+                  </td>
+
+                  <!-- Total Points -->
+                  <td class="py-3.5 px-4 text-right">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-950/70 border border-amber-800/50 px-2 py-0.5 text-[10px] font-mono font-black text-amber-300">
+                      <i class="fas fa-bolt text-[8px] text-amber-400" />
+                      +{{ st.total_points }}
+                    </span>
+                  </td>
+
+                  <!-- Last Active -->
+                  <td class="py-3.5 px-4 text-right text-[10px] font-mono text-slate-400">
+                    {{ formatDate(st.last_accessed_at || st.enrolled_at) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1245,6 +1482,120 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- ── Modal 4: Co-Teachers & People Management ──────────────── -->
+    <Teleport to="body">
+      <div
+        v-if="showCoTeacherModal && targetCoTeacherCourse"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+        @click.self="showCoTeacherModal = false"
+      >
+        <div class="custom-scrollbar max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-5">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between border-b border-slate-850 pb-3.5">
+            <div class="flex items-center gap-2.5">
+              <div class="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-950 border border-cyan-800/60 text-cyan-300">
+                <i class="fas fa-user-friends text-xs" />
+              </div>
+              <div>
+                <h3 class="text-sm font-black uppercase text-white">Course People & Collaborators</h3>
+                <p class="text-[11px] text-slate-400 truncate max-w-xs">{{ targetCoTeacherCourse.title }}</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="showCoTeacherModal = false"
+              class="text-slate-500 hover:text-white p-1 rounded-lg"
+            >
+              <i class="fas fa-times text-sm" />
+            </button>
+          </div>
+
+          <!-- Primary Instructor (Owner) -->
+          <div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 space-y-2">
+            <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Primary Instructor (Owner)</span>
+            <div class="flex items-center gap-3 pt-1">
+              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-600 text-white font-black text-xs uppercase shadow-md shadow-violet-600/20">
+                {{ (targetCoTeacherCourse.instructor_name || 'T')[0] }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="text-xs font-bold text-white truncate">{{ targetCoTeacherCourse.instructor_name || 'TechSavvy Instructor' }}</div>
+                <div class="text-[11px] font-mono text-violet-400 truncate">{{ targetCoTeacherCourse.instructor_email || 'instructor@techsavvy' }}</div>
+              </div>
+              <span class="rounded-full bg-violet-950 border border-violet-800/50 px-2 py-0.5 text-[9px] font-black uppercase text-violet-300">
+                Owner
+              </span>
+            </div>
+          </div>
+
+          <!-- Co-Teachers List -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Co-Teachers & Teaching Assistants ({{ (targetCoTeacherCourse.co_teachers || []).length }})
+              </span>
+            </div>
+
+            <div v-if="(targetCoTeacherCourse.co_teachers || []).length > 0" class="space-y-2 max-h-48 overflow-y-auto">
+              <div
+                v-for="coEmail in targetCoTeacherCourse.co_teachers"
+                :key="coEmail"
+                class="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/40 p-3"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-cyan-950 border border-cyan-800/50 text-cyan-300 font-bold text-[10px]">
+                    <i class="fas fa-user-check text-[9px]" />
+                  </div>
+                  <span class="text-xs font-mono text-slate-200 truncate">{{ coEmail }}</span>
+                </div>
+                <button
+                  type="button"
+                  @click="handleRemoveCoTeacher(coEmail)"
+                  :disabled="coTeacherActionLoading"
+                  class="rounded-lg p-1.5 text-slate-500 hover:bg-rose-950/40 hover:text-rose-400 disabled:opacity-40"
+                  title="Remove Co-Teacher"
+                >
+                  <i class="fas fa-trash text-[10px]" />
+                </button>
+              </div>
+            </div>
+
+            <div v-else class="rounded-xl border border-dashed border-slate-800 bg-slate-950/20 py-4 text-center">
+              <p class="text-xs text-slate-500">No co-teachers added yet.</p>
+            </div>
+          </div>
+
+          <!-- Add Co-Teacher Form -->
+          <div class="space-y-2 pt-2 border-t border-slate-850">
+            <label class="text-[10px] font-black uppercase tracking-wider text-slate-300">Invite Co-Teacher Collaborator</label>
+            <div class="flex items-center gap-2">
+              <input
+                v-model="newCoTeacherEmail"
+                type="email"
+                placeholder="colleague@example.com"
+                @keyup.enter="handleAddCoTeacher"
+                class="flex-1 rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2 text-xs font-medium text-white placeholder-slate-600 outline-none focus:border-cyan-500"
+              />
+              <button
+                type="button"
+                @click="handleAddCoTeacher"
+                :disabled="coTeacherActionLoading || !newCoTeacherEmail.trim()"
+                class="flex items-center gap-1.5 rounded-xl bg-cyan-600 px-3.5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-cyan-600/20 hover:bg-cyan-500 disabled:opacity-40 transition-all"
+              >
+                <i v-if="coTeacherActionLoading" class="fas fa-circle-notch fa-spin text-[10px]" />
+                <i v-else class="fas fa-plus text-[10px]" />
+                <span>Add</span>
+              </button>
+            </div>
+
+            <!-- Feedback message -->
+            <p v-if="coTeacherMessage" class="text-[11px] font-medium" :class="coTeacherMessage.type === 'success' ? 'text-emerald-400' : 'text-rose-400'">
+              {{ coTeacherMessage.text }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1254,8 +1605,10 @@ import {
   type AcademyCourse,
   type AcademyAssessmentOutline,
   type AcademyQuestion,
-  type AcademyQuestionOption
+  type AcademyQuestionOption,
+  type GradebookData
 } from '~/composables/useAcademy'
+import { useAuth } from '~/composables/useAuth'
 import { useMarkdownRenderer } from '~/composables/useMarkdownRenderer'
 
 useHead({
@@ -1263,8 +1616,11 @@ useHead({
   meta: [{ name: 'description', content: 'Minimalist Academy LMS Studio for courses, markdown lessons, and quiz management.' }]
 })
 
+const { user } = useAuth()
 const {
   courses,
+  userRole,
+  fetchMyAcademyRole,
   adminFetchCourses,
   adminFetchCourseById,
   fetchLesson,
@@ -1279,7 +1635,9 @@ const {
   adminSaveAssessment,
   adminDeleteAssessment,
   adminSaveQuestion,
-  adminDeleteQuestion
+  adminDeleteQuestion,
+  fetchCourseGradebook,
+  manageCoTeacher,
 } = useAcademy()
 
 const { renderMarkdown, renderMermaidInElement } = useMarkdownRenderer()
@@ -1296,8 +1654,130 @@ const filteredCourses = computed(() => {
   return courses.value.filter(c => (c.title || '').toLowerCase().includes(q) || (c.category || '').toLowerCase().includes(q))
 })
 
+// ── Google Classroom Gradebook State ──
+const selectedGradebookCourseId = ref<number | null>(null)
+const gradebookData = ref<GradebookData | null>(null)
+const gradebookLoading = ref(false)
+const gradebookSearch = ref('')
+
+const filteredGradebookStudents = computed(() => {
+  if (!gradebookData.value?.students) return []
+  const q = gradebookSearch.value.trim().toLowerCase()
+  if (!q) return gradebookData.value.students
+  return gradebookData.value.students.filter(s =>
+    (s.student_name || '').toLowerCase().includes(q) ||
+    (s.student_email || '').toLowerCase().includes(q)
+  )
+})
+
+const classAverageProgress = computed(() => {
+  if (!gradebookData.value?.students || gradebookData.value.students.length === 0) return 0
+  const sum = gradebookData.value.students.reduce((acc, s) => acc + (s.progress_percentage || 0), 0)
+  return Math.round(sum / gradebookData.value.students.length)
+})
+
+const classTotalPoints = computed(() => {
+  if (!gradebookData.value?.students) return 0
+  return gradebookData.value.students.reduce((acc, s) => acc + (s.total_points || 0), 0)
+})
+
+async function loadGradebook (courseId?: number | null) {
+  if (!courseId) {
+    gradebookData.value = null
+    return
+  }
+  gradebookLoading.value = true
+  try {
+    const res = await fetchCourseGradebook(courseId)
+    gradebookData.value = res
+  } finally {
+    gradebookLoading.value = false
+  }
+}
+
+function handleGradebookCourseChange () {
+  if (selectedGradebookCourseId.value) {
+    loadGradebook(selectedGradebookCourseId.value)
+  }
+}
+
+// ── Co-Teachers Modal State ──
+const showCoTeacherModal = ref(false)
+const targetCoTeacherCourse = ref<AcademyCourse | null>(null)
+const newCoTeacherEmail = ref('')
+const coTeacherActionLoading = ref(false)
+const coTeacherMessage = ref<{ type: 'success' | 'error'; text: string } | null>(null)
+
+function openCoTeacherModal (course: AcademyCourse) {
+  targetCoTeacherCourse.value = course
+  newCoTeacherEmail.value = ''
+  coTeacherMessage.value = null
+  showCoTeacherModal.value = true
+}
+
+async function handleAddCoTeacher () {
+  if (!targetCoTeacherCourse.value || !newCoTeacherEmail.value.trim()) return
+  coTeacherActionLoading.value = true
+  coTeacherMessage.value = null
+  try {
+    const res = await manageCoTeacher(targetCoTeacherCourse.value.id, newCoTeacherEmail.value.trim(), 'add')
+    if (res?.co_teachers) {
+      targetCoTeacherCourse.value.co_teachers = res.co_teachers
+      newCoTeacherEmail.value = ''
+      coTeacherMessage.value = { type: 'success', text: 'Co-teacher collaborator added successfully.' }
+      await adminFetchCourses()
+    }
+  } catch (e: any) {
+    coTeacherMessage.value = { type: 'error', text: e?.data?.error || 'Failed to add co-teacher.' }
+  } finally {
+    coTeacherActionLoading.value = false
+  }
+}
+
+async function handleRemoveCoTeacher (email: string) {
+  if (!targetCoTeacherCourse.value || !email) return
+  if (!confirm(`Remove "${email}" from co-teachers on this course?`)) return
+  coTeacherActionLoading.value = true
+  coTeacherMessage.value = null
+  try {
+    const res = await manageCoTeacher(targetCoTeacherCourse.value.id, email, 'remove')
+    if (res?.co_teachers) {
+      targetCoTeacherCourse.value.co_teachers = res.co_teachers
+      coTeacherMessage.value = { type: 'success', text: 'Co-teacher removed.' }
+      await adminFetchCourses()
+    }
+  } catch (e: any) {
+    coTeacherMessage.value = { type: 'error', text: 'Failed to remove co-teacher.' }
+  } finally {
+    coTeacherActionLoading.value = false
+  }
+}
+
+function formatDate (d?: string | null) {
+  if (!d) return '—'
+  try {
+    const date = new Date(d)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  } catch {
+    return String(d)
+  }
+}
+
+watch(activeTab, (tab) => {
+  if (tab === 'gradebook' && selectedGradebookCourseId.value && !gradebookData.value) {
+    loadGradebook(selectedGradebookCourseId.value)
+  }
+})
+
 onMounted(async () => {
-  await adminFetchCourses()
+  await fetchMyAcademyRole(user.value?.email)
+  const list = await adminFetchCourses(user.value?.email)
+  if (list && list.length > 0 && !selectedGradebookCourseId.value) {
+    selectedGradebookCourseId.value = list[0].id
+    if (activeTab.value === 'gradebook') {
+      await loadGradebook(list[0].id)
+    }
+  }
 })
 
 // ── Course Modal & Banner Upload ──

@@ -16,11 +16,12 @@
 
         <div class="flex items-center gap-3">
           <NuxtLink
+            v-if="userRole?.is_teacher || userRole?.is_admin"
             to="/academy/manage"
             class="flex items-center gap-1.5 rounded-xl border border-violet-800/40 bg-violet-950/40 px-3 py-1.5 text-xs font-bold text-violet-300 hover:border-violet-600 hover:bg-violet-900/60 transition-all"
           >
-            <i class="fas fa-layer-group text-[10px] text-violet-400" />
-            <span>LMS Studio</span>
+            <i class="fas fa-chalkboard-teacher text-[10px] text-violet-400" />
+            <span>Teacher Studio</span>
           </NuxtLink>
 
           <NuxtLink
@@ -211,7 +212,7 @@ useHead({
   meta: [{ name: 'description', content: 'Minimalist developer courses and interactive NetAcad learning platform.' }]
 })
 
-const { courses, myEnrollments, fetchCourses, fetchMyEnrollments } = useAcademy()
+const { courses, myEnrollments, userRole, fetchCourses, fetchMyEnrollments, fetchMyAcademyRole } = useAcademy()
 const { user } = useAuth()
 
 const searchQuery = ref('')
@@ -231,6 +232,7 @@ onMounted(async () => {
   await fetchCourses()
   if (user.value?.email) {
     await fetchMyEnrollments(user.value.email)
+    await fetchMyAcademyRole(user.value.email)
   }
 })
 

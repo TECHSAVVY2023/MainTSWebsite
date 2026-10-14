@@ -44,6 +44,42 @@ export interface AcademyModuleOutline {
   assessments: AcademyAssessmentOutline[]
 }
 
+export interface UserAcademyRole {
+  email: string
+  role: 'admin' | 'teacher' | 'student' | 'guest'
+  is_admin: boolean
+  is_teacher: boolean
+}
+
+export interface GradebookStudent {
+  id: number
+  student_email: string
+  student_name: string
+  progress_percentage: number
+  completed_lessons_count: number
+  total_points: number
+  mini_quiz_solved_count: number
+  assessment_scores: Array<{
+    assessment_id: number
+    assessment_title: string
+    score_percentage: number
+    passed: boolean
+    attempted_at: string
+  }>
+  enrolled_at: string
+  last_accessed_at: string
+}
+
+export interface GradebookData {
+  course_id: number
+  course_title: string
+  instructor_name: string
+  instructor_email: string
+  co_teachers: string[]
+  total_enrolled: number
+  students: GradebookStudent[]
+}
+
 export interface AcademyCourse {
   id: number
   title: string
@@ -53,7 +89,9 @@ export interface AcademyCourse {
   thumbnail?: string
   description?: string
   instructor_name: string
+  instructor_email?: string
   instructor_avatar?: string
+  co_teachers?: string[]
   estimated_hours: number
   badge_label?: string
   is_published: boolean
@@ -152,6 +190,7 @@ export function useAcademy () {
   const currentCourse = ref<AcademyCourse | null>(null)
   const currentLesson = ref<AcademyLessonDetail | null>(null)
   const myEnrollments = ref<AcademyEnrollment[]>([])
+  const userRole = ref<UserAcademyRole | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -340,14 +379,40 @@ export function useAcademy () {
     }
   }
 
-  // ── Admin Management Methods ─────────────────────────────────
+  // ── Admin & Instructor Management Methods ───────────────────
 
-  async function adminFetchCourses () {
+  async function fetchMyAcademyRole (email?: string): Promise<UserAcademyRole> {
+    if (!apiBase) {
+      const fallback: UserAcademyRole = { email: '', role: 'guest', is_admin: false, is_teacher: false }
+      userRole.value = fallback
+      return fallback
+    }
+    const targetEmail = (email || user.value?.email || '').trim().toLowerCase()
+    if (!targetEmail) {
+      const fallback: UserAcademyRole = { email: '', role: 'guest', is_admin: false, is_teacher: false }
+      userRole.value = fallback
+      return fallback
+    }
+    try {
+      const res = await $fetch<UserAcademyRole>(`${apiBase}/academy/my-role/?email=${encodeURIComponent(targetEmail)}`)
+      userRole.value = res
+      return res
+    } catch (e) {
+      console.error('Failed to fetch user academy role:', e)
+      const fallback: UserAcademyRole = { email: targetEmail, role: 'student', is_admin: false, is_teacher: false }
+      userRole.value = fallback
+      return fallback
+    }
+  }
+
+  async function adminFetchCourses (email?: string) {
     if (!apiBase) return []
     loading.value = true
     error.value = null
     try {
-      const res = await $fetch<AcademyCourse[]>(`${apiBase}/academy/admin/courses/`).catch(() => [])
+      const targetEmail = (email || user.value?.email || '').trim().toLowerCase()
+      const qs = targetEmail ? `?email=${encodeURIComponent(targetEmail)}` : ''
+      const res = await $fetch<AcademyCourse[]>(`${apiBase}/academy/admin/courses/${qs}`).catch(() => [])
       if (Array.isArray(res)) {
         courses.value = res
         return res
@@ -360,6 +425,24 @@ export function useAcademy () {
     } finally {
       loading.value = false
     }
+  }
+
+  async function fetchCourseGradebook (courseId: number | string): Promise<GradebookData | null> {
+    if (!apiBase || !courseId) return null
+    try {
+      return await $fetch<GradebookData>(`${apiBase}/academy/admin/gradebook/?course_id=${courseId}`)
+    } catch (e) {
+      console.error('Failed to fetch course gradebook:', e)
+      return null
+    }
+  }
+
+  async function manageCoTeacher (courseId: number, email: string, action: 'add' | 'remove' = 'add') {
+    if (!apiBase || !courseId || !email) return null
+    return await $fetch<any>(`${apiBase}/academy/admin/courses/${courseId}/co-teachers/`, {
+      method: 'POST',
+      body: { email, action }
+    })
   }
 
   async function adminFetchCourseById (id: number | string) {
@@ -529,6 +612,7 @@ export function useAcademy () {
     currentCourse,
     currentLesson,
     myEnrollments,
+    userRole,
     loading,
     error,
     fetchCourses,
@@ -539,6 +623,7 @@ export function useAcademy () {
     submitMiniQuiz,
     enrollCourse,
     fetchMyEnrollments,
+    fetchMyAcademyRole,
     markLessonProgress,
     adminFetchCourses,
     adminFetchCourseById,
@@ -555,5 +640,7 @@ export function useAcademy () {
     adminDeleteAssessment,
     adminSaveQuestion,
     adminDeleteQuestion,
+    fetchCourseGradebook,
+    manageCoTeacher,
   }
 }
