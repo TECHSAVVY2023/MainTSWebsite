@@ -209,11 +209,35 @@ import { useAuth } from '~/composables/useAuth'
 
 useHead({
   title: 'Academy | TechSavvy Developer LMS',
-  meta: [{ name: 'description', content: 'Minimalist developer courses and interactive NetAcad learning platform.' }]
+  meta: [
+    { name: 'description', content: 'Hands-on developer education inspired by Cisco NetAcad. Master modern frameworks with structured chapters, rich Markdown tutorials, and module quizzes.' },
+    { property: 'og:title', content: 'TechSavvy Academy — Developer LMS' },
+    { property: 'og:description', content: 'Master modern frameworks with structured chapters, rich Markdown tutorials, and interactive module quizzes.' },
+    { property: 'og:type', content: 'website' },
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: 'TechSavvy Academy — Developer LMS' }
+  ]
 })
 
 const { courses, myEnrollments, userRole, fetchCourses, fetchMyEnrollments, fetchMyAcademyRole } = useAcademy()
 const { user } = useAuth()
+const config = useRuntimeConfig()
+const apiBase = (config.public?.apiBase as string || '').replace(/\/$/, '')
+
+// SSR initial courses fetching for fast hydration & SEO
+const { data: initialCourses } = await useAsyncData('academy-catalog-ssr', async () => {
+  if (!apiBase) return []
+  try {
+    const res = await $fetch<any[]>(`${apiBase}/academy/courses/`).catch(() => [])
+    return Array.isArray(res) ? res : []
+  } catch {
+    return []
+  }
+})
+
+if (initialCourses.value && initialCourses.value.length > 0 && courses.value.length === 0) {
+  courses.value = initialCourses.value
+}
 
 const searchQuery = ref('')
 const selectedCategory = ref('all')
@@ -229,7 +253,9 @@ const categories = [
 ]
 
 onMounted(async () => {
-  await fetchCourses()
+  if (courses.value.length === 0) {
+    await fetchCourses()
+  }
   if (user.value?.email) {
     await fetchMyEnrollments(user.value.email)
     await fetchMyAcademyRole(user.value.email)

@@ -621,6 +621,19 @@ const activeMode = ref<'lesson' | 'quiz'>('lesson')
 const activeLessonId = ref<number | null>(null)
 const activeAssessment = ref<AcademyAssessmentOutline | null>(null)
 
+useHead(() => {
+  const cTitle = course.value?.title || 'Classroom'
+  const currentTitle = activeMode.value === 'lesson'
+    ? (activeLesson.value?.title ? `${activeLesson.value.title} · ` : '')
+    : (activeAssessment.value?.title ? `${activeAssessment.value.title} · ` : '')
+  return {
+    title: `${currentTitle}${cTitle} | TechSavvy Academy`,
+    meta: [
+      { name: 'description', content: course.value?.description || 'Interactive developer classroom with Markdown lessons and quizzes.' }
+    ]
+  }
+})
+
 // Lesson Mini Quiz state
 const miniQuizSelectedOptionId = ref<string>('')
 const submittingMiniQuiz = ref(false)

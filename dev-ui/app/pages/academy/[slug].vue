@@ -138,25 +138,79 @@
           </div>
         </div>
       </div>
+
+      <!-- Course Not Found State -->
+      <div v-else class="py-20 text-center">
+        <i class="fas fa-book-open text-4xl text-slate-600 mb-3" />
+        <h2 class="text-lg font-bold text-white uppercase">Course Not Found</h2>
+        <p class="text-xs text-slate-400 mt-1 mb-6">The course you are looking for does not exist or may have been unlisted.</p>
+        <NuxtLink to="/academy" class="rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white hover:bg-violet-500 transition-colors">
+          Browse Available Courses
+        </NuxtLink>
+      </div>
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useAcademy } from '~/composables/useAcademy'
+import { useAcademy, type AcademyCourse } from '~/composables/useAcademy'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const config = useRuntimeConfig()
+const apiBase = (config.public?.apiBase as string || '').replace(/\/$/, '')
 
-const { currentCourse: course, loading, fetchCourseBySlug } = useAcademy()
-const openModules = ref<number[]>([])
+const { currentCourse, fetchCourseBySlug } = useAcademy()
+
+// SSR syllabus and metadata fetching
+const { data: ssrCourse, status } = await useAsyncData(`academy-course-${slug.value}`, async () => {
+  if (!apiBase || !slug.value) return null
+  try {
+    return await $fetch<AcademyCourse>(`${apiBase}/academy/courses/${slug.value}/`).catch(() => null)
+  } catch {
+    return null
+  }
+})
+
+const course = computed(() => ssrCourse.value || currentCourse.value)
+const loading = computed(() => status.value === 'pending')
+
+const openModules = ref<number[]>(course.value?.modules ? course.value.modules.map(m => m.id) : [])
+
+watch(() => course.value?.modules, (mods) => {
+  if (mods && openModules.value.length === 0) {
+    openModules.value = mods.map(m => m.id)
+  }
+}, { immediate: true })
 
 onMounted(async () => {
-  if (slug.value) {
+  if (!ssrCourse.value && slug.value) {
     const c = await fetchCourseBySlug(slug.value)
     if (c?.modules) {
       openModules.value = c.modules.map(m => m.id)
     }
+  }
+})
+
+useHead(() => {
+  const c = course.value
+  const title = c ? `${c.title} | TechSavvy Academy` : 'Course Syllabus | TechSavvy Academy'
+  const desc = c?.description || 'Hands-on training curriculum featuring interactive Markdown lessons and practice quizzes.'
+  const image = c?.thumbnail || '/img/The-division-shd-logo.png'
+
+  return {
+    title,
+    meta: [
+      { name: 'description', content: desc },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: desc },
+      { property: 'og:image', content: image },
+      { property: 'og:type', content: 'article' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: title },
+      { name: 'twitter:description', content: desc },
+      { name: 'twitter:image', content: image }
+    ]
   }
 })
 
