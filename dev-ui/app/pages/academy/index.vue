@@ -236,6 +236,14 @@ onMounted(async () => {
   }
 })
 
+// React when user authentication session hydrates asynchronously
+watch(() => user.value?.email, async (newEmail) => {
+  if (newEmail) {
+    await fetchMyEnrollments(newEmail)
+    await fetchMyAcademyRole(newEmail)
+  }
+})
+
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 function handleSearch () {
   if (searchTimer) clearTimeout(searchTimer)
@@ -243,6 +251,10 @@ function handleSearch () {
     fetchCourses(selectedCategory.value, selectedLevel.value, searchQuery.value)
   }, 300)
 }
+
+onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer)
+})
 
 function setCategory (cat: string) {
   selectedCategory.value = cat

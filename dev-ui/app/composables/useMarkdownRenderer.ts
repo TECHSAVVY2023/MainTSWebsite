@@ -1,4 +1,5 @@
 import { marked } from 'marked'
+import DOMPurify from 'isomorphic-dompurify'
 
 let mermaidInstance: any = null
 const mermaidSvgCache = new Map<string, string>()
@@ -29,7 +30,7 @@ async function getMermaidInstance () {
           titleColor: '#ffffff',
           edgeLabelBackground: '#020617'
         },
-        securityLevel: 'loose',
+        securityLevel: 'strict',
         fontFamily: 'JetBrains Mono, monospace, sans-serif'
       })
     } catch (e) {
@@ -99,10 +100,15 @@ export function useMarkdownRenderer () {
         html = html.replace(`<p>${token}</p>`, blockHtml).replace(token, blockHtml)
       })
 
-      return html
+      // Sanitize the HTML output to prevent XSS attacks while preserving NetAcad styles, icons & SVGs
+      return DOMPurify.sanitize(html, {
+        USE_PROFILES: { html: true, svg: true },
+        ADD_TAGS: ['i'],
+        ADD_ATTR: ['target', 'rel', 'data-rendered', 'data-mermaid-source']
+      })
     } catch (e) {
       console.error('Markdown rendering error:', e)
-      return mdContent
+      return DOMPurify.sanitize(mdContent)
     }
   }
 

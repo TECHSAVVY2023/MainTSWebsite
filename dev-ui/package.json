@@ -13,6 +13,7 @@
     "@stripe/stripe-js": "^9.0.1",
     "@vuepic/vue-datepicker": "^12.1.0",
     "chart.js": "^4.4.9",
+    "isomorphic-dompurify": "^4.6.0",
     "marked": "^18.0.10",
     "mermaid": "^11.17.2",
     "moment": "^2.30.1",

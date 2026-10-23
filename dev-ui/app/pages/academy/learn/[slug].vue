@@ -594,6 +594,7 @@ import { useMarkdownRenderer } from '~/composables/useMarkdownRenderer'
 import { useAuth } from '~/composables/useAuth'
 
 const route = useRoute()
+const router = useRouter()
 const courseSlug = computed(() => route.params.slug as string)
 
 const {
@@ -790,9 +791,31 @@ onMounted(async () => {
     const c = await fetchCourseBySlug(courseSlug.value)
     if (c?.modules && c.modules.length > 0) {
       openModules.value = c.modules.map(m => m.id)
-      const firstMod = c.modules[0]
-      if (firstMod.lessons && firstMod.lessons.length > 0) {
-        await selectLesson(firstMod.lessons[0].id)
+
+      // Query param deep linking: ?lesson=123 or ?quiz=456
+      const qLesson = route.query.lesson ? Number(route.query.lesson) : null
+      const qQuiz = route.query.quiz ? Number(route.query.quiz) : null
+
+      let selectedFromQuery = false
+      if (qLesson) {
+        const exists = c.modules.some(m => (m.lessons || []).some(l => l.id === qLesson))
+        if (exists && isItemUnlocked('lesson', qLesson)) {
+          await selectLesson(qLesson, false)
+          selectedFromQuery = true
+        }
+      } else if (qQuiz) {
+        const foundAss = c.modules.flatMap(m => m.assessments || []).find(a => a.id === qQuiz)
+        if (foundAss && isItemUnlocked('quiz', qQuiz)) {
+          await selectAssessment(foundAss, false)
+          selectedFromQuery = true
+        }
+      }
+
+      if (!selectedFromQuery) {
+        const firstMod = c.modules[0]
+        if (firstMod.lessons && firstMod.lessons.length > 0) {
+          await selectLesson(firstMod.lessons[0].id)
+        }
       }
     }
   }
@@ -801,6 +824,26 @@ onMounted(async () => {
   if (user.value?.email) {
     await fetchMyEnrollments(user.value.email)
     await enrollCourse(undefined, courseSlug.value, user.value.email, user.value.name)
+  }
+})
+
+// Reactive watcher for asynchronous user auth hydration
+watch(() => user.value?.email, async (newEmail) => {
+  if (newEmail) {
+    await fetchMyEnrollments(newEmail)
+    if (courseSlug.value) {
+      await enrollCourse(undefined, courseSlug.value, newEmail, user.value?.name)
+    }
+  }
+})
+
+// Watch route query changes for browser back/forward history navigation
+watch(() => [route.query.lesson, route.query.quiz], ([newLesson, newQuiz]) => {
+  if (newLesson && Number(newLesson) !== activeLessonId.value) {
+    selectLesson(Number(newLesson), false)
+  } else if (newQuiz && Number(newQuiz) !== activeAssessment.value?.id) {
+    const ass = course.value?.modules?.flatMap(m => m.assessments || []).find(a => a.id === Number(newQuiz))
+    if (ass) selectAssessment(ass, false)
   }
 })
 
@@ -827,7 +870,7 @@ function handleItemClick (type: 'lesson' | 'quiz', id: number, ass?: AcademyAsse
   }
 }
 
-async function selectLesson (id: number) {
+async function selectLesson (id: number, updateQuery = true) {
   activeMode.value = 'lesson'
   activeLessonId.value = id
   activeAssessment.value = null
@@ -835,16 +878,22 @@ async function selectLesson (id: number) {
   miniQuizSelectedOptionId.value = ''
   miniQuizFeedback.value = null
   sidebarOpen.value = false
+  if (updateQuery && route.query.lesson !== String(id)) {
+    router.replace({ query: { ...route.query, lesson: String(id), quiz: undefined } })
+  }
   await fetchLesson(id)
 }
 
-async function selectAssessment (ass: AcademyAssessmentOutline) {
+async function selectAssessment (ass: AcademyAssessmentOutline, updateQuery = true) {
   activeMode.value = 'quiz'
   activeAssessment.value = ass
   activeLessonId.value = null
   quizResult.value = null
   userAnswers.value = {}
   sidebarOpen.value = false
+  if (updateQuery && route.query.quiz !== String(ass.id)) {
+    router.replace({ query: { ...route.query, quiz: String(ass.id), lesson: undefined } })
+  }
 
   const res = await fetchAssessmentQuestions(ass.id)
   if (res?.questions) {

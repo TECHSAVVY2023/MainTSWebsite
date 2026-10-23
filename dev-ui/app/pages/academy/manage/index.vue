@@ -1600,6 +1600,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  middleware: ['academy-teacher']
+})
+
 import {
   useAcademy,
   type AcademyCourse,
