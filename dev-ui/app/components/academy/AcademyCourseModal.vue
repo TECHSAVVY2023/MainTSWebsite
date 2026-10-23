@@ -37,7 +37,7 @@
                 :src="form.thumbnail"
                 alt="Course Banner Preview"
                 class="h-full w-full object-cover"
-                @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
+                @error="(e: any) => { e.target.src = getAcademyCourseFallback(form.category) }"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent flex items-end justify-between p-3">
                 <span class="text-[10px] font-mono text-slate-300 truncate max-w-[70%]">
@@ -66,7 +66,7 @@
                 Upload or attach course banner
               </p>
               <p class="text-[10px] text-slate-500 text-center mt-0.5">
-                PNG, JPG, or WebP. Defaults to SHD banner if left empty.
+                PNG, JPG, or WebP. Defaults to themed track banner if left empty.
               </p>
             </div>
 
@@ -93,11 +93,11 @@
               <button
                 v-if="!form.thumbnail"
                 type="button"
-                @click="form.thumbnail = '/img/The-division-shd-logo.png'"
+                @click="form.thumbnail = getAcademyCourseFallback(form.category)"
                 class="flex items-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 hover:border-slate-700 hover:text-white transition-colors cursor-pointer"
               >
-                <i class="fas fa-undo text-[10px] text-slate-400" />
-                <span>Use Default SHD Banner</span>
+                <i class="fas fa-magic text-[10px] text-violet-400" />
+                <span>Use Track Banner</span>
               </button>
 
               <button
@@ -233,7 +233,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAcademy, type AcademyCourse } from '~/composables/useAcademy'
+import { useAcademy, getAcademyCourseFallback, type AcademyCourse } from '~/composables/useAcademy'
 
 const props = defineProps<{
   isOpen: boolean

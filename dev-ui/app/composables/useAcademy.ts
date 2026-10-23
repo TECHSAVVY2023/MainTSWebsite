@@ -1,5 +1,22 @@
 import { useAuth } from '~/composables/useAuth'
 
+export function getAcademyCourseFallback (category?: string): string {
+  const cat = (category || '').toLowerCase()
+  if (cat.includes('web') || cat.includes('frontend') || cat.includes('fullstack')) {
+    return '/img/webdev.png'
+  }
+  if (cat.includes('python') || cat.includes('ai') || cat.includes('data')) {
+    return '/img/python.png'
+  }
+  if (cat.includes('cyber') || cat.includes('security')) {
+    return '/img/sec3bg.png'
+  }
+  if (cat.includes('cloud') || cat.includes('devops') || cat.includes('system') || cat.includes('network')) {
+    return '/img/banndercoder.jpg'
+  }
+  return '/img/The-division-shd-logo.png'
+}
+
 export interface MiniQuizOption {
   id: string
   text: string

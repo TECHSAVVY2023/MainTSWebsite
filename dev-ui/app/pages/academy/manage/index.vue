@@ -133,10 +133,10 @@
             >
               <div class="relative h-36 w-full overflow-hidden bg-slate-950 border-b border-slate-800">
                 <img
-                  :src="c.thumbnail || '/img/The-division-shd-logo.png'"
+                  :src="c.thumbnail || getAcademyCourseFallback(c.category)"
                   :alt="c.title"
                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
+                  @error="(e: any) => { e.target.src = getAcademyCourseFallback(c.category) }"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
                 <div class="absolute top-2.5 left-2.5">
@@ -280,6 +280,7 @@ definePageMeta({
 
 import {
   useAcademy,
+  getAcademyCourseFallback,
   type AcademyCourse,
   type AcademyAssessmentOutline
 } from '~/composables/useAcademy'

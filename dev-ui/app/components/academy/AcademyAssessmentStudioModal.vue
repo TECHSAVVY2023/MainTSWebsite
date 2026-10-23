@@ -273,8 +273,8 @@
               <div class="pt-4 border-t border-slate-800 flex justify-end gap-2">
                 <button
                   type="button"
-                  @click="isEditingQuestion = false"
-                  class="rounded-xl px-4 py-2 text-xs font-bold text-slate-400 hover:bg-slate-800"
+                  @click="cancelQuestionEdit"
+                  class="rounded-xl px-4 py-2 text-xs font-bold text-slate-400 hover:bg-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -396,6 +396,37 @@ const questionForm = ref<QuestionFormState>({
   options_json: defaultQuestionOptions('single_choice')
 })
 
+// Unsaved changes guards
+const initialSettingsSnapshot = ref('')
+const initialQuestionSnapshot = ref('')
+
+const isSettingsDirty = computed(() => {
+  return Boolean(initialSettingsSnapshot.value && initialSettingsSnapshot.value !== JSON.stringify(assessmentForm.value))
+})
+
+const isQuestionDirty = computed(() => {
+  return Boolean(isEditingQuestion.value && initialQuestionSnapshot.value && initialQuestionSnapshot.value !== JSON.stringify(questionForm.value))
+})
+
+function handleBeforeUnload (e: BeforeUnloadEvent) {
+  if (props.isOpen && (isSettingsDirty.value || isQuestionDirty.value)) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  }
+})
+
 watch(() => [props.isOpen, props.assessment], async ([isOpen, ass]) => {
   if (isOpen && ass) {
     try {
@@ -416,6 +447,8 @@ watch(() => [props.isOpen, props.assessment], async ([isOpen, ass]) => {
         }))
         isEditingQuestion.value = false
         editingQuestionId.value = null
+        initialQuestionSnapshot.value = ''
+        initialSettingsSnapshot.value = JSON.stringify(assessmentForm.value)
       }
     } catch (err) {
       console.error('Failed to load assessment in studio:', err)
@@ -424,8 +457,22 @@ watch(() => [props.isOpen, props.assessment], async ([isOpen, ass]) => {
 })
 
 function handleClose () {
+  if (isQuestionDirty.value || isSettingsDirty.value) {
+    const confirmDiscard = window.confirm('You have unsaved changes in this assessment/question. Are you sure you want to exit?')
+    if (!confirmDiscard) return
+  }
   emit('update:isOpen', false)
   emit('close')
+}
+
+function cancelQuestionEdit () {
+  if (isQuestionDirty.value) {
+    const confirmDiscard = window.confirm('Discard unsaved question edits?')
+    if (!confirmDiscard) return
+  }
+  isEditingQuestion.value = false
+  editingQuestionId.value = null
+  initialQuestionSnapshot.value = ''
 }
 
 async function saveAssessmentSettings () {
@@ -440,6 +487,7 @@ async function saveAssessmentSettings () {
       time_limit_minutes: assessmentForm.value.time_limit_minutes,
       description: assessmentForm.value.description
     })
+    initialSettingsSnapshot.value = JSON.stringify(assessmentForm.value)
     emit('saved')
   } catch (err) {
     console.error('Failed to save assessment settings:', err)
@@ -449,6 +497,10 @@ async function saveAssessmentSettings () {
 }
 
 function openCreateQuestion () {
+  if (isQuestionDirty.value) {
+    const proceed = window.confirm('You have unsaved question edits. Discard and create a new question?')
+    if (!proceed) return
+  }
   editingQuestionId.value = null
   questionForm.value = {
     prompt_markdown: '',
@@ -457,10 +509,15 @@ function openCreateQuestion () {
     order: assessmentQuestions.value.length + 1,
     options_json: defaultQuestionOptions('single_choice')
   }
+  initialQuestionSnapshot.value = JSON.stringify(questionForm.value)
   isEditingQuestion.value = true
 }
 
 function openEditQuestion (q: AcademyQuestion) {
+  if (isQuestionDirty.value && editingQuestionId.value !== q.id) {
+    const proceed = window.confirm('You have unsaved question edits. Discard and switch questions?')
+    if (!proceed) return
+  }
   editingQuestionId.value = q.id
   const opts = (q.options_json || []).map((o: any, idx: number) => ({
     id: String(o.id || idx + 1),
@@ -477,6 +534,7 @@ function openEditQuestion (q: AcademyQuestion) {
     order: q.order || 1,
     options_json: opts.length ? opts : defaultQuestionOptions(q.question_type as any)
   }
+  initialQuestionSnapshot.value = JSON.stringify(questionForm.value)
   isEditingQuestion.value = true
 }
 
@@ -533,6 +591,7 @@ async function saveQuestionConfirm () {
     }
     isEditingQuestion.value = false
     editingQuestionId.value = null
+    initialQuestionSnapshot.value = ''
     emit('saved')
   } catch (err) {
     console.error('Failed to save question:', err)

@@ -36,10 +36,10 @@
           <!-- Course Banner on Top of Title -->
           <div class="relative h-48 sm:h-64 w-full overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 mb-6 shadow-xl">
             <img
-              :src="course.thumbnail || '/img/The-division-shd-logo.png'"
+              :src="course.thumbnail || getAcademyCourseFallback(course.category)"
               :alt="course.title"
               class="h-full w-full object-cover"
-              @error="(e: any) => { e.target.src = '/img/The-division-shd-logo.png' }"
+              @error="(e: any) => { e.target.src = getAcademyCourseFallback(course.category) }"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
           </div>
@@ -153,7 +153,7 @@
 </template>
 
 <script setup lang="ts">
-import { useAcademy, type AcademyCourse } from '~/composables/useAcademy'
+import { useAcademy, getAcademyCourseFallback, type AcademyCourse } from '~/composables/useAcademy'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -196,7 +196,7 @@ useHead(() => {
   const c = course.value
   const title = c ? `${c.title} | TechSavvy Academy` : 'Course Syllabus | TechSavvy Academy'
   const desc = c?.description || 'Hands-on training curriculum featuring interactive Markdown lessons and practice quizzes.'
-  const image = c?.thumbnail || '/img/The-division-shd-logo.png'
+  const image = c?.thumbnail || getAcademyCourseFallback(c?.category)
 
   return {
     title,

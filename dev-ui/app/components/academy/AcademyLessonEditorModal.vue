@@ -47,10 +47,17 @@
           </div>
 
           <div class="flex items-center gap-2">
+            <span
+              v-if="lastAutosavedAt"
+              class="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1 text-[10px] font-mono text-slate-400"
+            >
+              <i class="fas fa-check-circle text-emerald-400 text-[9px]" />
+              <span>Draft saved {{ lastAutosavedAt }}</span>
+            </span>
             <button
               type="button"
               @click="handleClose"
-              class="rounded-xl px-4 py-1.5 text-xs font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+              class="rounded-xl px-4 py-1.5 text-xs font-bold text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -58,9 +65,36 @@
               type="button"
               @click="handleSave"
               :disabled="savingLesson"
-              class="rounded-xl bg-violet-600 px-5 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-violet-500 transition-all disabled:opacity-50"
+              class="rounded-xl bg-violet-600 px-5 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-violet-500 transition-all disabled:opacity-50 cursor-pointer"
             >
               {{ savingLesson ? 'Saving…' : 'Save Lesson' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Unsaved Draft Recovery Banner -->
+        <div
+          v-if="hasSavedDraft"
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-amber-500/30 bg-amber-950/30 px-6 py-2.5 text-xs text-amber-200"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fas fa-history text-amber-400" />
+            <span>Unsaved local draft found from <strong>{{ formatDraftTime(savedDraftTimestamp) }}</strong>. Would you like to restore it?</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              @click="restoreDraft"
+              class="rounded-lg bg-amber-500 px-3 py-1 text-xs font-black uppercase text-slate-950 hover:bg-amber-400 transition-colors shadow cursor-pointer"
+            >
+              Restore Draft
+            </button>
+            <button
+              type="button"
+              @click="discardDraft"
+              class="rounded-lg bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+            >
+              Discard
             </button>
           </div>
         </div>
@@ -390,6 +424,26 @@ const lessonForm = ref<LessonFormState>({
 
 const debouncedLessonContent = ref(lessonForm.value.content_markdown)
 
+// Draft Autosave & Unsaved Changes Guard State
+const isInitialized = ref(false)
+const initialSnapshot = ref('')
+const hasSavedDraft = ref(false)
+const savedDraftTimestamp = ref<number | null>(null)
+const pendingDraft = ref<any>(null)
+const lastAutosavedAt = ref<string>('')
+
+const draftStorageKey = computed(() => {
+  if (props.lessonId) {
+    return `academy_draft_lesson_${props.lessonId}`
+  }
+  return `academy_draft_lesson_mod_${props.moduleId || 'new'}`
+})
+
+const isDirty = computed(() => {
+  if (!isInitialized.value) return false
+  return initialSnapshot.value !== JSON.stringify(lessonForm.value)
+})
+
 let previewDebounceTimer: any = null
 watch(() => lessonForm.value.content_markdown, (newVal) => {
   clearTimeout(previewDebounceTimer)
@@ -402,9 +456,104 @@ watch(() => lessonForm.value.content_markdown, (newVal) => {
   }, 100)
 })
 
+// Debounced Autosave to localStorage
+let autosaveTimer: any = null
+watch(
+  () => [
+    lessonForm.value.title,
+    lessonForm.value.content_markdown,
+    lessonForm.value.estimated_minutes,
+    lessonForm.value.mini_quiz_enabled,
+    JSON.stringify(lessonForm.value.mini_quiz_data)
+  ],
+  () => {
+    if (!props.isOpen || !isInitialized.value || !isDirty.value) return
+    clearTimeout(autosaveTimer)
+    autosaveTimer = setTimeout(() => {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const draft = {
+          timestamp: Date.now(),
+          title: lessonForm.value.title,
+          content_markdown: lessonForm.value.content_markdown,
+          estimated_minutes: lessonForm.value.estimated_minutes,
+          mini_quiz_enabled: lessonForm.value.mini_quiz_enabled,
+          mini_quiz_data: lessonForm.value.mini_quiz_data
+        }
+        try {
+          localStorage.setItem(draftStorageKey.value, JSON.stringify(draft))
+          lastAutosavedAt.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        } catch (e) {
+          console.warn('LocalStorage draft autosave failed:', e)
+        }
+      }
+    }, 800)
+  }
+)
+
+function formatDraftTime (ts: number | null) {
+  if (!ts) return 'earlier'
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function restoreDraft () {
+  if (!pendingDraft.value) return
+  lessonForm.value.title = pendingDraft.value.title ?? lessonForm.value.title
+  lessonForm.value.content_markdown = pendingDraft.value.content_markdown ?? lessonForm.value.content_markdown
+  if (typeof pendingDraft.value.estimated_minutes === 'number') {
+    lessonForm.value.estimated_minutes = pendingDraft.value.estimated_minutes
+  }
+  if (typeof pendingDraft.value.mini_quiz_enabled === 'boolean') {
+    lessonForm.value.mini_quiz_enabled = pendingDraft.value.mini_quiz_enabled
+  }
+  if (pendingDraft.value.mini_quiz_data) {
+    lessonForm.value.mini_quiz_data = pendingDraft.value.mini_quiz_data
+  }
+  debouncedLessonContent.value = lessonForm.value.content_markdown
+  hasSavedDraft.value = false
+  nextTick(async () => {
+    if (lessonPreviewContainer.value) {
+      await renderMermaidInElement(lessonPreviewContainer.value)
+    }
+  })
+}
+
+function discardDraft () {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    localStorage.removeItem(draftStorageKey.value)
+  }
+  hasSavedDraft.value = false
+  pendingDraft.value = null
+}
+
+function handleBeforeUnload (e: BeforeUnloadEvent) {
+  if (props.isOpen && isDirty.value) {
+    e.preventDefault()
+    e.returnValue = ''
+  }
+}
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  }
+  clearTimeout(autosaveTimer)
+  clearTimeout(previewDebounceTimer)
+})
+
 watch(() => props.isOpen, async (isOpen) => {
   if (isOpen) {
+    isInitialized.value = false
+    hasSavedDraft.value = false
+    pendingDraft.value = null
+    lastAutosavedAt.value = ''
     lessonEditorTab.value = 'markdown'
+
     if (props.lessonId) {
       const les = await fetchLesson(props.lessonId)
       if (les) {
@@ -445,11 +594,34 @@ watch(() => props.isOpen, async (isOpen) => {
       debouncedLessonContent.value = defaultMarkdown
     }
 
-    nextTick(async () => {
-      if (lessonPreviewContainer.value) {
-        await renderMermaidInElement(lessonPreviewContainer.value)
+    initialSnapshot.value = JSON.stringify(lessonForm.value)
+
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const cached = localStorage.getItem(draftStorageKey.value)
+        if (cached) {
+          const parsed = JSON.parse(cached)
+          const isDifferent = parsed.content_markdown !== lessonForm.value.content_markdown ||
+                              parsed.title !== lessonForm.value.title ||
+                              Boolean(parsed.mini_quiz_enabled) !== Boolean(lessonForm.value.mini_quiz_enabled)
+          if (isDifferent) {
+            pendingDraft.value = parsed
+            hasSavedDraft.value = true
+            savedDraftTimestamp.value = parsed.timestamp || Date.now()
+          }
+        }
+      } catch (e) {
+        console.warn('Error reading lesson draft:', e)
       }
-    })
+    }
+
+    await nextTick()
+    if (lessonPreviewContainer.value) {
+      await renderMermaidInElement(lessonPreviewContainer.value)
+    }
+    isInitialized.value = true
+  } else {
+    isInitialized.value = false
   }
 })
 
@@ -469,6 +641,10 @@ const renderedLessonPreviewHtml = computed(() => {
 })
 
 function handleClose () {
+  if (isDirty.value) {
+    const proceed = window.confirm('You have unsaved changes in this lesson. Are you sure you want to close and discard your edits?')
+    if (!proceed) return
+  }
   emit('update:isOpen', false)
   emit('close')
 }
@@ -597,8 +773,18 @@ async function handleSave () {
   savingLesson.value = true
   try {
     await adminSaveLesson(lessonForm.value)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.removeItem(draftStorageKey.value)
+      } catch (e) {
+        console.warn('Failed to remove draft from localStorage:', e)
+      }
+    }
+    initialSnapshot.value = JSON.stringify(lessonForm.value)
+    hasSavedDraft.value = false
     emit('saved')
-    handleClose()
+    emit('update:isOpen', false)
+    emit('close')
   } catch (err) {
     console.error('Failed to save lesson:', err)
   } finally {
